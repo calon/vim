@@ -5,11 +5,14 @@ set nocompatible " 如果使用兼容模式，后续设置会使用 Vi 的一些
 " source $VIMRUNTIME/vimrc_example.vim
 source $VIMRUNTIME/mswin.vim
 behave mswin " 使用更接近 Windows 的操作配置
+set t_Co=256
 
 " 在编辑保存配置文件后立即在当前会话启用
 if has("autocmd")
   autocmd bufwritepost .vimrc source $MYVIMRC
 endif
+
+source $VIM/vimrc_path.vim
 
 "---------------------------------------
 " 备份、临时文件、历史和会话信息
@@ -17,8 +20,8 @@ endif
 set backup " 自动生成备份文件
 set writebackup " 覆盖文件前建立备份
 set updatecount=30 " 输入这么多个字符以后，把交换文件写入磁盘
-set backupdir=D:\\Bak\\txt " 备份目录
-set directory=D:\\Bak\\txt " 交换目录
+" set backupdir=E:\\Bak\\txt " 备份目录
+" set directory=E:\\Bak\\txt " 交换目录
 " 失去焦点时自动保存
 " au FocusLost * :wa
 
@@ -31,7 +34,7 @@ set sessionoptions=blank,curdir,folds,help,resize,tabpages,winpos,winsize " 保�
 "---------------------------------------
 " 撤销文件
 "---------------------------------------
-set undodir=D:\\Bak\\txt " 撤销文件目录
+" set undodir=E:\\Bak\\txt " 撤销文件目录
 set undofile
 " set undolevels = 1000 "maximum number of changes that can be undone
 " set undoreload = 10000 "maximum number lines to save for undo on a buffer reload
@@ -94,7 +97,7 @@ source $VIMRUNTIME/delmenu.vim
 source $VIMRUNTIME/menu.vim
 language messages zh_CN.utf-8 " 弹出信息语言选项
 set ambiwidth=double " 把所有的“不明宽度”字符——指的是在 Unicode 字符集中某些同时在东西方语言中使用的字符，如省略号、破折号、书名号和全角引号，在西方文字中通常字符宽度等同于普通 ASCII 字符，而在东方文字中通常字符宽度等同于两倍的普通 ASCII 字符，因而其宽度“不明”——的宽度置为双倍字符宽度（中文字符宽度）。此数值只在 encoding 设为 utf-8 或某一 Unicode 编码时才有效。需要额外注意的是，如果你通过终端使用 Vim 的话，需要令终端也将这些字符显示为双宽度。
-" set imcmdline " 开始编辑命令行时总是打开输入方法
+set imcmdline " 开始编辑命令行时总是打开输入方法
 set formatoptions+=mB "打开断行模块对亚洲语言支持。 m 表示允许在两个汉字之间断行， 即使汉字之间没有出现空格。 B 表示将两行合并为一行的时候， 汉字与汉字之间不要补空格。
 
 "---------------------------------------
@@ -113,7 +116,7 @@ set confirm " 某些因为缓冲区有未保存的改变而失败的操作会弹
 " 搜索
 "---------------------------------------
 " 开启语法高亮
-" 开启搜索高亮
+" 开启搜索高亮TrueType Collection
 if &t_Co > 2 || has("gui_running")
   syntax on
   set hlsearch
@@ -128,7 +131,7 @@ set smartcase " 搜索小写忽略大小写
 "---------------------------------------
 set filetype=txt " 设置默认文件类型
 set syntax=txt " 设置默认语法类型
-color ir_black " 设置默认颜色主题
+" 设置默认颜色主题
 if has("gui_running")
     colorscheme ir_black
 else
@@ -161,6 +164,12 @@ autocmd BufWinEnter * setlocal cursorline " 当前缓冲区高亮光标所在行
 set backspace=2 " 退格会删除缩进、换行符和插入的起始位置
 set iskeyword+=_,$,@,%,#,- " 定义一个word中可以包含哪些字符。"@"在这里代指所有的字母。
 
+" 打开文件时回到上次光标所在的位置
+autocmd BufReadPost *
+     \ if line("'\"") > 0 && line("'\"") <= line("$") |
+     \ exe "normal! g`\"" |
+     \ endif
+
 "---------------------------------------
 " 命令行
 "---------------------------------------
@@ -187,6 +196,9 @@ set selectmode="" " 指定什么场合开始选择时启动选择模式而不是
 "---------------------------------------
 set scrolloff=1 " 光标上下两侧最少保留的屏幕行数。
 set whichwrap=b,s,<,>,[,] "对某一个或几个按键开启到头后自动折向下一行的功能
+set lazyredraw " Don't redraw while executing macros (good performance config)
+set linebreak
+
 
 "---------------------------------------
 " 剪贴板、寄存器
@@ -199,10 +211,34 @@ set clipboard=unnamed "与系统共剪贴板
 set laststatus=2 " 总是显示状态行
 
 if has('statusline')
-  set statusline=%m%r%h%w[TYPE=%Y][POS=%l,%v][%p%%][LEN=%L][%{(&fenc)}]
+  set statusline=%m  " 修改标志位
+  set statusline+=%r  " 只读标志位
+  set statusline+=%h  " 帮助缓冲区标志位
+  set statusline+=%w  " 预览窗口标志位
+  set statusline+=[%Y] " 文件类型
+  set statusline+=[%{&ff}]  " 文件格式
+  set statusline+=[%l\/%L,\ %v,\ %p%%]  " 光标位置、文件行数和窗口在文件位置的百分比
+  set statusline+=[%{(&fenc)}] " 文件编码
   set statusline+=%#StatusLine#
-  set statusline+=[%t][BUF=%n][%{strftime('%Y%m%d',getftime(expand('%')))}]
+  set statusline+=[%t]  " 文件名
+  set statusline+=[%{FileSize()}]  " 文件大小
+  set statusline+=[#%n]  " 缓冲区号
+  " set statusline+=[%{strftime("%Y-%m-%d %H:%M",getftime(expand('\%')))}]  " 最后修改的时间
+  set statusline+=[%{strftime(\"%Y\-%m\-%d\ %H\:%M\",getftime(expand(\"%:p\")))}]
 endif
+
+function! FileSize()
+  let bytes = getfsize(expand("%:p"))
+  if bytes <= 0
+    return ""
+  endif
+  if bytes < 1024
+    return bytes
+  else
+    return (bytes / 1024) . "K"
+  endif
+endfunction
+
 
 "---------------------------------------
 " 窗口标题设置
@@ -239,7 +275,7 @@ endif
 "---------------------------------------
 
 " 进入命令行
-nnoremap ; :
+nnoremap <silent> ; :
 
 " 上下移动
 nnoremap <silent> k gk
@@ -250,6 +286,9 @@ inoremap <silent> <Down> <Esc>gja
 " 上下翻页
 nnoremap <Space> <C-F>
 nnoremap <BackSpace> <C-B>
+
+" 转换为纯文本类型，应用相应的语法高亮和插件
+nnoremap <F1> <Esc>:set filetype=txt<CR>
 
 " 切换是否显示行号，显示绝对或相对行号
 nnoremap <F2> <Esc>:call ToggleRelativeNumber()<CR>
@@ -340,7 +379,7 @@ cabbrev gb2utf set encoding=utf-8 fileencoding=utf-8
 "---------------------------------------
 
 " Calendar插件
-let g:calendar_diary="D:/Share/My Dropbox/Note/Diary/"
+" let g:calendar_diary="C:/Software/Share/My Dropbox/Note/Diary/"
 let g:calendar_monday = 1 "以星期一为开始 
 let g:calendar_focus_today = 1 " 光标在当天的日期上 
 let g:calendar_mark = 'left-fit' "可以让*和数字可靠近 
@@ -361,4 +400,96 @@ endif
 " YankRing
 let g:yankring_manage_numbered_reg = 1
 nnoremap <leader>yr :YRShow<CR>
+let g:yankring_window_use_horiz = 0  " Use vertical split
+let g:yankring_history_dir = '$VIM'
+let g:yankring_max_element_length = 102400
+let g:yankring_max_display = 70
+let g:yankring_persist = 0
+
+" BetterSearch
+nnoremap <A-F7> :BetterSearchPromptOn<CR>
+vnoremap <A-F7> :BetterSearchVisualSelect<CR>
+nnoremap <A-w>  :BetterSearchSwitchWin<CR>
+
+" PinyinSearch
+nnoremap <Leader>ps :call PinyinSearch()<CR>
+nnoremap <Leader>pn :call PinyinNext()<CR>
+" let g:PinyinSearch_Dict = "c:/Program Files/Vim/PinyinSearch.dict"
+
+" PyDiction
+" let g:pydiction_location = 'c:\Program Files\Vim\vimfiles\bundle\pydiction\ftplugin\pydiction\complete-dict'
+
+" Omni Completion
+" autocmd FileType python set omnifunc=pythoncomplete#Complete
+" imap <silent><A-`> <C-X><C-O>
+
+" Indent Guides
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_guide_size = 1
+
+" Neocomplcache
+let g:neocomplcache_enable_at_startup = 1
+" Use smartcase.
+let g:neocomplcache_enable_smart_case = 1
+" Use camel case completion.
+let g:neocomplcache_enable_camel_case_completion = 0
+" Use underbar completion.
+let g:neocomplcache_enable_underbar_completion = 0
+let g:neocomplcache_max_list = 15
+" Set minimum syntax keyword length.
+let g:neocomplcache_min_syntax_length = 3
+let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
+
+" if !exists('g:neocomplcache_dictionary_patterns')
+"    let g:neocomplcache_dictionary_patterns = {}
+" endif
+"     let g:neocomplcache_dictionary_patterns = {
+"         \'python': expand('c:/Program Files/Vim/vimfiles/dict/python-dict'),
+"         \}
+
+" if !exists('g:neocomplcache_dictionary_patterns')
+"   let g:neocomplcache_dictionary_patterns = {}
+" endif
+" " works well for the pydiction.vim dictionary file(complete-dict)
+" let g:neocomplcache_dictionary_patterns.python = '\(\h\w*[.(]\?\)\+'
+
+  let g:neocomplcache_dictionary_filetype_lists = {
+      \ 'default' : '',
+      \ 'vimshell' : $HOME.'/.vimshell_hist',
+      \ 'scheme' : $HOME.'/.gosh_completions',
+      \ 'python' : $VIM.'/vimfiles/dict/python-dict'
+         \ }
+
+
+" Define keyword.
+if !exists('g:neocomplcache_keyword_patterns')
+    let g:neocomplcache_keyword_patterns = {}
+endif
+    let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
+
+" AutoComplPop like behavior.
+let g:neocomplcache_enable_auto_select = 0
+
+" Enable omni completion.
+autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+
+
+" inoremap <expr><space> pumvisible() ? neocomplcache#close_popup() . "\<SPACE>" : "\<SPACE>"
+
+" XPTemplate
+
+" let g:xptemplate_pum_tab_nav = 1
+" let g:xptemplate_nav_next = '<C-Left>'
+" let g:xptemplate_nav_prev = '<C-Right>'
+
+" Quick Filter
+nnoremap <leader>f :call FilteringNew().addToParameter('alt', @/).run()<CR>
+
+" Gundo
+nnoremap <F5> :GundoToggle<CR>
+
 
