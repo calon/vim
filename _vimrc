@@ -492,4 +492,5 @@ nnoremap <leader>f :call FilteringNew().addToParameter('alt', @/).run()<CR>
 " Gundo
 nnoremap <F5> :GundoToggle<CR>
 
-
+" Colorize
+let g:colorizer_nomap = 1
