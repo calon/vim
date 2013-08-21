@@ -71,6 +71,7 @@ hi NonText          guifg=#070707     guibg=black       gui=NONE      ctermfg=bl
 
 hi Cursor           guifg=black       guibg=#b6ff00     gui=NONE      ctermfg=black       ctermbg=NONE        cterm=reverse
 hi LineNr           guifg=#3D3D3D     guibg=black       gui=NONE      ctermfg=darkgray    ctermbg=NONE        cterm=NONE
+hi CursorLineNR     guifg=#FF6C60     guibg=black       gui=NONE      ctermfg=darkgray    ctermbg=NONE        cterm=NONE
 
 hi VertSplit        guifg=#202020     guibg=#202020     gui=NONE      ctermfg=darkgray    ctermbg=darkgray    cterm=NONE
 hi StatusLine       guifg=#CCCCCC     guibg=#0d56a6     gui=NONE      ctermfg=white       ctermbg=darkgray    cterm=NONE

@@ -398,13 +398,13 @@ if !exists(":DiffOrig")
 endif
 
 " YankRing
-let g:yankring_manage_numbered_reg = 1
-nnoremap <leader>yr :YRShow<CR>
-let g:yankring_window_use_horiz = 0  " Use vertical split
-let g:yankring_history_dir = '$VIM'
-let g:yankring_max_element_length = 102400
-let g:yankring_max_display = 70
-let g:yankring_persist = 0
+"let g:yankring_manage_numbered_reg = 1
+"nnoremap <leader>yr :YRShow<CR>
+"let g:yankring_window_use_horiz = 0  " Use vertical split
+"let g:yankring_history_dir = '$VIM'
+"let g:yankring_max_element_length = 102400
+"let g:yankring_max_display = 70
+"let g:yankring_persist = 0
 
 " BetterSearch
 nnoremap <A-F7> :BetterSearchPromptOn<CR>
@@ -427,18 +427,18 @@ nnoremap <Leader>pn :call PinyinNext()<CR>
 let g:indent_guides_enable_on_vim_startup = 1
 let g:indent_guides_guide_size = 1
 
-" Neocomplcache
-let g:neocomplcache_enable_at_startup = 1
-" Use smartcase.
-let g:neocomplcache_enable_smart_case = 1
-" Use camel case completion.
-let g:neocomplcache_enable_camel_case_completion = 0
-" Use underbar completion.
-let g:neocomplcache_enable_underbar_completion = 0
-let g:neocomplcache_max_list = 15
-" Set minimum syntax keyword length.
-let g:neocomplcache_min_syntax_length = 3
-let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
+"" Neocomplcache
+"let g:neocomplcache_enable_at_startup = 1
+"" Use smartcase.
+"let g:neocomplcache_enable_smart_case = 1
+"" Use camel case completion.
+"let g:neocomplcache_enable_camel_case_completion = 0
+"" Use underbar completion.
+"let g:neocomplcache_enable_underbar_completion = 0
+"let g:neocomplcache_max_list = 15
+"" Set minimum syntax keyword length.
+"let g:neocomplcache_min_syntax_length = 3
+"let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
 
 " if !exists('g:neocomplcache_dictionary_patterns')
 "    let g:neocomplcache_dictionary_patterns = {}
@@ -453,29 +453,29 @@ let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
 " " works well for the pydiction.vim dictionary file(complete-dict)
 " let g:neocomplcache_dictionary_patterns.python = '\(\h\w*[.(]\?\)\+'
 
-  let g:neocomplcache_dictionary_filetype_lists = {
-      \ 'default' : '',
-      \ 'vimshell' : $HOME.'/.vimshell_hist',
-      \ 'scheme' : $HOME.'/.gosh_completions',
-      \ 'python' : $VIM.'/vimfiles/dict/python-dict'
-         \ }
+  "let g:neocomplcache_dictionary_filetype_lists = {
+      "\ 'default' : '',
+      "\ 'vimshell' : $HOME.'/.vimshell_hist',
+      "\ 'scheme' : $HOME.'/.gosh_completions',
+      "\ 'python' : $VIM.'/vimfiles/dict/python-dict'
+         "\ }
 
 
 " Define keyword.
-if !exists('g:neocomplcache_keyword_patterns')
-    let g:neocomplcache_keyword_patterns = {}
-endif
-    let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
+"if !exists('g:neocomplcache_keyword_patterns')
+    "let g:neocomplcache_keyword_patterns = {}
+"endif
+    "let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
 
 " AutoComplPop like behavior.
-let g:neocomplcache_enable_auto_select = 0
+"let g:neocomplcache_enable_auto_select = 0
 
 " Enable omni completion.
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+"autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+"autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+"autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+"autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+"autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
 
 " inoremap <expr><space> pumvisible() ? neocomplcache#close_popup() . "\<SPACE>" : "\<SPACE>"
@@ -492,5 +492,8 @@ nnoremap <leader>f :call FilteringNew().addToParameter('alt', @/).run()<CR>
 " Gundo
 nnoremap <F5> :GundoToggle<CR>
 
-" Colorize
-let g:colorizer_nomap = 1
+" Colorizer
+nmap <leader>ct <Plug>Colorizer
+
+" TagList
+nnoremap <silent> <F8> :TlistToggle<CR>
