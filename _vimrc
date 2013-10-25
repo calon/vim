@@ -309,7 +309,9 @@ noremap <F12> <Esc>:browse saveas<CR>
 noremap <leader>bl <Esc>:Bufferlist<CR>
 
 " 在垂直窗口中编辑配置文件
-nnoremap <leader>ev <C-w><C-v><C-l>:e $MYVIMRC<cr>
+nnoremap <leader>ev <C-w><C-v><C-l>:e $MYVIMRC<CR>
+
+nnoremap <leader>sv :so $MYVIMRC<CR>
 
 " 应用语法高亮
 nnoremap <leader>tx <Esc>:set filetype=txt<CR>
@@ -497,3 +499,6 @@ nmap <leader>ct <Plug>Colorizer
 
 " TagList
 nnoremap <silent> <F8> :TlistToggle<CR>
+
+" PanDoc
+nnoremap <leader>pd :!pandoc -o %:r.html %<CR>
