@@ -1,4 +1,4 @@
-*gui.txt*       For Vim version 7.2.  最近更新: 2008年6月
+*gui.txt*       For Vim version 7.4.  最近更新: 2013年8月
 
 
 		  VIM 参考手册    by Bram Moolenaar
@@ -34,12 +34,12 @@ GTK、GTK2 等，或者 "MS-Windows 32 bit GUI version"。
 
 GUI 和非 GUI 版本在 Vim 的 X11 版本上都可以运行。见 |gui-x11-start|。
 
-					*gui-init* *gvimrc* *.gvimrc* *_gvimrc*
+			*gui-init* *gvimrc* *.gvimrc* *_gvimrc* *$MYGVIMRC*
 gvimrc 文件是 GUI 专用的启动命令应该放置的地方。它总在 |vimrc| 文件之后执行。
 如果你有这样的文件，$MYGVIMRC 环境变量保存它的名字。
 
 当 GUI 开始时，开展以下初始化操作 (按照给出的顺序):
-- 'term' 选项设为 "builgin_gui"，复位终端选项到其 GUI 的缺省值
+- 'term' 选项设为 "builtin_gui"，复位终端选项到其 GUI 的缺省值
   |terminal-options|。
 - 如果存在系统菜单文件，执行之。该文件名通常是 "$VIMRUNTIME/menu.vim"。你需要
   用 ":version" 检查这一点。另见 |$VIMRUNTIME|。要跳过菜单载入，在
@@ -79,10 +79,15 @@ GUI 窗口只在全部的初始化执行完毕后才会打开。如果你希望�
 终端版本不同的设置。
 
 建议你把自己的 GUI 初始化部分放在:
-	Unix		    $HOME/.gvimrc
-	OS/2		    $HOME/.gvimrc 或 $VIM/.gvimrc
-	MS-DOS 和 Win32     HOME/_gvimrc 或 $VIM/_gvimrc
-	Amiga		    s:.gvimrc 或 $VIM/.gvimrc
+	Unix		    $HOME/.gvimrc 或 $HOME/.vim/gvimrc
+	OS/2		    $HOME/.gvimrc、$HOME/vimfiles/gvimrc 或
+			    $VIM/.gvimrc
+	MS-DOS 和 Win32     $HOME/_gvimrc、$HOME/vimfiles/gvimrc 或
+			    $VIM/_gvimrc
+	Amiga		    s:.gvimrc、home:.gvimrc、home:vimfiles:gvimrc 或
+			    $VIM/.gvimrc
+
+按上述的顺序依次查找个人化的初始文件，只读入第一个找到的文件。
 
 若干选项只有在 GUI 版本的 Vim 里才有意义。它们是 'guicursor'、'guifont'、
 'guipty' 和 'guioptions'。和其它选项一样，他们的文档在 |options.txt|。
@@ -124,6 +129,14 @@ Vim 试图在启动时使窗口在屏幕上的大小合适，以免部分内容�
 
 如果你运行 X 窗口系统，你可以这样得到关于 Vim 运行所在的窗口的信息: >
 	:!xwininfo -id $WINDOWID
+<
+							*gui-IME* *iBus*
+在 X 里依赖于 XIM 框架输入国际字符的输入法，尤其是 iBus，已知会给 gVim 带来一
+些不良效果。包括不能输入空格，输入字符间有长时间的延迟，或者输入的字符不能为
+应用所识别等。
+
+一个可行的解决方法，虽然不知什么原因，是启动时用 |-f| 参数，不让 gvim 进入后台
+执行。
 
 ==============================================================================
 2. 滚动条						*gui-scrollbars*
@@ -133,26 +146,26 @@ Vim 试图在启动时使窗口在屏幕上的大小合适，以免部分内容�
 
 界面看起来是这样 (使用 ":set guioptions=mlrb" 的情形下):
 
-		       +------------------------------+
-		       | File  Edit		 Help | <- 菜单栏 (m)
-		       +-+--------------------------+-+
-		       |^|			    |^|
-		       |#| 文本区域		    |#|
-		       | |			    | |
-		       |v|__________________________|v|
- Vim 窗口间的       -> |-+ File.c	       5,2  +-|
- 普通状态行            |^|""""""""""""""""""""""""""|^|
-		       | |			    | |
-		       | | 另一个文件缓冲区。       | |
-		       | |			    | |
-		       |#|			    |#|
- 左滚动条 (l)       -> |#|			    |#| <- 右滚动条  (r)
-		       |#|			    |#| 
-		       | |			    | |
-		       |v|			    |v|
-		       +-+--------------------------+-+
-		       | |< ####		   >| | <- 底部滚动条  (b)
-		       +-+--------------------------+-+ 
+		       +------------------------------+ `
+		       | File  Edit		 Help | <- 菜单栏 (m) `
+		       +-+--------------------------+-+ `
+		       |^|			    |^| `
+		       |#| 文本区域		    |#| `
+		       | |			    | | `
+		       |v|__________________________|v| `
+ Vim 窗口间的       -> |-+ File.c	       5,2  +-| `
+ 普通状态行            |^|""""""""""""""""""""""""""|^| `
+		       | |			    | | `
+		       | | 另一个文件缓冲区。       | | `
+		       | |			    | | `
+		       |#|			    |#| `
+ 左滚动条 (l)       -> |#|			    |#| <- 右滚动条  (r) `
+		       |#|			    |#| `
+		       | |			    | | `
+		       |v|			    |v| `
+		       +-+--------------------------+-+ `
+		       | |< ####		   >| | <- 底部滚动条  (b) `
+		       +-+--------------------------+-+ `
 
 任何滚动条或者菜单都可以关闭，只要在 'guioptions' 字符串里没有相应的字母就行
 了。底部滚动条只有在置位 'nowrap' 时才有用。
@@ -403,8 +416,10 @@ Vim  的长期用户不太用菜单。但是它的优势在你可以增加自己
 	:let did_install_default_menus = 1
 如果你也不想载入 Syntax 菜单: >
 	:let did_install_syntax_menu = 1
-如果你想要 Syntax 菜单，但不需要所有可用的语法文件项 (载入需要不少时间): >
-		:let skip_syntax_sel_menu = 1
+Syntax 菜单第一项可以用来显示包含所有可用的文件类型的菜单 (载入需要不少时间)。
+如果你确实想要启动时就同时得到所有文件类型，加入: >
+		:let do_syntax_sel_menu = 1
+
 <
 							*console-menus*
 尽管本文档讨论 GUI，你其实也可以在控制台模式使用菜单。你需要自行载入
@@ -474,7 +489,7 @@ Win32 GUI 版本模拟 Motif 的可撕下菜单。实际上，Motif 用户很容
 	模式		前面插入	后面附加	~
 	普通		不需要		不需要
 	可视		<C-C>		<C-\><C-G>
-	插入		<C-O>
+	插入		<C-\><C-O>
 	命令行		<C-C>		<C-\><C-G>
 	等待操作符	<C-C>		<C-\><C-G>
 
@@ -489,7 +504,7 @@ Win32 GUI 版本模拟 Motif 的可撕下菜单。实际上，Motif 用户很容
 
    :nmenu File.Next	:next^M
    :vmenu File.Next	^C:next^M^\^G
-   :imenu File.Next	^O:next^M
+   :imenu File.Next	^\^O:next^M
    :cmenu File.Next	^C:next^M^\^G
    :omenu File.Next	^C:next^M^\^G
 
@@ -688,8 +703,8 @@ Win32 GUI 版本模拟 Motif 的可撕下菜单。实际上，Motif 用户很容
 	:emenu File.Exit
 
 如果控制台模式的 vim 编译时加入 WANT_MENU，你可以用 :emenu 来访问你已经习惯的
-的 GUI 模式下有用的菜单项目。关于一个能用于此目的的选项，见 'wildmenu'。例子又
-可以见 |console-menus|。
+GUI 模式下有用的菜单项目。关于一个能用于此目的的选项，见 'wildmenu'。例子又可
+以见 |console-menus|。
 
 如果使用行范围 range，并且选择的行和 '<、'> 指定的范围相同，则使用最近一次可视
 选择的范围执行菜单命令。
@@ -739,7 +754,7 @@ Win32 GUI 版本模拟 Motif 的可撕下菜单。实际上，Motif 用户很容
 5.7 菜单示例					*menu-examples*
 
 这里是一个如何用 menu 增加菜单项的例子。你可以为光标下的关键字增加菜单项。使用
-寄存器 "z". >
+寄存器 "z"。 >
 
   :nmenu Words.Add\ Var		wb"zye:menu! Words.<C-R>z <C-R>z<CR>
   :nmenu Words.Remove\ Var	wb"zye:unmenu! Words.<C-R>z<CR>
@@ -749,7 +764,7 @@ Win32 GUI 版本模拟 Motif 的可撕下菜单。实际上，Motif 用户很容
   :imenu Words.Remove\ Var	<Esc>wb"zye:unmenu! Words.<C-R>z<CR>a
 
 (这里的右手边表达式使用 <> 记法，你可以复制/粘贴这里的文本来测试这些映射，或者
-把这些行加到你的 gvimrc 文件里；"<C-R>" 是 CTRL-R, "<CR>" 是 <CR> 键。|<>|)
+把这些行加到你的 gvimrc 文件里；"<C-R>" 是 CTRL-R，"<CR>" 是 <CR> 键。|<>|)
 
 
 5.8 工具提示 (Tooltips) 和菜单提示

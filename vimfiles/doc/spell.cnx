@@ -1,4 +1,4 @@
-*spell.txt*	For Vim version 7.2.  最近更新: 2008年4月
+*spell.txt*	For Vim version 7.4.  最近更新: 2013年8月
 
 
 		  VIM 参考手册	  by Bram Moolenaar
@@ -289,6 +289,8 @@ Vim 会寻找:
 当前的 'encoding' 下不一定有可用的拼写文件。|spell-mkspell| 说明如何建立拼写文
 件。用 "iconv" 转换拼写文件_不能_工作！
 
+备注: VMS 上 ".{enc}.spl" 被换名为 "_{enc}.spl"，否则文件名会有问题。
+
 						    *spell-sug-file* *E781*
 如果存在和 ".spl" 同名但以 ".sug" 结尾的文件，使用该文件来给出更好的建议。直到
 需要建议的时候才载入该文件，以减少内存开销。
@@ -399,7 +401,10 @@ Vim 的拼写文件使用二进制文件格式。这大大加快了单词列表�
 小。
 						    *.aff* *.dic* *Myspell*
 你可以用 Myspell 使用的 .aff 和 .dic 文件构造 Vim 的拼写文件。OpenOffice.org
-和 Mozilla 使用 Myspell。你可以在这里找到这些文件:
+和 Mozilla 使用 Myspell。OpenOffice .oxt 文件是包含 .aff 和 .dic 文件的 zip 压
+缩包。你可以在此找到那些文件:
+	http://extensions.services.openoffice.org/dictionary
+如果不行，这里可以找到较旧的 OpenOffice 2 文件:
 	http://wiki.services.openoffice.org/wiki/Dictionaries
 你也可以使用简单单词列表列表。效果相同，这取决于你能找到什么格式的单词列表。
 
@@ -438,6 +443,7 @@ Vim 的拼写文件使用二进制文件格式。这大大加快了单词列表�
 			使用第一个包含 REP 和 SAL 项目的 .aff 文件的这些项目。
 			|spell-REP| |spell-SAL|
 
+								*E845*
 			该命令需要大量内存，用于寻找最优单词树 (波兰语、意大利
 			语和匈牙利语需要几百兆字节)。最终结果因为使用压缩的缘
 			故会小得多。为了避免内存溢出，压缩会时不时进行。使用
@@ -683,7 +689,7 @@ Vim 支持不少附加成分。下面给出描述 |spell-affix-vim|。已经作�
 词。
 
 行 12 (译者注: 应为行 11) 定义单词 "TCP/IP"。因为斜杠有特殊含义，这里使用逗号
-代替。它定义在字缀文件的 SLASH 项目里，见 |spell-SLASH|。注意 没有这个 SLASH 
+代替。它定义在字缀文件的 SLASH 项目里，见 |spell-SLASH|。注意 没有这个 SLASH
 项目，匹配的单词将是 "TCP,IP"。
 
 
@@ -694,7 +700,10 @@ Vim 支持不少附加成分。下面给出描述 |spell-affix-vim|。已经作�
 
 	# 注释行 ~
 
-注释可以出现在有些项目之后，但这并不是通用的情况。
+带有固定数目参数的项目之后可以有注释，但不能有包含空白的参数。注释必须以 "#"
+字符开始。例如:
+
+	KEEPCASE =  # fix case for words with this flag ~
 
 
 编 码								*spell-SET*
@@ -767,8 +776,11 @@ Vim 支持不少附加成分。下面给出描述 |spell-affix-vim|。已经作�
 							*E763*
 Vim 允许在相同文件里为多种语言进行拼写检查。它们在 'spelllang' 选项里列出。为
 此，相同编码的所有拼写文件必须使用相同的单词字符，否则不能保证它们合并使用而不
-产生错误。如果你得到警告说单词表格不一致，可能需要重新用 |:mkspell| 生成 .spl
-文件。请检查所用的 .aff 文件里的 FOL、LOW 和 UPP 三行。
+产生错误。
+
+如果你得到 E763 警告说单词表格不一致，可能需要更新 .spl 文件。如果你是下载得到
+的文件，下载所有拼写文件的最新版本。否则重新用 |:mkspell| 生成 .spl 文件。如果
+还有错误，请检查所用的 .aff 文件里的 FOL、LOW 和 UPP 三行。
 
 用 "-ascii" 参数生成的 XX.ascii.spl 拼写文件不包含字符表格，所以它可以和任何编
 码的拼写文件合并使用。.add.spl 文件同样如此。
@@ -804,6 +816,7 @@ they're，但既然 "they" 和 "are" 本身都是单词，不这么做就发现�
 
 注意: 如果使用 utf-8，标志位只能使用不超过 65000 的字符值。
 
+注意: 即使使用 "num" 或 "long"，复合词和前缀的标志位限定在大约 250 个。
 
 后 缀
 					    *spell-PFX* *spell-SFX*
@@ -987,6 +1000,9 @@ Myspell 不支持此标志位。此标志位的出现意味着大小写相关。
 
 此标志位也可用于带字缀的单词，因而可以用来标注一系列相关的词为坏词。
 
+							*spell-FORBIDDENWORD*
+FORBIDDENWORD 等同于 BAD。为了保持和 Hunspell 的兼容而设。
+
 							*spell-NEEDAFFIX*
 NEEDAFFIX 标志位用来指定单词必须使用字缀。该单词本身不被认为是好词 (除非有空字
 缀)。例如:
@@ -1032,6 +1048,7 @@ COMPOUNDRULE 项目可以出现多次。它的参数包含一或多个组。每�
 可选地，后面可跟:
 	*	该组出现零或多次，例如，sm*e
 	+	该组出现一或多次，例如，c+
+	?	该组出现零或一次，例如，x?
 
 这和正规表达式的语法相似 (但不完全相同！)。一些例子如下，这里同时列出它们所要
 求的标志位序列:
@@ -1039,6 +1056,7 @@ COMPOUNDRULE 项目可以出现多次。它的参数包含一或多个组。每�
     COMPOUNDRULE yz	   yz
     COMPOUNDRULE x+z	   xz xxz xxxz 等
     COMPOUNDRULE yx+	   yx yxx yxxx 等
+    COMPOUNDRULE xy?z	   xz xyz
 
     COMPOUNDRULE [abc]z    az bz cz
     COMPOUNDRULE [abc]+z   az aaz abaz bz baz bcbz cz caz cbaz 等
@@ -1067,6 +1085,9 @@ COMPOUNDRULE 项目可以出现多次。它的参数包含一或多个组。每�
 NEEDCOMPOUND 标志位要求单词必须用作复合词的一部分。该单词本身不作为好词。例如:
 
 	NEEDCOMPOUND & ~
+
+							*spell-ONLYINCOMPOUND*
+ONLYINCOMPOUND 等同于 NEEDCOMPOUND。为保持和 Hunspell 兼容性而设。
 
 							*spell-COMPOUNDMIN*
 用于复合词的最短字符长度用 COMPOUNDMIN 指定。例如:
@@ -1119,6 +1140,17 @@ COMPOUNDPERMITFLAG 指定可用于字缀的标志位。它意味着加上字缀�
 						    *spell-COMPOUNDROOT*
 COMPOUNDROOT 标志位用来指定字典里已经是复合词的单词。检查复合词规则时，它可以
 被计算为两个单词。也可用于字缀，使得该字缀成为一个复合词。
+
+						*spell-CHECKCOMPOUNDPATTERN*
+CHECKCOMPOUNDPATTERN 用于定义这样的模式，在两个词复合的位置匹配时禁止该复合
+词。示例:
+	CHECKCOMPOUNDPATTERN o e ~
+
+如果第一个词以 "o" 结尾而第二个词以 "e" 开始，禁止它们的复合。
+
+虽然名字叫模式，参数必须是普通的文本而不是什么模式。总是忽略大小写。
+
+不支持 Hunspell 带三个参数和标志位的功能。
 
 							*spell-SYLLABLE*
 SYLLABLE 项目定义用于计算单词音节数的字符或字符序列。例如:
@@ -1266,6 +1298,10 @@ SAL 机制复杂又费时。一个稍简单的机制是把所有的字符映射�
 ACCENT		(Hunspell)				*spell-ACCENT*
 		用 MAP 代替。|spell-MAP|
 
+BREAK		(Hunspell)				*spell-BREAK*
+		定义分切点。还不清楚这是怎么工作的。
+		不支持。
+
 CHECKCOMPOUNDCASE  (Hunspell)			*spell-CHECKCOMPOUNDCASE*
 		不允许复合词边界上有大写字母。不支持。
 
@@ -1277,9 +1313,6 @@ CHECKCOMPOUNDREP  (Hunspell)			*spell-CHECKCOMPOUNDREP*
 
 CHECKCOMPOUNDTRIPLE  (Hunspell)			*spell-CHECKCOMPOUNDTRIPLE*
 		禁止复合时出现三个相同的字符。不支持。
-
-CHECKCOMPOUNDPATTERN  (Hunspell)		*spell-CHECKCOMPOUNDPATTERN*
-		匹配对应模式时禁止复合。不支持。
 
 COMPLEXPREFIXES  (Hunspell)				*spell-COMPLEXPREFIXES*
 		允许使用两个前缀。不支持。
@@ -1302,12 +1335,16 @@ COMPOUNDEND	(Hunspell)				*spell-COMPOUNDEND*
 COMPOUNDMIDDLE	(Hunspell)				*spell-COMPOUNDMIDDLE*
 		用 COMPOUNDRULE 代替。|spell-COMPOUNDRULE|
 
+COMPOUNDRULES	(Hunspell)				*spell-COMPOUNDRULES*
+		紧跟其后的 COMPOUNDRULE 行的数目。忽略，但参数必须是数值。
+
 COMPOUNDSYLLABLE  (Hunspell)			*spell-COMPOUNDSYLLABLE*
 		用 SYLLABLE 和 COMPOUNDSYLMAX 代替。|spell-SYLLABLE|
 		|spell-COMPOUNDSYLMAX|
 
-FORBIDDENWORD	(Hunspell)				*spell-FORBIDDENWORD*
-		用 BAD 代替。|spell-BAD|
+KEY		(Hunspell)				*spell-KEY*
+		定义键盘上互相靠近的字符。
+		用于给出更好的建议。不支持。
 
 LANG		(Hunspell)				*spell-LANG*
 		指定语言特定的行为。实际上把部分有关语言的知识放进了程序里。因
@@ -1317,10 +1354,7 @@ LEMMA_PRESENT	(Hunspell)				*spell-LEMMA_PRESENT*
 		只用于词态学分析。
 
 MAXNGRAMSUGS	(Hunspell)				*spell-MAXNGRAMSUGS*
-		不支持。
-
-ONLYINCOMPOUND	(Hunspell)				*spell-ONLYINCOMPOUND*
-		用 NEEDCOMPOUND 代替。|spell-NEEDCOMPOUND|
+		设置 n-元组建议的数目。不支持。
 
 PSEUDOROOT	(Hunspell)				*spell-PSEUDOROOT*
 		用 NEEDAFFIX 代替。|spell-NEEDAFFIX|

@@ -112,6 +112,34 @@ set guifontwide=Yahei_Mono:h11 " 如果非空，指定逗号分隔的用于双�
 set hidden " 退出时隐藏而不是卸载缓冲区
 set confirm " 某些因为缓冲区有未保存的改变而失败的操作会弹出对话框要求确认
 
+" 快速切换缓冲区
+" noremap <unique> <script> <leader>1 :1b<CR>
+" noremap <unique> <script> <leader>2 :2b<CR>
+" noremap <unique> <script> <leader>3 :3b<CR>
+" noremap <unique> <script> <leader>4 :4b<CR>
+" noremap <unique> <script> <leader>5 :5b<CR>
+" noremap <unique> <script> <leader>6 :6b<CR>
+" noremap <unique> <script> <leader>7 :7b<CR>
+" noremap <unique> <script> <leader>8 :8b<CR>
+" noremap <unique> <script> <leader>9 :9b<CR>
+" noremap <unique> <script> <leader>0 :0b<CR>
+" inoremap <unique> <script> <leader>1 <Esc>:1b<CR>
+" inoremap <unique> <script> <leader>2 <Esc>:2b<CR>
+" inoremap <unique> <script> <leader>3 <Esc>:3b<CR>
+" inoremap <unique> <script> <leader>4 <Esc>:4b<CR>
+" inoremap <unique> <script> <leader>5 <Esc>:5b<CR>
+" inoremap <unique> <script> <leader>6 <Esc>:6b<CR>
+" inoremap <unique> <script> <leader>7 <Esc>:7b<CR>
+" inoremap <unique> <script> <leader>8 <Esc>:8b<CR>
+" inoremap <unique> <script> <leader>9 <Esc>:9b<CR>
+" inoremap <unique> <script> <leader>0 <Esc>:0b<CR>
+
+let c = 1
+while c <= 99
+  execute "nnoremap " . c . "gb :" . c . "b\<CR>"
+  let c += 1
+endwhile
+
 "---------------------------------------
 " 搜索
 "---------------------------------------
@@ -129,15 +157,15 @@ set smartcase " 搜索小写忽略大小写
 "---------------------------------------
 " 文件、语法和颜色主题
 "---------------------------------------
-set filetype=txt " 设置默认文件类型
+"set filetype=txt " 设置默认文件类型
 set syntax=txt " 设置默认语法类型
 " 设置默认颜色主题
-if has("gui_running")
-    colorscheme ir_black
-else
-    colorscheme desert256.vim
-endif
-
+" if has("gui_running")
+"     colorscheme ir_black
+" else
+"     colorscheme desert256.vim
+" endif
+ 
 
 "---------------------------------------
 " 提示信息
@@ -223,9 +251,25 @@ if has('statusline')
   set statusline+=[%t]  " 文件名
   set statusline+=[%{FileSize()}]  " 文件大小
   set statusline+=[#%n]  " 缓冲区号
-  " set statusline+=[%{strftime("%Y-%m-%d %H:%M",getftime(expand('\%')))}]  " 最后修改的时间
   set statusline+=[%{strftime(\"%Y\-%m\-%d\ %H\:%M\",getftime(expand(\"%:p\")))}]
 endif
+
+" let g:airline_powerline_fonts = 1
+" let g:airline#extensions#tabline#enabled = 1
+" let g:airline#extensions#tabline#show_buffers = 1
+" let g:airline#extensions#tabline#show_tab_nr = 1
+" let g:airline#extensions#tabline#show_tab_type = 1
+" let g:airline#extensions#tabline#buffer_idx_mode = 1
+"   nmap <leader>1 <Plug>AirlineSelectTab1
+"   nmap <leader>2 <Plug>AirlineSelectTab2
+"   nmap <leader>3 <Plug>AirlineSelectTab3
+"   nmap <leader>4 <Plug>AirlineSelectTab4
+"   nmap <leader>5 <Plug>AirlineSelectTab5
+"   nmap <leader>6 <Plug>AirlineSelectTab6
+"   nmap <leader>7 <Plug>AirlineSelectTab7
+"   nmap <leader>8 <Plug>AirlineSelectTab8
+"   nmap <leader>9 <Plug>AirlineSelectTab9
+
 
 function! FileSize()
   let bytes = getfsize(expand("%:p"))
@@ -290,26 +334,35 @@ nnoremap <BackSpace> <C-B>
 " 转换为纯文本类型，应用相应的语法高亮和插件
 nnoremap <F1> <Esc>:set filetype=txt<CR>
 
-" 切换是否显示行号，显示绝对或相对行号
+" 切换显示绝对或相对行号
 nnoremap <F2> <Esc>:call ToggleRelativeNumber()<CR>
 
 " 显示/禁止搜索高亮
 nnoremap <silent> <F3> <Esc>:call ToggleHLSearch()<CR>
 
+" 插入时间戳
+
+nmap <F4> a<C-R>=strftime("%Y%m%d%H%M%S")<CR><Esc>
+imap <F4> <C-R>=strftime("%Y%m%d%H%M%S")<CR>
+
 " 启用/禁止折行
 nnoremap <silent> <F6> <Esc>:call ToggleWrap()<CR>
 
 " 新建标签页
-noremap <F10> <Esc>:tabnew<CR>
+noremap <F10> <Esc>:enew<CR>
 
 " 打开另存为对话框
 noremap <F12> <Esc>:browse saveas<CR>
 
 " 显示缓冲区清单
-noremap <leader>bl <Esc>:Bufferlist<CR>
+noremap <leader>b <Esc>:Bufferlist<CR>
+" noremap <leader>mb <Esc>:MBEToggle<CR>
 
-" 在垂直窗口中编辑配置文件
-nnoremap <leader>ev <C-w><C-v><C-l>:e $MYVIMRC<CR>
+" 普通模式下 Ctrl+c 复制文件路径
+nnoremap <c-c> :let @* = expand('%:p')<cr>
+
+" 编辑配置文件
+nnoremap <leader>ev :e $MYVIMRC<CR>
 
 nnoremap <leader>sv :so $MYVIMRC<CR>
 
@@ -333,12 +386,12 @@ function! ToggleHLSearch()
 endfunction
 
 function! ToggleRelativeNumber()
-    if &nu == 1
-       set rnu
-    elseif &rnu == 1
-       set nornu
+    if( &nu == 1 )
+        set nonu
+        set rnu
     else
-       set nu
+        set nu
+        set nornu
     endif
 endfunction
 
@@ -414,8 +467,8 @@ vnoremap <A-F7> :BetterSearchVisualSelect<CR>
 nnoremap <A-w>  :BetterSearchSwitchWin<CR>
 
 " PinyinSearch
-nnoremap <Leader>ps :call PinyinSearch()<CR>
-nnoremap <Leader>pn :call PinyinNext()<CR>
+" nnoremap <Leader>ps :call PinyinSearch()<CR>
+" nnoremap <Leader>pn :call PinyinNext()<CR>
 " let g:PinyinSearch_Dict = "c:/Program Files/Vim/PinyinSearch.dict"
 
 " PyDiction
@@ -426,8 +479,8 @@ nnoremap <Leader>pn :call PinyinNext()<CR>
 " imap <silent><A-`> <C-X><C-O>
 
 " Indent Guides
-let g:indent_guides_enable_on_vim_startup = 1
-let g:indent_guides_guide_size = 1
+" let g:indent_guides_enable_on_vim_startup = 1
+" let g:indent_guides_guide_size = 1
 
 "" Neocomplcache
 "let g:neocomplcache_enable_at_startup = 1
@@ -492,13 +545,61 @@ let g:indent_guides_guide_size = 1
 nnoremap <leader>f :call FilteringNew().addToParameter('alt', @/).run()<CR>
 
 " Gundo
-nnoremap <F5> :GundoToggle<CR>
+" nnoremap <F5> :GundoToggle<CR>
 
 " Colorizer
 nmap <leader>ct <Plug>Colorizer
 
 " TagList
-nnoremap <silent> <F8> :TlistToggle<CR>
+" nnoremap <silent> <F8> :TlistToggle<CR>
 
 " PanDoc
-nnoremap <leader>pd :!pandoc -o %:r.html %<CR>
+" nnoremap <leader>pd :!pandoc % -o %:r.html<CR>
+
+" Rainbow Parentheses Improved 
+" let g:rainbow_active = 1
+
+" Start interactive EasyAlign in visual mode
+vmap <Enter> <Plug>(EasyAlign)
+" Start interactive EasyAlign with a Vim movement
+nmap <Leader>a <Plug>(EasyAlign)
+
+" MiniBufExpl
+" let g:miniBufExplCheckDupeBufs = 0
+
+" CtrlP
+let g:ctrlp_cmd = 'CtrlPMRUFiles'
+
+" neocomplete.vim
+" Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
+" Disable AutoComplPop.
+let g:acp_enableAtStartup = 0
+" Use neocomplete.
+let g:neocomplete#enable_at_startup = 1
+" Set minimum syntax keyword length.
+let g:neocomplete#sources#syntax#min_keyword_length = 3
+
+" Recommended key-mappings.
+" <CR>: close popup and save indent.
+inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+function! s:my_cr_function()
+  return neocomplete#close_popup() . "\<CR>"
+  " For no inserting <CR> key.
+  "return pumvisible() ? neocomplete#close_popup() : "\<CR>"
+endfunction
+" <TAB>: completion.
+inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+
+" Search from neocomplete, omni candidates, vim keywords.
+let g:neocomplete#fallback_mappings =
+\ ["\<C-x>\<C-o>", "\<C-x>\<C-n>"]
+
+" Enable omni completion.
+autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+
+" SuperTab
+" let g:SuperTabDefaultCompletionType = "<c-n>"

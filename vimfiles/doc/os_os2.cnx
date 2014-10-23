@@ -1,4 +1,4 @@
-*os_os2.txt*    For Vim version 7.2.  最近更新: 2006年7月
+*os_os2.txt*    For Vim version 7.4.  最近更新: 2006年7月
 
 
 		  VIM 参考手册    by Paul Slootman
@@ -36,7 +36,7 @@ Unix系统下用 telnet 访问，打开 Vim。看起来，这个问题是因为 
 预 备 条 件
 
 要执行 Vim，你需要 emx 运行环境 (至少 rev. 0.9b)。这可以如下得到 (可以询问
-Archie): 
+Archie):
 
     emxrt.zip     emx 运行包
 
@@ -82,8 +82,8 @@ POSIX 的关于 select() 函数的特色。3.27 以前的 Vim 版本在启动的
 录下面的 "textfile" 文件。另外，你也可以用别的环境变量，比如，":n $SRC/*.c"。
 
 HOME 环境变量还用于定位 .viminfo 文件 (参见 |viminfo-file|)。还没有 FAT 文件系
-统下的 .viminfo支持，对不起了。不过，你自己可以加上 -i 启动标志位来设定 (比如，
-"vim -i $HOME/_viminfo")。
+统下的 .viminfo支持，对不起了。不过，你自己可以加上 -i 启动标志位来设定 (比
+如，"vim -i $HOME/_viminfo")。
 
 如果 HOME 环境变量没有设置，缺省值是 "C:/"。
 
@@ -147,7 +147,8 @@ vimbig2.cmd: >
 OS/2 的 Vim 没有对系统剪贴板的直接支持。要允许这样的访问，你需要一个附加的工
 具: 通过一个 vio 应用来访问剪贴板。Stefan Gruendel 的免费软件包 clipbrd.zip
 就可以。你可以从这个地方下载到编译好的可执行码和所有的源代码:
-	http://www.stellarcom.org/vim/index.html
+	http://www.os2site.com/sw/util/clipboard/index.html
+	http://download.uni-hd.de/ftp/pub/os2/pmtools/
 
 它的安装很简单: 只要把包里的两个可执行程序放到你的 PATH 里面的一个目录，Vim 就
 可以从的你的任何工作目录里访问他们了。
