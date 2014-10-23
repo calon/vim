@@ -1,1 +1,0 @@
-DrawIt.vba: call delete('c:\Program Files\Vim\vimfiles\bundle\drawit/plugin/DrawItPlugin.vim')|call delete('c:\Program Files\Vim\vimfiles\bundle\drawit/plugin/cecutil.vim')|call delete('c:\Program Files\Vim\vimfiles\bundle\drawit/autoload/DrawIt.vim')|call delete('c:\Program Files\Vim\vimfiles\bundle\drawit/doc/DrawIt.txt')
