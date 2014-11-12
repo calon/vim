@@ -170,9 +170,9 @@ set syntax=txt " 设置默认语法类型
 "---------------------------------------
 " 提示信息
 "---------------------------------------
-set showcmd " 在屏幕最后一行显示 (部分的) 命令。
-set shortmess=atI " 缩写某些提示信息
-set showmatch " 插入括号时，短暂地跳转到匹配的对应括号。
+set showcmd " 在屏幕最后一行显示 (部分的) 命令
+set shortmess=aoOtTI " 缩写某些提示信息
+set showmatch " 插入括号时，短暂地跳转到匹配的对应括号
 set list " 显示特殊字符
 set listchars=tab:>-,nbsp:.
 
@@ -331,43 +331,56 @@ inoremap <silent> <Down> <Esc>gja
 nnoremap <Space> <C-F>
 nnoremap <BackSpace> <C-B>
 
-" 转换为纯文本类型，应用相应的语法高亮和插件
-nnoremap <F1> <Esc>:set filetype=txt<CR>
+" 显示缓冲区清单
+nnoremap <leader>b <Esc>:Bufferlist<CR>
+nnoremap <F1> <Esc>:Bufferlist<CR>
+
+" noremap <leader>mb <Esc>:MBEToggle<CR>
 
 " 切换显示绝对或相对行号
 nnoremap <F2> <Esc>:call ToggleRelativeNumber()<CR>
 
 " 显示/禁止搜索高亮
-nnoremap <silent> <F3> <Esc>:call ToggleHLSearch()<CR>
+nnoremap <F3> <Esc>:call ToggleHLSearch()<CR>
 
 " 插入时间戳
 
-nmap <F4> a<C-R>=strftime("%Y%m%d%H%M%S")<CR><Esc>
-imap <F4> <C-R>=strftime("%Y%m%d%H%M%S")<CR>
+nnoremap <F4> a<C-R>=strftime("%Y%m%d%H%M%S")<CR><Esc>
+inoremap <F4> <C-R>=strftime("%Y%m%d%H%M%S")<CR>
+
+" UndoTree 显示撤销历史
+nnoremap <F5> :UndotreeToggle<CR>
 
 " 启用/禁止折行
-nnoremap <silent> <F6> <Esc>:call ToggleWrap()<CR>
+nnoremap <F6> <Esc>:call ToggleWrap()<CR>
+
+" 切换语法高亮
+nnoremap <F7> <Esc>:call ToggleSyntaxHighlight()<CR>
+
+function! ToggleSyntaxHighlight()
+     if exists("g:syntax_on")
+          syntax off
+     else
+          syntax enable
+     endif
+endfunction
+
+" Locate 搜索清单
+nnoremap <A-F7> <Esc>:L<SPACE>
 
 " 新建标签页
-noremap <F10> <Esc>:enew<CR>
+nnoremap <F10> <Esc>:enew<CR>
 
 " 打开另存为对话框
-noremap <F12> <Esc>:browse saveas<CR>
-
-" 显示缓冲区清单
-noremap <leader>b <Esc>:Bufferlist<CR>
-" noremap <leader>mb <Esc>:MBEToggle<CR>
+nnoremap <F12> <Esc>:browse saveas<CR>
 
 " 普通模式下 Ctrl+c 复制文件路径
-nnoremap <c-c> :let @* = expand('%:p')<cr>
+nnoremap <c-c> :let @* = expand('%:p')<CR>
 
 " 编辑配置文件
 nnoremap <leader>ev :e $MYVIMRC<CR>
 
-nnoremap <leader>sv :so $MYVIMRC<CR>
-
-" 应用语法高亮
-nnoremap <leader>tx <Esc>:set filetype=txt<CR>
+nnoremap <leader>sv :source $MYVIMRC<CR>
 
 function! ToggleWrap()
      if &wrap
@@ -396,14 +409,19 @@ function! ToggleRelativeNumber()
 endfunction
 
 " 窗口间跳转
-map <C-j> <C-W>j
-map <C-k> <C-W>k
-map <C-h> <C-W>h
-map <C-l> <C-W>l
+" map <C-j> <C-W>j
+" map <C-k> <C-W>k
+" map <C-h> <C-W>h
+" map <C-l> <C-W>l
+
+nnoremap <S-Up> <C-W><Up>
+nnoremap <S-Down> <C-W><Down>
+nnoremap <S-Left> <C-W><Left>
+nnoremap <S-Right> <C-W><Right>
 
 " 标签页操作
-noremap <leader>tn :tabnew<CR>
-noremap <leader>tc :tabclose<CR>
+nnoremap <leader>tn :tabnew<CR>
+nnoremap <leader>tc :tabclose<CR>
 
 " Next Tab
 nnoremap <silent> <C-Right> :tabnext<CR>
@@ -422,9 +440,6 @@ inoremap <C-l> <Right>
 inoremap <C-j> <Down>
 inoremap <C-k> <Up>
 
-" 在vim中将查找出来的所有结果全部显示在单独的窗口中，在该窗口中双击该行就能定位到文件中的相应行上。 
-cnoremap <leader>/ :exec 'lvimgrep /' . input('/', expand('<cword>')) . '/j % <bar> lopen'<CR>
-
 " 编码转换
 cabbrev utf2gb set encoding=cp936 fileencoding=cp936
 cabbrev gb2utf set encoding=utf-8 fileencoding=utf-8
@@ -440,9 +455,8 @@ let g:calendar_focus_today = 1 " 光标在当天的日期上
 let g:calendar_mark = 'left-fit' "可以让*和数字可靠近 
 
 " Voom Markdown
-nnoremap <leader>vm <Esc>:Voom markdown<CR>
-noremap <F11> <Esc>:Voom markdown<CR>
-nnoremap <leader>ol <Esc>:Voom<CR>
+nnoremap <leader>vm <Esc>:VoomToggle markdown<CR>
+noremap <F11> <Esc>:VoomToggle markdown<CR>
 
 " Convenient command to see the difference between the current buffer and the
 " file it was loaded from, thus the changes you made.
@@ -462,17 +476,9 @@ endif
 "let g:yankring_persist = 0
 
 " BetterSearch
-nnoremap <A-F7> :BetterSearchPromptOn<CR>
-vnoremap <A-F7> :BetterSearchVisualSelect<CR>
-nnoremap <A-w>  :BetterSearchSwitchWin<CR>
-
-" PinyinSearch
-" nnoremap <Leader>ps :call PinyinSearch()<CR>
-" nnoremap <Leader>pn :call PinyinNext()<CR>
-" let g:PinyinSearch_Dict = "c:/Program Files/Vim/PinyinSearch.dict"
-
-" PyDiction
-" let g:pydiction_location = 'c:\Program Files\Vim\vimfiles\bundle\pydiction\ftplugin\pydiction\complete-dict'
+"nnoremap <A-F7> :BetterSearchPromptOn<CR>
+"vnoremap <A-F7> :BetterSearchVisualSelect<CR>
+"nnoremap <A-w>  :BetterSearchSwitchWin<CR>
 
 " Omni Completion
 " autocmd FileType python set omnifunc=pythoncomplete#Complete
@@ -542,13 +548,13 @@ nnoremap <A-w>  :BetterSearchSwitchWin<CR>
 " let g:xptemplate_nav_prev = '<C-Right>'
 
 " Quick Filter
-nnoremap <leader>f :call FilteringNew().addToParameter('alt', @/).run()<CR>
+"nnoremap <leader>f :call FilteringNew().addToParameter('alt', @/).run()<CR>
 
 " Gundo
 " nnoremap <F5> :GundoToggle<CR>
 
 " Colorizer
-nmap <leader>ct <Plug>Colorizer
+nnoremap <leader>ct <Plug>Colorizer
 
 " TagList
 " nnoremap <silent> <F8> :TlistToggle<CR>
@@ -560,9 +566,9 @@ nmap <leader>ct <Plug>Colorizer
 " let g:rainbow_active = 1
 
 " Start interactive EasyAlign in visual mode
-vmap <Enter> <Plug>(EasyAlign)
+vnoremap <Enter> <Plug>(EasyAlign)
 " Start interactive EasyAlign with a Vim movement
-nmap <Leader>a <Plug>(EasyAlign)
+nnoremap <Leader>a <Plug>(EasyAlign)
 
 " MiniBufExpl
 " let g:miniBufExplCheckDupeBufs = 0
@@ -603,3 +609,106 @@ autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
 " SuperTab
 " let g:SuperTabDefaultCompletionType = "<c-n>"
+
+" Unite.vim
+nnoremap <C-p> :Unite -no-split -auto-resize -buffer-name=MRU_File file_mru<CR>
+
+autocmd FileType unite call s:unite_settings()
+
+function! s:unite_settings()
+  let b:SuperTabDisabled=1
+  setlocal noswapfile undolevels=-1
+  nmap <buffer> <ESC> <Plug>(unite_exit)
+endfunction
+
+let g:unite_source_history_yank_enable = 1
+nnoremap <Leader>y :Unite -no-split -quick-match -auto-resize -buffer-name=Yank_History history/yank<CR>
+
+nnoremap <Leader><Leader> :Unite -no-split -quick-match -auto-resize -buffer-name=Buffer_List buffer<CR>
+
+" Unite Menu
+
+nnoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
+
+let g:unite_source_menu_menus = {}
+
+let g:unite_source_menu_menus.Unite = {
+    \ 'description' : ' > Unite 常用操作
+        \                            ',
+    \}
+
+let g:unite_source_menu_menus.Unite.command_candidates = [
+    \[' > 查看历史文件         Ctrl-P',
+        \'Unite -no-split -auto-resize -buffer-name=MRU_File file_mru'],
+    \[' > 查看当前目录文件',
+        \'Unite -no-split -auto-resize -start-insert -buffer-name=File_List file'],
+    \[' > 查看缓冲区',
+        \'Unite -no-split -quick-match -auto-resize -buffer-name=Buffer_List buffer'],
+    \[' > 查看复制寄存器内容',
+        \'Unite -no-split -quick-match -auto-resize -buffer-name=Yank_History history/yank'],
+    \]
+
+let g:unite_source_menu_menus.View = {
+    \ 'description' : ' > 视图设置切换操作
+        \                            ',
+    \}
+
+let g:unite_source_menu_menus.View.command_candidates = [
+    \[' > 切换大纲视图（Markdown）',
+        \'VoomToggle markdown'],
+    \[' > 切换颜色代码自动着色',
+        \'ColorToggle'],
+    \[' > 设置为纯文本类型',
+        \'set filetype=txt'],
+    \[' > 切换行号显示模式           <F2> ',
+        \'call ToggleRelativeNumber()'],
+    \[' > 切换搜索结果高亮显示       <F3> ',
+        \'call ToggleHLSearch()'],
+    \[' > 切换撤销历史显示           <F5> ',
+        \'UndotreeToggle'],
+    \[' > 切换自动换行               <F6> ',
+        \'call ToggleWrap()'],
+    \[' > 切换语法高亮显示           <F7> ',
+        \'call ToggleSyntaxHighlight()'],
+    \[' > 切换缩进标志显示',
+        \'IndentLinesToggle'],
+    \]
+
+let g:unite_source_menu_menus.Edit = {
+    \ 'description' : ' > 编辑操作
+        \                            ',
+    \}
+
+" Todo
+" sort u
+" NerdCommnent
+" Calendar
+" Mark
+" Bookmark
+" HTML
+" NarrowRegion
+" EasyAlign <CTRL-/> or <CTRL-X> for Regular Expression
+
+let g:unite_source_menu_menus.Edit.command_candidates = [
+    \[' > 搜索清单  :L[!] /<pattern1>/<pattern2>/.../[<flags>]）',
+        \''],
+    \[' > 切换颜色代码自动着色',
+        \'ColorToggle'],
+    \[' > 设置为纯文本类型',
+        \'set filetype=txt'],
+    \[' > 切换行号显示模式           <F2> ',
+        \'call ToggleRelativeNumber()'],
+    \[' > 切换搜索结果高亮显示       <F3> ',
+        \'call ToggleHLSearch()'],
+    \[' > 切换撤销历史显示           <F5> ',
+        \'UndotreeToggle'],
+    \[' > 切换自动换行               <F6> ',
+        \'call ToggleWrap()'],
+    \[' > 切换语法高亮显示           <F7> ',
+        \'call ToggleSyntaxHighlight()'],
+    \[' > 切换缩进标志显示',
+        \'IndentLinesToggle'],
+    \]
+
+"nnoremap <silent>[menu]g :Unite -silent -start-insert menu:git<CR>
+
