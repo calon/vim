@@ -7,12 +7,14 @@ source $VIMRUNTIME/mswin.vim
 behave mswin " 使用更接近 Windows 的操作配置
 set t_Co=256
 
-" 在编辑保存配置文件后立即在当前会话启用
+" 进入后最大化窗口
 if has("autocmd")
-  autocmd bufwritepost .vimrc source $MYVIMRC
+  "autocmd bufwritepost .vimrc source $MYVIMRC
+  autocmd GUIEnter * simalt ~x
 endif
 
 source $VIM/vimrc_path.vim
+set browsedir=buffer
 
 "---------------------------------------
 " 备份、临时文件、历史和会话信息
@@ -143,7 +145,6 @@ endwhile
 "---------------------------------------
 " 搜索
 "---------------------------------------
-" 开启语法高亮
 " 开启搜索高亮TrueType Collection
 if &t_Co > 2 || has("gui_running")
   syntax on
@@ -182,11 +183,8 @@ set listchars=tab:>-,nbsp:.
 " set cursorline " 显示光标所在行背景颜色
 " set ruler " 显示光标位置的行号和列号
 set number " 显示行号
-" autocmd BufWinLeave * setlocal nocursorline nocursorcolumn " 非当前缓冲区取消高亮光标所在行列
 autocmd BufWinLeave * setlocal nocursorline " 非当前缓冲区取消高亮光标所在行
-" autocmd BufWinEnter * setlocal cursorline cursorcolumn " 当前缓冲区高亮光标所在行列
 autocmd BufWinEnter * setlocal cursorline " 当前缓冲区高亮光标所在行
-" set rulerformat=%55(%{strftime('%a\ %b\ %e\ %I:%M\ %p')}\ %5l,%-6(%c%V%)\ %P%) " 设置标尺提示信息
 
 
 set backspace=2 " 退格会删除缩进、换行符和插入的起始位置
@@ -238,21 +236,21 @@ set clipboard=unnamed "与系统共剪贴板
 "---------------------------------------
 set laststatus=2 " 总是显示状态行
 
-if has('statusline')
-  set statusline=%m  " 修改标志位
-  set statusline+=%r  " 只读标志位
-  set statusline+=%h  " 帮助缓冲区标志位
-  set statusline+=%w  " 预览窗口标志位
-  set statusline+=[%Y] " 文件类型
-  set statusline+=[%{&ff}]  " 文件格式
-  set statusline+=[%l\/%L,\ %v,\ %p%%]  " 光标位置、文件行数和窗口在文件位置的百分比
-  set statusline+=[%{(&fenc)}] " 文件编码
-  set statusline+=%#StatusLine#
-  set statusline+=[%t]  " 文件名
-  set statusline+=[%{FileSize()}]  " 文件大小
-  set statusline+=[#%n]  " 缓冲区号
-  set statusline+=[%{strftime(\"%Y\-%m\-%d\ %H\:%M\",getftime(expand(\"%:p\")))}]
-endif
+"if has('statusline')
+  "set statusline=%m  " 修改标志位
+  "set statusline+=%r  " 只读标志位
+  "set statusline+=%h  " 帮助缓冲区标志位
+  "set statusline+=%w  " 预览窗口标志位
+  "set statusline+=[%Y] " 文件类型
+  "set statusline+=[%{&ff}]  " 文件格式
+  "set statusline+=[%l\/%L,\ %v,\ %p%%]  " 光标位置、文件行数和窗口在文件位置的百分比
+  "set statusline+=[%{(&fenc)}] " 文件编码
+  "set statusline+=%#StatusLine#
+  "set statusline+=[%t]  " 文件名
+  "set statusline+=[%{FileSize()}]  " 文件大小
+  "set statusline+=[#%n]  " 缓冲区号
+  "set statusline+=[%{strftime(\"%Y\-%m\-%d\ %H\:%M\",getftime(expand(\"%:p\")))}]
+"endif
 
 " let g:airline_powerline_fonts = 1
 " let g:airline#extensions#tabline#enabled = 1
@@ -271,17 +269,6 @@ endif
 "   nmap <leader>9 <Plug>AirlineSelectTab9
 
 
-function! FileSize()
-  let bytes = getfsize(expand("%:p"))
-  if bytes <= 0
-    return ""
-  endif
-  if bytes < 1024
-    return bytes
-  else
-    return (bytes / 1024) . "K"
-  endif
-endfunction
 
 
 "---------------------------------------
@@ -298,13 +285,13 @@ endif
 " 优化大文件编辑
 "---------------------------------------
 
-if !exists("my_auto_commands_loaded")
-        let my_auto_commands_loaded = 1
-        let g:LargeFile = 1024 * 1024 * 100
-        augroup LargeFile
-                autocmd BufReadPre * let f=expand("<afile>") | if getfsize(f) > g:LargeFile | set eventignore+=FileType | setlocal noswapfile bufhidden=unload buftype=nowrite undolevels=-1 | else | set eventignore-=FileType | endif
-        augroup END
-endif
+"if !exists("my_auto_commands_loaded")
+        "let my_auto_commands_loaded = 1
+        "let g:LargeFile = 1024 * 1024 * 100
+        "augroup LargeFile
+                "autocmd BufReadPre * let f=expand("<afile>") | if getfsize(f) > g:LargeFile | set eventignore+=FileType | setlocal noswapfile bufhidden=unload buftype=nowrite undolevels=-1 | else | set eventignore-=FileType | endif
+        "augroup END
+"endif
 
 "---------------------------------------
 " 拼写检查
@@ -332,8 +319,8 @@ nnoremap <Space> <C-F>
 nnoremap <BackSpace> <C-B>
 
 " 显示缓冲区清单
-nnoremap <leader>b <Esc>:Bufferlist<CR>
-nnoremap <F1> <Esc>:Bufferlist<CR>
+"nnoremap <leader>b <Esc>:Bufferlist<CR>
+nnoremap <F1> :Unite -no-split -auto-resize -start-insert -buffer-name=Buffer_List buffer<CR>
 
 " noremap <leader>mb <Esc>:MBEToggle<CR>
 
@@ -345,11 +332,11 @@ nnoremap <F3> <Esc>:call ToggleHLSearch()<CR>
 
 " 插入时间戳
 
-nnoremap <F4> a<C-R>=strftime("%Y%m%d%H%M%S")<CR><Esc>
-inoremap <F4> <C-R>=strftime("%Y%m%d%H%M%S")<CR>
+nnoremap <F4> a<C-R>=strftime("%Y-%m-%d %H:%M:%S")<CR><Esc>
+inoremap <F4> <C-R>=strftime("%Y-%m-%d %H:%M:%S")<CR>
 
 " UndoTree 显示撤销历史
-nnoremap <F5> :UndotreeToggle<CR>
+nnoremap <F5> <Esc>:UndotreeToggle<CR>
 
 " 启用/禁止折行
 nnoremap <F6> <Esc>:call ToggleWrap()<CR>
@@ -421,13 +408,13 @@ nnoremap <S-Right> <C-W><Right>
 
 " 标签页操作
 nnoremap <leader>tn :tabnew<CR>
-nnoremap <leader>tc :tabclose<CR>
+"nnoremap <leader>tc :tabclose<CR>
 
 " Next Tab
-nnoremap <silent> <C-Right> :tabnext<CR>
+"nnoremap <silent> <C-Right> :tabnext<CR>
 
 " Previous Tab
-nnoremap <silent> <C-Left> :tabprevious<CR>
+"nnoremap <silent> <C-Left> :tabprevious<CR>
 
 
 " 缩进操作
@@ -440,9 +427,6 @@ inoremap <C-l> <Right>
 inoremap <C-j> <Down>
 inoremap <C-k> <Up>
 
-" 编码转换
-cabbrev utf2gb set encoding=cp936 fileencoding=cp936
-cabbrev gb2utf set encoding=utf-8 fileencoding=utf-8
 
 "---------------------------------------
 " 插件配置
@@ -461,120 +445,21 @@ noremap <F11> <Esc>:VoomToggle markdown<CR>
 " Convenient command to see the difference between the current buffer and the
 " file it was loaded from, thus the changes you made.
 " Only define it when not defined already.
-if !exists(":DiffOrig")
-  command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
-		  \ | wincmd p | diffthis
-endif
-
-" YankRing
-"let g:yankring_manage_numbered_reg = 1
-"nnoremap <leader>yr :YRShow<CR>
-"let g:yankring_window_use_horiz = 0  " Use vertical split
-"let g:yankring_history_dir = '$VIM'
-"let g:yankring_max_element_length = 102400
-"let g:yankring_max_display = 70
-"let g:yankring_persist = 0
-
-" BetterSearch
-"nnoremap <A-F7> :BetterSearchPromptOn<CR>
-"vnoremap <A-F7> :BetterSearchVisualSelect<CR>
-"nnoremap <A-w>  :BetterSearchSwitchWin<CR>
-
-" Omni Completion
-" autocmd FileType python set omnifunc=pythoncomplete#Complete
-" imap <silent><A-`> <C-X><C-O>
-
-" Indent Guides
-" let g:indent_guides_enable_on_vim_startup = 1
-" let g:indent_guides_guide_size = 1
-
-"" Neocomplcache
-"let g:neocomplcache_enable_at_startup = 1
-"" Use smartcase.
-"let g:neocomplcache_enable_smart_case = 1
-"" Use camel case completion.
-"let g:neocomplcache_enable_camel_case_completion = 0
-"" Use underbar completion.
-"let g:neocomplcache_enable_underbar_completion = 0
-"let g:neocomplcache_max_list = 15
-"" Set minimum syntax keyword length.
-"let g:neocomplcache_min_syntax_length = 3
-"let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
-
-" if !exists('g:neocomplcache_dictionary_patterns')
-"    let g:neocomplcache_dictionary_patterns = {}
-" endif
-"     let g:neocomplcache_dictionary_patterns = {
-"         \'python': expand('c:/Program Files/Vim/vimfiles/dict/python-dict'),
-"         \}
-
-" if !exists('g:neocomplcache_dictionary_patterns')
-"   let g:neocomplcache_dictionary_patterns = {}
-" endif
-" " works well for the pydiction.vim dictionary file(complete-dict)
-" let g:neocomplcache_dictionary_patterns.python = '\(\h\w*[.(]\?\)\+'
-
-  "let g:neocomplcache_dictionary_filetype_lists = {
-      "\ 'default' : '',
-      "\ 'vimshell' : $HOME.'/.vimshell_hist',
-      "\ 'scheme' : $HOME.'/.gosh_completions',
-      "\ 'python' : $VIM.'/vimfiles/dict/python-dict'
-         "\ }
-
-
-" Define keyword.
-"if !exists('g:neocomplcache_keyword_patterns')
-    "let g:neocomplcache_keyword_patterns = {}
+"if !exists(":DiffOrig")
+  "command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
+		  "\ | wincmd p | diffthis
 "endif
-    "let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
-
-" AutoComplPop like behavior.
-"let g:neocomplcache_enable_auto_select = 0
-
-" Enable omni completion.
-"autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-"autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-"autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-"autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-"autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-
-
-" inoremap <expr><space> pumvisible() ? neocomplcache#close_popup() . "\<SPACE>" : "\<SPACE>"
-
-" XPTemplate
-
-" let g:xptemplate_pum_tab_nav = 1
-" let g:xptemplate_nav_next = '<C-Left>'
-" let g:xptemplate_nav_prev = '<C-Right>'
-
-" Quick Filter
-"nnoremap <leader>f :call FilteringNew().addToParameter('alt', @/).run()<CR>
-
-" Gundo
-" nnoremap <F5> :GundoToggle<CR>
-
-" Colorizer
-nnoremap <leader>ct <Plug>Colorizer
-
-" TagList
-" nnoremap <silent> <F8> :TlistToggle<CR>
-
-" PanDoc
-" nnoremap <leader>pd :!pandoc % -o %:r.html<CR>
-
-" Rainbow Parentheses Improved 
-" let g:rainbow_active = 1
 
 " Start interactive EasyAlign in visual mode
-vnoremap <Enter> <Plug>(EasyAlign)
+vmap <Enter> <Plug>(EasyAlign)
 " Start interactive EasyAlign with a Vim movement
-nnoremap <Leader>a <Plug>(EasyAlign)
+nmap <Leader>a <Plug>(EasyAlign)
 
 " MiniBufExpl
 " let g:miniBufExplCheckDupeBufs = 0
 
 " CtrlP
-let g:ctrlp_cmd = 'CtrlPMRUFiles'
+"let g:ctrlp_cmd = 'CtrlPMRUFiles'
 
 " neocomplete.vim
 " Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
@@ -622,9 +507,9 @@ function! s:unite_settings()
 endfunction
 
 let g:unite_source_history_yank_enable = 1
-nnoremap <Leader>y :Unite -no-split -quick-match -auto-resize -buffer-name=Yank_History history/yank<CR>
+nnoremap <Leader>y :Unite -no-split -start-insert -auto-resize -buffer-name=Yank_History history/yank<CR>
 
-nnoremap <Leader><Leader> :Unite -no-split -quick-match -auto-resize -buffer-name=Buffer_List buffer<CR>
+nnoremap <Leader><Leader> :Unite -no-split -auto-resize -buffer-name=Buffer_List buffer<CR>
 
 " Unite Menu
 
@@ -633,7 +518,7 @@ nnoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
 let g:unite_source_menu_menus = {}
 
 let g:unite_source_menu_menus.Unite = {
-    \ 'description' : ' > Unite 常用操作
+    \ 'description' : ' > Unite 常用操作（文件、缓冲区）
         \                            ',
     \}
 
@@ -649,17 +534,21 @@ let g:unite_source_menu_menus.Unite.command_candidates = [
     \]
 
 let g:unite_source_menu_menus.View = {
-    \ 'description' : ' > 视图设置切换操作
+    \ 'description' : ' > 视图设置切换操作（View）
         \                            ',
     \}
 
 let g:unite_source_menu_menus.View.command_candidates = [
-    \[' > 切换大纲视图（Markdown）',
+    \[' > 切换大纲视图（Markdown）   :VoomToggle markdown',
         \'VoomToggle markdown'],
-    \[' > 切换颜色代码自动着色',
+    \[' > 切换注释                   :Commentary ',
+        \'Commentary'],
+    \[' > 切换颜色代码自动着色       :ColorToggle',
         \'ColorToggle'],
     \[' > 设置为纯文本类型',
         \'set filetype=txt'],
+    \[' > 显示缓冲区                 <F1> ',
+        \'Unite -no-split -auto-resize -start-insert -buffer-name=Buffer_List buffer'],
     \[' > 切换行号显示模式           <F2> ',
         \'call ToggleRelativeNumber()'],
     \[' > 切换搜索结果高亮显示       <F3> ',
@@ -670,45 +559,124 @@ let g:unite_source_menu_menus.View.command_candidates = [
         \'call ToggleWrap()'],
     \[' > 切换语法高亮显示           <F7> ',
         \'call ToggleSyntaxHighlight()'],
-    \[' > 切换缩进标志显示',
+    \[' > 切换缩进标志显示           :IndentLinesToggle',
         \'IndentLinesToggle'],
     \]
 
 let g:unite_source_menu_menus.Edit = {
-    \ 'description' : ' > 编辑操作
+    \ 'description' : ' > 编辑操作（Edit）
         \                            ',
     \}
 
-" Todo
-" sort u
-" NerdCommnent
-" Calendar
-" Mark
-" Bookmark
-" HTML
-" NarrowRegion
-" EasyAlign <CTRL-/> or <CTRL-X> for Regular Expression
 
 let g:unite_source_menu_menus.Edit.command_candidates = [
-    \[' > 搜索清单  :L[!] /<pattern1>/<pattern2>/.../[<flags>]）',
-        \''],
-    \[' > 切换颜色代码自动着色',
-        \'ColorToggle'],
-    \[' > 设置为纯文本类型',
-        \'set filetype=txt'],
-    \[' > 切换行号显示模式           <F2> ',
-        \'call ToggleRelativeNumber()'],
-    \[' > 切换搜索结果高亮显示       <F3> ',
-        \'call ToggleHLSearch()'],
-    \[' > 切换撤销历史显示           <F5> ',
-        \'UndotreeToggle'],
-    \[' > 切换自动换行               <F6> ',
-        \'call ToggleWrap()'],
-    \[' > 切换语法高亮显示           <F7> ',
-        \'call ToggleSyntaxHighlight()'],
-    \[' > 切换缩进标志显示',
-        \'IndentLinesToggle'],
+    \[' > 剔重排序，带 [!] 则反向排序     :sort[!] u ',
+        \'sort u'],
+    \[' > 排序并只保留最后一个            :g/^\(.*\)$\n\1$/d ',
+        \'g/^\(.*\)$\n\1$/d'],
+    \[' > Bookmark 增删书签               mm 或 :ToggleBookmark ',
+        \'ToggleBookmark'],
+    \[' > 编辑书签的描述说明              mi 或 :Annotate <TEXT> ',
+        \'echo ":Annotate <TEXT>"'],
+    \[' > 在新窗口中显示所有书签          ma 或 :ShowAllBookmarks ',
+        \'ShowAllBookmarks'],
+    \[' > 清除当前缓冲区书签              mc 或 :clearbookmarks ',
+        \'clearbookmarks'],
+    \[' > 删除 HTML 的标签部分            :%s#<[^>]\+>##g ',
+        \'%s#<[^>]\+>##g'],
+    \[' > Pathogen 更新插件帮助文档       :Helptags ',
+        \'Helptags'],
+    \[' > 转换为 GB2312 编码              :set encoding=cp936 fileencoding=cp936 ',
+        \'set encoding=cp936 fileencoding=cp936'],
+    \[' > 转换为 UTF-8 编码               :set encoding=utf-8 fileencoding=utf-8 ',
+        \'set encoding=utf-8 fileencoding=utf-8'],
+    \[' > 跳回最后编辑的位置              `. ',
+        \'exe "normal! `."'],
+    \[' > Case Switch 切换大小写           ~ ',
+        \'exe "normal! ~"'],
+    \[' > 显示光标位置，并统计字词        g<Ctrl-g> ',
+        \'exe "normal! g\<c-g>"'],
+    \[' > Locate 列出搜索清单             :L[!] /<pattern1>/<pattern2>/.../[<flags>]） ',
+        \'echo ":L[!] /{pattern1}/{pattern2}/.../[{flags}]"'],
+    \[' > EasyAlign 对齐                  <Enter>*<Delimiter>，<CTRL-/> 或 <CTRL-X> 输入正则表达式 ',
+        \'echo "<Enter>*<Delimiter>，<CTRL-/> 或 <CTRL-X> 输入正则表达式"'],
+    \[' > Mark 标记当前词                 <Leader>m ',
+        \'call mark#MarkCurrentWord()<CR>'],
+    \[' > Mark 标记指定模式               :Mark {pattern} ',
+        \'echo ":Mark {pattern}"'],
+    \[' > To Html 转换为网页文件          :TOhtml ',
+        \'TOhtml'],
     \]
 
-"nnoremap <silent>[menu]g :Unite -silent -start-insert menu:git<CR>
+
+" Vim-Bookmark
+let g:bookmark_sign = '>>'
+let g:bookmark_annotation_sign = '##'
+
+
+" Lightline
+
+let g:lightline = {
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ], [ 'filename' ], [ 'updatetime' ] ],
+      \   'right': [ [ 'lineinfo' ], ['percent'], [ 'fileformat', 'fileencoding', 'filetype' ], [ 'size' ] ]
+      \ },
+      \ 'component_function': {
+      \   'filename': 'MyFilename',
+      \   'fileformat': 'MyFileformat',
+      \   'filetype': 'MyFiletype',
+      \   'fileencoding': 'MyFileencoding',
+      \   'modified': 'MyModified',
+      \   'size': 'FileSize',
+      \   'updatetime': 'UpdateTime',
+      \ },
+      \ 'subseparator': { 'left': '|', 'right': '|' }
+      \ }
+
+function! UpdateTime()
+    return strftime("%Y-%m-%d %H:%M", getftime(expand("%:p")))
+endfunction
+
+function! FileSize()
+  let bytes = getfsize(expand("%:p"))
+  if bytes <= 0
+    return ""
+  endif
+  if bytes < 1024
+    return bytes
+  else
+    return (bytes / 1024) . "K"
+  endif
+endfunction
+
+function! MyFilename()
+  return ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
+       \ ('' != expand('%:t') ? expand('%:t') : '[No Name]') .
+       \ ('' != MyModified() ? ' ' . MyModified() : '')
+endfunction
+
+function! MyModified()
+  return &ft =~ 'help' ? '' : &modified ? '+' : &modifiable ? '' : '-'
+endfunction
+
+function! MyReadonly()
+  return &ft !~? 'help' && &readonly ? 'RO' : ''
+endfunction
+
+function! MyFileformat()
+  return winwidth(0) > 70 ? &fileformat : 'No Format'
+endfunction
+
+function! MyFiletype()
+  return winwidth(0) > 70 ? (strlen(&filetype) ? &filetype : 'No Type') : ''
+endfunction
+
+function! MyFileencoding()
+  return winwidth(0) > 70 ? (strlen(&fenc) ? &fenc : &enc) : ''
+endfunction
+
+" Buftabline
+let g:buftabline_show = 1 " only if there are at least two buffers 
+let g:buftabline_numbers = 1
+let g:buftabline_indicators = 1
 
