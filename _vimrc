@@ -137,7 +137,7 @@ set confirm " 某些因为缓冲区有未保存的改变而失败的操作会弹
 " inoremap <unique> <script> <leader>0 <Esc>:0b<CR>
 
 let c = 1
-while c <= 99
+while c <= 49
   execute "nnoremap " . c . "gb :" . c . "b\<CR>"
   let c += 1
 endwhile
@@ -208,7 +208,7 @@ if has('mouse') " 所有模式下允许使用鼠标
   set mouse=a
 endif  
 
-set guioptions=behgmrLtTv " 菜单、滚动条、工具栏、对话框等的设置
+set guioptions=behrv " 菜单、滚动条、工具栏、对话框等的设置，去掉m（菜单栏）和T（工具栏）
 
 
 "---------------------------------------
@@ -320,7 +320,7 @@ nnoremap <BackSpace> <C-B>
 
 " 显示缓冲区清单
 "nnoremap <leader>b <Esc>:Bufferlist<CR>
-nnoremap <F1> :Unite -no-split -auto-resize -start-insert -buffer-name=Buffer_List buffer<CR>
+nnoremap <F1> :Unite -no-split -auto-resize -quick-match -buffer-name=Buffer_List buffer<CR>
 
 " noremap <leader>mb <Esc>:MBEToggle<CR>
 
@@ -427,6 +427,13 @@ inoremap <C-l> <Right>
 inoremap <C-j> <Down>
 inoremap <C-k> <Up>
 
+" 快速跳转缓冲区
+let i = 1
+while i <= 99
+  execute 'nnoremap <leader>' . i . ' <ESC>:b' . i . '<CR>'
+  let i = i + 1
+endwhile  
+
 
 "---------------------------------------
 " 插件配置
@@ -496,6 +503,7 @@ autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 " let g:SuperTabDefaultCompletionType = "<c-n>"
 
 " Unite.vim
+
 nnoremap <C-p> :Unite -no-split -auto-resize -buffer-name=MRU_File file_mru<CR>
 
 autocmd FileType unite call s:unite_settings()
@@ -505,6 +513,19 @@ function! s:unite_settings()
   setlocal noswapfile undolevels=-1
   nmap <buffer> <ESC> <Plug>(unite_exit)
 endfunction
+
+" For ag/silver searcher
+
+" if executable('ag')
+"   " Use ag in unite grep source.
+"   let g:unite_source_grep_command = 'ag'
+"   let g:unite_source_grep_default_opts =
+"         \ '--line-numbers --nocolor --nogroup --hidden --ignore ' .
+"         \  '''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'''
+"   let g:unite_source_grep_recursive_opt = ''
+" endif
+
+" Yank history
 
 let g:unite_source_history_yank_enable = 1
 nnoremap <Leader>y :Unite -no-split -start-insert -auto-resize -buffer-name=Yank_History history/yank<CR>
@@ -529,6 +550,10 @@ let g:unite_source_menu_menus.Unite.command_candidates = [
         \'Unite -no-split -auto-resize -start-insert -buffer-name=File_List file'],
     \[' > 查看缓冲区',
         \'Unite -no-split -quick-match -auto-resize -buffer-name=Buffer_List buffer'],
+    \[' > 增加文件书签        :UniteBookmarkAdd',
+        \'UniteBookmarkAdd'],
+    \[' > 查看文件书签',
+        \'Unite -no-split -auto-resize -buffer-name=Bookmark bookmark'],
     \[' > 查看复制寄存器内容',
         \'Unite -no-split -quick-match -auto-resize -buffer-name=Yank_History history/yank'],
     \]
@@ -548,7 +573,7 @@ let g:unite_source_menu_menus.View.command_candidates = [
     \[' > 设置为纯文本类型',
         \'set filetype=txt'],
     \[' > 显示缓冲区                 <F1> ',
-        \'Unite -no-split -auto-resize -start-insert -buffer-name=Buffer_List buffer'],
+        \'Unite -no-split -auto-resize -quick-match -buffer-name=Buffer_List buffer'],
     \[' > 切换行号显示模式           <F2> ',
         \'call ToggleRelativeNumber()'],
     \[' > 切换搜索结果高亮显示       <F3> ',
