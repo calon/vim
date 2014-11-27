@@ -639,25 +639,25 @@ let g:unite_source_menu_menus.Edit.command_candidates = [
     \]
 
 
-let g:unite_source_menu_menus.Note = {
-    \ 'description' : ' > 笔记管理（Note）
-        \                            ',
-    \}
+" let g:unite_source_menu_menus.Note = {
+"     \ 'description' : ' > 笔记管理（Note）
+"         \                            ',
+"     \}
 
-let g:unite_source_menu_menus.Note.command_candidates = [
-    \[' > 列出近期笔记                    :RecentNotes ',
-        \'RecentNotes'],
-    \[' > 新建或打开笔记                  <F8> 或 :Note [title] ',
-        \'Note'],
-    \[' > 根据选定文本新建或打开笔记      :NoteFromSelectedText ',
-        \'echo ":NoteFromSelectedText" '],
-    \[' > 删除笔记                        :DeleteNote [title] ',
-        \'DeleteNote'],
-    \[' > 搜索笔记                        :SearchNotes keyword or pattern ',
-        \'echo ":SearchNotes keyword or pattern" '],
-    \[' > 列出反向引用的笔记              :RelatedNotes ',
-        \'RelatedNotes'],
-    \]
+" let g:unite_source_menu_menus.Note.command_candidates = [
+"     \[' > 列出近期笔记                    :RecentNotes ',
+"         \'RecentNotes'],
+"     \[' > 新建或打开笔记                  <F8> 或 :Note [title] ',
+"         \'Note'],
+"     \[' > 根据选定文本新建或打开笔记      :NoteFromSelectedText ',
+"         \'echo ":NoteFromSelectedText" '],
+"     \[' > 删除笔记                        :DeleteNote [title] ',
+"         \'DeleteNote'],
+"     \[' > 搜索笔记                        :SearchNotes keyword or pattern ',
+"         \'echo ":SearchNotes keyword or pattern" '],
+"     \[' > 列出反向引用的笔记              :RelatedNotes ',
+"         \'RelatedNotes'],
+"     \]
 
 
 " Vim-Bookmark
