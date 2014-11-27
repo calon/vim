@@ -502,6 +502,11 @@ autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 " SuperTab
 " let g:SuperTabDefaultCompletionType = "<c-n>"
 
+" Vim-Notes
+" nnoremap <F8> <Esc>:Note<CR>
+" let g:notes_suffix = '.txt'
+" let g:notes_tab_indents = 0
+
 " Unite.vim
 
 nnoremap <C-p> :Unite -no-split -auto-resize -buffer-name=MRU_File file_mru<CR>
@@ -602,7 +607,7 @@ let g:unite_source_menu_menus.Edit.command_candidates = [
     \[' > Bookmark 增删书签               mm 或 :ToggleBookmark ',
         \'ToggleBookmark'],
     \[' > 编辑书签的描述说明              mi 或 :Annotate <TEXT> ',
-        \'echo ":Annotate <TEXT>"'],
+        \'echo ":Annotate <TEXT>" '],
     \[' > 在新窗口中显示所有书签          ma 或 :ShowAllBookmarks ',
         \'ShowAllBookmarks'],
     \[' > 清除当前缓冲区书签              mc 或 :clearbookmarks ',
@@ -622,15 +627,36 @@ let g:unite_source_menu_menus.Edit.command_candidates = [
     \[' > 显示光标位置，并统计字词        g<Ctrl-g> ',
         \'exe "normal! g\<c-g>"'],
     \[' > Locate 列出搜索清单             :L[!] /<pattern1>/<pattern2>/.../[<flags>]） ',
-        \'echo ":L[!] /{pattern1}/{pattern2}/.../[{flags}]"'],
+        \'echo ":L[!] /{pattern1}/{pattern2}/.../[{flags}]" '],
     \[' > EasyAlign 对齐                  <Enter>*<Delimiter>，<CTRL-/> 或 <CTRL-X> 输入正则表达式 ',
-        \'echo "<Enter>*<Delimiter>，<CTRL-/> 或 <CTRL-X> 输入正则表达式"'],
+        \'echo "<Enter>*<Delimiter>，<CTRL-/> 或 <CTRL-X> 输入正则表达式" '],
     \[' > Mark 标记当前词                 <Leader>m ',
         \'call mark#MarkCurrentWord()<CR>'],
     \[' > Mark 标记指定模式               :Mark {pattern} ',
-        \'echo ":Mark {pattern}"'],
+        \'echo ":Mark {pattern}" '],
     \[' > To Html 转换为网页文件          :TOhtml ',
         \'TOhtml'],
+    \]
+
+
+let g:unite_source_menu_menus.Note = {
+    \ 'description' : ' > 笔记管理（Note）
+        \                            ',
+    \}
+
+let g:unite_source_menu_menus.Note.command_candidates = [
+    \[' > 列出近期笔记                    :RecentNotes ',
+        \'RecentNotes'],
+    \[' > 新建或打开笔记                  <F8> 或 :Note [title] ',
+        \'Note'],
+    \[' > 根据选定文本新建或打开笔记      :NoteFromSelectedText ',
+        \'echo ":NoteFromSelectedText" '],
+    \[' > 删除笔记                        :DeleteNote [title] ',
+        \'DeleteNote'],
+    \[' > 搜索笔记                        :SearchNotes keyword or pattern ',
+        \'echo ":SearchNotes keyword or pattern" '],
+    \[' > 列出反向引用的笔记              :RelatedNotes ',
+        \'RelatedNotes'],
     \]
 
 

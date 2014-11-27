@@ -53,15 +53,15 @@ function! buftabline#render()
 		if strlen(bufpath)
 			let tab.head = fnamemodify(bufpath, ':p:~:.:h')
 			let tab.tail = fnamemodify(bufpath, ':t')
-			let tab.pre = ( show_mod && getbufvar(bufnum, '&mod') ? '+' : '' ) . ( show_num ? bufnum : '' )
+			let tab.pre = ( show_mod && getbufvar(bufnum, '&mod') ? '+' : '' ) . ( show_num ? '[' . bufnum . ']' : '' )
 			if strlen(tab.pre) | let tab.pre .= ' ' | endif
 			let tab.label = ' ' . tab.pre . tab.tail . ' '
 			let tabs_by_tail[tab.tail] = get(tabs_by_tail, tab.tail, []) + [tab]
 		elseif -1 < index(['nofile','acwrite'], getbufvar(bufnum, '&buftype')) " scratch buffer
-			let tab.label = ( show_num ? ' ' . bufnum . ' ! ' : ' ! ' )
+			let tab.label = ( show_num ? ' ' . '[' . bufnum . ']' . ' ! ' : ' ! ' )
 		else " unnamed file
 			let tab.label = ( show_mod && getbufvar(bufnum, '&mod') ? ' +' : ' ' )
-						\ . ( show_num ? bufnum . ' ' : '* ' )
+						\ . ( show_num ? '[' . bufnum . ']' . ' ' : '* ' )
 		endif
 		let tabs += [tab]
 	endfor
