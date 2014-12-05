@@ -434,6 +434,8 @@ while i <= 99
   let i = i + 1
 endwhile  
 
+" Disable SQL completion
+let g:omni_sql_no_default_maps = 1
 
 "---------------------------------------
 " 插件配置
@@ -569,13 +571,17 @@ let g:unite_source_menu_menus.View = {
     \}
 
 let g:unite_source_menu_menus.View.command_candidates = [
-    \[' > 切换大纲视图（Markdown）   :VoomToggle markdown',
+    \[' > 切换大纲视图（Markdown）   :VoomToggle markdown ',
         \'VoomToggle markdown'],
-    \[' > 切换注释                   :Commentary ',
-        \'Commentary'],
-    \[' > 切换颜色代码自动着色       :ColorToggle',
+    \[' > Toggle Comment 切换注释    gcc ',
+        \'exe "normal! gcc"'],
+    \[' > 多行注释                   gcw ',
+        \'exe "normal! gcw"'],
+    \[' > 取消多行注释               gcuw ',
+        \'exe "normal! gcuw"'],
+    \[' > 切换颜色代码自动着色       :ColorToggle ',
         \'ColorToggle'],
-    \[' > 设置为纯文本类型',
+    \[' > 设置为纯文本类型           :set filetype=txt ',
         \'set filetype=txt'],
     \[' > 显示缓冲区                 <F1> ',
         \'Unite -no-split -auto-resize -quick-match -buffer-name=Buffer_List buffer'],
