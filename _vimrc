@@ -142,6 +142,8 @@ while c <= 49
   let c += 1
 endwhile
 
+nnoremap <leader>x :bd<CR>
+
 "---------------------------------------
 " 搜索
 "---------------------------------------
@@ -471,7 +473,6 @@ nmap <Leader>a <Plug>(EasyAlign)
 "let g:ctrlp_cmd = 'CtrlPMRUFiles'
 
 " neocomplete.vim
-" Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
 " Disable AutoComplPop.
 let g:acp_enableAtStartup = 0
 " Use neocomplete.
@@ -502,6 +503,8 @@ autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
 " SuperTab
+
+let g:SuperTabNoCompleteAfter = ['^', ',', '\s', '"', "'"]
 " let g:SuperTabDefaultCompletionType = "<c-n>"
 
 " Vim-Notes
@@ -543,6 +546,8 @@ nnoremap <Leader><Leader> :Unite -no-split -auto-resize -buffer-name=Buffer_List
 
 nnoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
 
+nnoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line
+
 let g:unite_source_menu_menus = {}
 
 let g:unite_source_menu_menus.Unite = {
@@ -551,17 +556,19 @@ let g:unite_source_menu_menus.Unite = {
     \}
 
 let g:unite_source_menu_menus.Unite.command_candidates = [
-    \[' > 查看历史文件         Ctrl-P',
+    \[' > 查看历史文件         Ctrl-p ',
         \'Unite -no-split -auto-resize -buffer-name=MRU_File file_mru'],
-    \[' > 查看当前目录文件',
+    \[' > 筛选当前缓冲区内容   Ctrl-l',
+        \'Unite -no-split -auto-resize -buffer-name=Lines line'],
+    \[' > 查看当前目录文件 ',
         \'Unite -no-split -auto-resize -start-insert -buffer-name=File_List file'],
-    \[' > 查看缓冲区',
+    \[' > 查看缓冲区 ',
         \'Unite -no-split -quick-match -auto-resize -buffer-name=Buffer_List buffer'],
-    \[' > 增加文件书签        :UniteBookmarkAdd',
+    \[' > 增加文件书签        :UniteBookmarkAdd ',
         \'UniteBookmarkAdd'],
-    \[' > 查看文件书签',
+    \[' > 查看文件书签 ',
         \'Unite -no-split -auto-resize -buffer-name=Bookmark bookmark'],
-    \[' > 查看复制寄存器内容',
+    \[' > 查看复制寄存器内容 ',
         \'Unite -no-split -quick-match -auto-resize -buffer-name=Yank_History history/yank'],
     \]
 
