@@ -1,24 +1,127 @@
-"---------------------------------------
-" 通用
-"---------------------------------------
+" 通用 {{{1
 set nocompatible " 如果使用兼容模式，后续设置会使用 Vi 的一些设置
 " source $VIMRUNTIME/vimrc_example.vim
 source $VIMRUNTIME/mswin.vim
 behave mswin " 使用更接近 Windows 的操作配置
 set t_Co=256
+source $VIM/vimrc_path.vim
+set browsedir=buffer
 
-" 进入后最大化窗口
+" 界面 {{{1
+
+" 进入后最大化窗口 {{{2
 if has("autocmd")
   "autocmd bufwritepost .vimrc source $MYVIMRC
   autocmd GUIEnter * simalt ~x
 endif
 
-source $VIM/vimrc_path.vim
-set browsedir=buffer
 
-"---------------------------------------
-" 备份、临时文件、历史和会话信息
-"---------------------------------------
+" 文件、语法和颜色主题 {{{2
+"set filetype=txt " 设置默认文件类型
+set syntax=txt " 设置默认语法类型
+" 设置默认颜色主题
+" if has("gui_running")
+"     colorscheme ir_black
+" else
+"     colorscheme desert256.vim
+" endif
+ 
+" 字体设置 {{{2
+set guifont=Yahei_Mono:h11 " GUI 版本使用的字体列表。
+set guifontwide=Yahei_Mono:h11 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
+
+
+" 提示信息 {{{2
+set showcmd " 在屏幕最后一行显示 (部分的) 命令
+set shortmess=aoOtTI " 缩写某些提示信息
+set showmatch " 插入括号时，短暂地跳转到匹配的对应括号
+set list " 显示特殊字符
+set listchars=tab:>-,nbsp:.
+
+" 光标和标尺 {{{2
+" set cursorline " 显示光标所在行背景颜色
+" set ruler " 显示光标位置的行号和列号
+set number " 显示行号
+autocmd BufWinLeave * setlocal nocursorline " 非当前缓冲区取消高亮光标所在行
+autocmd BufWinEnter * setlocal cursorline " 当前缓冲区高亮光标所在行
+
+
+set backspace=2 " 退格会删除缩进、换行符和插入的起始位置
+set iskeyword+=_,$,@,%,#,- " 定义一个word中可以包含哪些字符。"@"在这里代指所有的字母。
+
+" 打开文件时回到上次光标所在的位置
+autocmd BufReadPost *
+     \ if line("'\"") > 0 && line("'\"") <= line("$") |
+     \ exe "normal! g`\"" |
+     \ endif
+
+" GUI {{{2
+if has('mouse') " 所有模式下允许使用鼠标
+  set mouse=a
+endif  
+
+set guioptions=behrv " 菜单、滚动条、工具栏、对话框等的设置，去掉m（菜单栏）和T（工具栏）
+
+" 屏幕显示 {{{2
+set scrolloff=1 " 光标上下两侧最少保留的屏幕行数。
+set whichwrap=b,s,<,>,[,] "对某一个或几个按键开启到头后自动折向下一行的功能
+set lazyredraw " Don't redraw while executing macros (good performance config)
+set linebreak
+
+" 状态栏设置 {{{2
+set laststatus=2 " 总是显示状态行
+
+"if has('statusline')
+  "set statusline=%m  " 修改标志位
+  "set statusline+=%r  " 只读标志位
+  "set statusline+=%h  " 帮助缓冲区标志位
+  "set statusline+=%w  " 预览窗口标志位
+  "set statusline+=[%Y] " 文件类型
+  "set statusline+=[%{&ff}]  " 文件格式
+  "set statusline+=[%l\/%L,\ %v,\ %p%%]  " 光标位置、文件行数和窗口在文件位置的百分比
+  "set statusline+=[%{(&fenc)}] " 文件编码
+  "set statusline+=%#StatusLine#
+  "set statusline+=[%t]  " 文件名
+  "set statusline+=[%{FileSize()}]  " 文件大小
+  "set statusline+=[#%n]  " 缓冲区号
+  "set statusline+=[%{strftime(\"%Y\-%m\-%d\ %H\:%M\",getftime(expand(\"%:p\")))}]
+"endif
+
+" let g:airline_powerline_fonts = 1
+" let g:airline#extensions#tabline#enabled = 1
+" let g:airline#extensions#tabline#show_buffers = 1
+" let g:airline#extensions#tabline#show_tab_nr = 1
+" let g:airline#extensions#tabline#show_tab_type = 1
+" let g:airline#extensions#tabline#buffer_idx_mode = 1
+"   nmap <leader>1 <Plug>AirlineSelectTab1
+"   nmap <leader>2 <Plug>AirlineSelectTab2
+"   nmap <leader>3 <Plug>AirlineSelectTab3
+"   nmap <leader>4 <Plug>AirlineSelectTab4
+"   nmap <leader>5 <Plug>AirlineSelectTab5
+"   nmap <leader>6 <Plug>AirlineSelectTab6
+"   nmap <leader>7 <Plug>AirlineSelectTab7
+"   nmap <leader>8 <Plug>AirlineSelectTab8
+"   nmap <leader>9 <Plug>AirlineSelectTab9
+
+" 窗口标题设置 {{{2
+if has('title') && (has('gui_running') || &title)
+    set titlestring=
+    set titlestring+=%F\  " file name
+    set titlestring+=%h%m%r%w " flag
+    set titlestring+=\ -\ %{v:progname} " program name
+endif
+
+
+" 命令行 {{{2
+set wildmenu " 打开命令行补全功能
+
+" 选择 {{{2
+set selection=inclusive " 选择区的最后一个字符包含在操作范围之内
+set selectmode="" " 指定什么场合开始选择时启动选择模式而不是可视模式
+
+" 文件、缓冲区和会话 {{{1
+
+" 备份、临时文件 {{{2
 set backup " 自动生成备份文件
 set writebackup " 覆盖文件前建立备份
 set updatecount=30 " 输入这么多个字符以后，把交换文件写入磁盘
@@ -27,28 +130,54 @@ set updatecount=30 " 输入这么多个字符以后，把交换文件写入磁�
 " 失去焦点时自动保存
 " au FocusLost * :wa
 
-"---------------------------------------
-" 历史和会话信息
-"---------------------------------------
+" 历史和会话信息 {{{2
 set history=500		" keep 50 lines of command line history
 set sessionoptions=blank,curdir,folds,help,resize,tabpages,winpos,winsize " 保存和恢复会话时，同时保存和恢复的设置类型
 
-"---------------------------------------
-" 撤销文件
-"---------------------------------------
+" 缓冲区 {{{2
+set hidden " 退出时隐藏而不是卸载缓冲区
+set confirm " 某些因为缓冲区有未保存的改变而失败的操作会弹出对话框要求确认
+
+" 快速切换缓冲区
+" noremap <unique> <script> <leader>1 :1b<CR>
+" noremap <unique> <script> <leader>2 :2b<CR>
+" noremap <unique> <script> <leader>3 :3b<CR>
+" noremap <unique> <script> <leader>4 :4b<CR>
+" noremap <unique> <script> <leader>5 :5b<CR>
+" noremap <unique> <script> <leader>6 :6b<CR>
+" noremap <unique> <script> <leader>7 :7b<CR>
+" noremap <unique> <script> <leader>8 :8b<CR>
+" noremap <unique> <script> <leader>9 :9b<CR>
+" noremap <unique> <script> <leader>0 :0b<CR>
+" inoremap <unique> <script> <leader>1 <Esc>:1b<CR>
+" inoremap <unique> <script> <leader>2 <Esc>:2b<CR>
+" inoremap <unique> <script> <leader>3 <Esc>:3b<CR>
+" inoremap <unique> <script> <leader>4 <Esc>:4b<CR>
+" inoremap <unique> <script> <leader>5 <Esc>:5b<CR>
+" inoremap <unique> <script> <leader>6 <Esc>:6b<CR>
+" inoremap <unique> <script> <leader>7 <Esc>:7b<CR>
+" inoremap <unique> <script> <leader>8 <Esc>:8b<CR>
+" inoremap <unique> <script> <leader>9 <Esc>:9b<CR>
+" inoremap <unique> <script> <leader>0 <Esc>:0b<CR>
+
+let c = 1
+while c <= 49
+  execute "nnoremap " . c . "gb :" . c . "b\<CR>"
+  let c += 1
+endwhile
+
+nnoremap <leader>x :bd<CR>
+
+" 撤销文件 {{{2
 " set undodir=E:\\Bak\\txt " 撤销文件目录
 set undofile
 " set undolevels = 1000 "maximum number of changes that can be undone
 " set undoreload = 10000 "maximum number lines to save for undo on a buffer reload
 
-"---------------------------------------
-" 插件管理
-"---------------------------------------
-call pathogen#infect()
 
-"---------------------------------------
-" 制表和缩进
-"---------------------------------------
+" 文档处理设置 {{{1
+
+" 制表和缩进 {{{2
 
 if has("autocmd")
 
@@ -87,9 +216,7 @@ set expandtab " 插入模式里: 插入制表符时使用合适数量的空格�
 " set smarttab " use tabs at the start of a line, spaces elsewhere
 set shiftround " 缩进取整到 shiftwidth 的倍数。应用于 > 和 < 命令。
 
-"---------------------------------------
-" 语言、字符编码和输入法设置
-"---------------------------------------
+" 语言、字符编码和输入法设置 {{{2
 let &termencoding=&encoding
 set encoding=utf-8 " 内部使用的字符编码为UTF-8
 set fileencodings=utf-8,chinese,ucs-bom,gb18030,gbk,gb2312,cp936 "编辑已存在文件时，参考此字符编码列表
@@ -102,51 +229,7 @@ set ambiwidth=double " 把所有的“不明宽度”字符——指的是在 Un
 set imcmdline " 开始编辑命令行时总是打开输入方法
 set formatoptions+=mB "打开断行模块对亚洲语言支持。 m 表示允许在两个汉字之间断行， 即使汉字之间没有出现空格。 B 表示将两行合并为一行的时候， 汉字与汉字之间不要补空格。
 
-"---------------------------------------
-" 字体设置
-"---------------------------------------
-set guifont=Yahei_Mono:h11 " GUI 版本使用的字体列表。
-set guifontwide=Yahei_Mono:h11 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
-
-"---------------------------------------
-" 缓冲区
-"---------------------------------------
-set hidden " 退出时隐藏而不是卸载缓冲区
-set confirm " 某些因为缓冲区有未保存的改变而失败的操作会弹出对话框要求确认
-
-" 快速切换缓冲区
-" noremap <unique> <script> <leader>1 :1b<CR>
-" noremap <unique> <script> <leader>2 :2b<CR>
-" noremap <unique> <script> <leader>3 :3b<CR>
-" noremap <unique> <script> <leader>4 :4b<CR>
-" noremap <unique> <script> <leader>5 :5b<CR>
-" noremap <unique> <script> <leader>6 :6b<CR>
-" noremap <unique> <script> <leader>7 :7b<CR>
-" noremap <unique> <script> <leader>8 :8b<CR>
-" noremap <unique> <script> <leader>9 :9b<CR>
-" noremap <unique> <script> <leader>0 :0b<CR>
-" inoremap <unique> <script> <leader>1 <Esc>:1b<CR>
-" inoremap <unique> <script> <leader>2 <Esc>:2b<CR>
-" inoremap <unique> <script> <leader>3 <Esc>:3b<CR>
-" inoremap <unique> <script> <leader>4 <Esc>:4b<CR>
-" inoremap <unique> <script> <leader>5 <Esc>:5b<CR>
-" inoremap <unique> <script> <leader>6 <Esc>:6b<CR>
-" inoremap <unique> <script> <leader>7 <Esc>:7b<CR>
-" inoremap <unique> <script> <leader>8 <Esc>:8b<CR>
-" inoremap <unique> <script> <leader>9 <Esc>:9b<CR>
-" inoremap <unique> <script> <leader>0 <Esc>:0b<CR>
-
-let c = 1
-while c <= 49
-  execute "nnoremap " . c . "gb :" . c . "b\<CR>"
-  let c += 1
-endwhile
-
-nnoremap <leader>x :bd<CR>
-
-"---------------------------------------
-" 搜索
-"---------------------------------------
+" 搜索 {{{2
 " 开启搜索高亮TrueType Collection
 if &t_Co > 2 || has("gui_running")
   syntax on
@@ -157,135 +240,10 @@ set incsearch " 即时跳转到搜索目标所在行
 set ignorecase " 搜索时忽略大小写
 set smartcase " 搜索小写忽略大小写
 
-"---------------------------------------
-" 文件、语法和颜色主题
-"---------------------------------------
-"set filetype=txt " 设置默认文件类型
-set syntax=txt " 设置默认语法类型
-" 设置默认颜色主题
-" if has("gui_running")
-"     colorscheme ir_black
-" else
-"     colorscheme desert256.vim
-" endif
- 
-
-"---------------------------------------
-" 提示信息
-"---------------------------------------
-set showcmd " 在屏幕最后一行显示 (部分的) 命令
-set shortmess=aoOtTI " 缩写某些提示信息
-set showmatch " 插入括号时，短暂地跳转到匹配的对应括号
-set list " 显示特殊字符
-set listchars=tab:>-,nbsp:.
-
-"---------------------------------------
-" 光标和标尺
-"---------------------------------------
-" set cursorline " 显示光标所在行背景颜色
-" set ruler " 显示光标位置的行号和列号
-set number " 显示行号
-autocmd BufWinLeave * setlocal nocursorline " 非当前缓冲区取消高亮光标所在行
-autocmd BufWinEnter * setlocal cursorline " 当前缓冲区高亮光标所在行
-
-
-set backspace=2 " 退格会删除缩进、换行符和插入的起始位置
-set iskeyword+=_,$,@,%,#,- " 定义一个word中可以包含哪些字符。"@"在这里代指所有的字母。
-
-" 打开文件时回到上次光标所在的位置
-autocmd BufReadPost *
-     \ if line("'\"") > 0 && line("'\"") <= line("$") |
-     \ exe "normal! g`\"" |
-     \ endif
-
-"---------------------------------------
-" 命令行
-"---------------------------------------
-set wildmenu " 打开命令行补全功能
-
-"---------------------------------------
-" GUI
-"---------------------------------------
-if has('mouse') " 所有模式下允许使用鼠标
-  set mouse=a
-endif  
-
-set guioptions=behrv " 菜单、滚动条、工具栏、对话框等的设置，去掉m（菜单栏）和T（工具栏）
-
-
-"---------------------------------------
-" 选择
-"---------------------------------------
-set selection=inclusive " 选择区的最后一个字符包含在操作范围之内
-set selectmode="" " 指定什么场合开始选择时启动选择模式而不是可视模式
-
-"---------------------------------------
-" 屏幕显示
-"---------------------------------------
-set scrolloff=1 " 光标上下两侧最少保留的屏幕行数。
-set whichwrap=b,s,<,>,[,] "对某一个或几个按键开启到头后自动折向下一行的功能
-set lazyredraw " Don't redraw while executing macros (good performance config)
-set linebreak
-
-
-"---------------------------------------
-" 剪贴板、寄存器
-"---------------------------------------
+" 剪贴板、寄存器 {{{2
 set clipboard=unnamed "与系统共剪贴板
 
-"---------------------------------------
-" 状态栏设置
-"---------------------------------------
-set laststatus=2 " 总是显示状态行
-
-"if has('statusline')
-  "set statusline=%m  " 修改标志位
-  "set statusline+=%r  " 只读标志位
-  "set statusline+=%h  " 帮助缓冲区标志位
-  "set statusline+=%w  " 预览窗口标志位
-  "set statusline+=[%Y] " 文件类型
-  "set statusline+=[%{&ff}]  " 文件格式
-  "set statusline+=[%l\/%L,\ %v,\ %p%%]  " 光标位置、文件行数和窗口在文件位置的百分比
-  "set statusline+=[%{(&fenc)}] " 文件编码
-  "set statusline+=%#StatusLine#
-  "set statusline+=[%t]  " 文件名
-  "set statusline+=[%{FileSize()}]  " 文件大小
-  "set statusline+=[#%n]  " 缓冲区号
-  "set statusline+=[%{strftime(\"%Y\-%m\-%d\ %H\:%M\",getftime(expand(\"%:p\")))}]
-"endif
-
-" let g:airline_powerline_fonts = 1
-" let g:airline#extensions#tabline#enabled = 1
-" let g:airline#extensions#tabline#show_buffers = 1
-" let g:airline#extensions#tabline#show_tab_nr = 1
-" let g:airline#extensions#tabline#show_tab_type = 1
-" let g:airline#extensions#tabline#buffer_idx_mode = 1
-"   nmap <leader>1 <Plug>AirlineSelectTab1
-"   nmap <leader>2 <Plug>AirlineSelectTab2
-"   nmap <leader>3 <Plug>AirlineSelectTab3
-"   nmap <leader>4 <Plug>AirlineSelectTab4
-"   nmap <leader>5 <Plug>AirlineSelectTab5
-"   nmap <leader>6 <Plug>AirlineSelectTab6
-"   nmap <leader>7 <Plug>AirlineSelectTab7
-"   nmap <leader>8 <Plug>AirlineSelectTab8
-"   nmap <leader>9 <Plug>AirlineSelectTab9
-
-
-
-
-"---------------------------------------
-" 窗口标题设置
-"---------------------------------------
-if has('title') && (has('gui_running') || &title)
-    set titlestring=
-    set titlestring+=%F\  " file name
-    set titlestring+=%h%m%r%w " flag
-    set titlestring+=\ -\ %{v:progname} " program name
-endif
-
-"---------------------------------------
-" 优化大文件编辑
-"---------------------------------------
+" 优化大文件编辑 {{{2
 
 "if !exists("my_auto_commands_loaded")
         "let my_auto_commands_loaded = 1
@@ -295,36 +253,20 @@ endif
         "augroup END
 "endif
 
-"---------------------------------------
-" 拼写检查
-"---------------------------------------
+" 拼写检查 {{{2
 if version >= 700
-   set spl=en spell
+   " set spl=en spell
    set nospell
 endif
 
-"---------------------------------------
-" 按键映射
-"---------------------------------------
+" 按键映射 {{{1
 
 " 进入命令行
 nnoremap <silent> ; :
 
-" 上下移动
-nnoremap <silent> k gk
-nnoremap <silent> j gj
-inoremap <silent> <Up> <Esc>gka
-inoremap <silent> <Down> <Esc>gja
-
-" 上下翻页
-nnoremap <Space> <C-F>
-nnoremap <BackSpace> <C-B>
-
 " 显示缓冲区清单
 "nnoremap <leader>b <Esc>:Bufferlist<CR>
 nnoremap <F1> :Unite -no-split -auto-resize -quick-match -buffer-name=Buffer_List buffer<CR>
-
-" noremap <leader>mb <Esc>:MBEToggle<CR>
 
 " 切换显示绝对或相对行号
 nnoremap <F2> <Esc>:call ToggleRelativeNumber()<CR>
@@ -357,8 +299,12 @@ endfunction
 " Locate 搜索清单
 nnoremap <A-F7> <Esc>:L<SPACE>
 
-" 新建标签页
+" 新建缓冲区
 nnoremap <F10> <Esc>:enew<CR>
+
+" 标签页操作
+nnoremap <leader>tn :tabnew<CR>
+"nnoremap <leader>tc :tabclose<CR>
 
 " 打开另存为对话框
 nnoremap <F12> <Esc>:browse saveas<CR>
@@ -397,20 +343,33 @@ function! ToggleRelativeNumber()
     endif
 endfunction
 
+" 缩进操作
+vnoremap < <gv
+vnoremap > >gv
+
+" 移动 {{{2
+
 " 窗口间跳转
 " map <C-j> <C-W>j
 " map <C-k> <C-W>k
 " map <C-h> <C-W>h
 " map <C-l> <C-W>l
 
+" 上下移动
+nnoremap <silent> k gk
+nnoremap <silent> j gj
+inoremap <silent> <Up> <Esc>gka
+inoremap <silent> <Down> <Esc>gja
+
+" 上下翻页
+nnoremap <Space> <C-F>
+nnoremap <BackSpace> <C-B>
+
 nnoremap <S-Up> <C-W><Up>
 nnoremap <S-Down> <C-W><Down>
 nnoremap <S-Left> <C-W><Left>
 nnoremap <S-Right> <C-W><Right>
 
-" 标签页操作
-nnoremap <leader>tn :tabnew<CR>
-"nnoremap <leader>tc :tabclose<CR>
 
 " Next Tab
 "nnoremap <silent> <C-Right> :tabnext<CR>
@@ -418,10 +377,6 @@ nnoremap <leader>tn :tabnew<CR>
 " Previous Tab
 "nnoremap <silent> <C-Left> :tabprevious<CR>
 
-
-" 缩进操作
-vnoremap < <gv
-vnoremap > >gv
 
 " 在插入模式下移动方向
 inoremap <C-h> <Left>
@@ -436,20 +391,58 @@ while i <= 99
   let i = i + 1
 endwhile  
 
-" Disable SQL completion
-let g:omni_sql_no_default_maps = 1
+" 折叠 {{{2
+nnoremap f za
+set foldenable " 开始折叠
+set foldmethod=marker " 设置语法折叠
+setlocal foldlevel=1 " 设置折叠层数
+" set foldclose=all " 设置为自动关闭折叠 
+" nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
+set foldtext=CustomFoldText()
 
-"---------------------------------------
-" 插件配置
-"---------------------------------------
+function! CustomFoldText()
+    "get first non-blank line
+    let fs = v:foldstart
+    while getline(fs) =~ '^\s*$' | let fs = nextnonblank(fs + 1)
+    endwhile
+    if fs > v:foldend
+        let line = getline(v:foldstart)
+    else
+        let line = substitute(getline(fs), '\t', repeat(' ', &tabstop), 'g')
+    endif
 
-" Calendar插件
-" let g:calendar_diary="C:/Software/Share/My Dropbox/Note/Diary/"
+    let w = winwidth(0) - &foldcolumn - (&number ? 8 : 0)
+    let foldSize = 1 + v:foldend - v:foldstart
+    let foldSizeStr = " " . foldSize . " lines "
+    let foldLevelStr = repeat("+--", v:foldlevel)
+    let lineCount = line("$")
+    let foldPercentage = printf("[%.1f", (foldSize*1.0)/lineCount*100) . "%] "
+    let expansionString = repeat(".", w - strwidth(foldSizeStr.line.foldLevelStr.foldPercentage))
+    return line . expansionString . foldSizeStr . foldPercentage . foldLevelStr
+endf
+
+
+" function! NeatFoldText()
+"   let line = ' ' . substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
+"   let lines_count = v:foldend - v:foldstart + 1
+"   let lines_count_text = '| ' . printf("%10s", lines_count . ' lines') . ' |'
+"   let foldchar = matchstr(&fillchars, 'fold:\zs.')
+"   let foldtextstart = strpart('+' . repeat(foldchar, v:foldlevel*2) . line, 0, (winwidth(0)*2)/3)
+"   let foldtextend = lines_count_text . repeat(foldchar, 8)
+"   let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
+"   return foldtextstart . repeat(foldchar, winwidth(0)-foldtextlength) . foldtextend
+" endfunction
+
+
+" 插件管理和配置 {{{1
+call pathogen#infect()
+
+" Calendar插件 {{{2
 let g:calendar_monday = 1 "以星期一为开始 
 let g:calendar_focus_today = 1 " 光标在当天的日期上 
 let g:calendar_mark = 'left-fit' "可以让*和数字可靠近 
 
-" Voom Markdown
+" Voom Markdown {{{2
 nnoremap <leader>vm <Esc>:VoomToggle markdown<CR>
 noremap <F11> <Esc>:VoomToggle markdown<CR>
 
@@ -466,13 +459,13 @@ vmap <Enter> <Plug>(EasyAlign)
 " Start interactive EasyAlign with a Vim movement
 nmap <Leader>a <Plug>(EasyAlign)
 
-" MiniBufExpl
+" MiniBufExpl {{{2
 " let g:miniBufExplCheckDupeBufs = 0
 
-" CtrlP
+" CtrlP {{{2
 "let g:ctrlp_cmd = 'CtrlPMRUFiles'
 
-" neocomplete.vim
+" Neocomplete {{{2
 " Disable AutoComplPop.
 let g:acp_enableAtStartup = 0
 " Use neocomplete.
@@ -502,7 +495,7 @@ autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
-" SuperTab
+" SuperTab {{{2
 
 let g:SuperTabNoCompleteAfter = ['^', ',', '\s', '"', "'"]
 " let g:SuperTabDefaultCompletionType = "<c-n>"
@@ -512,7 +505,7 @@ let g:SuperTabNoCompleteAfter = ['^', ',', '\s', '"', "'"]
 " let g:notes_suffix = '.txt'
 " let g:notes_tab_indents = 0
 
-" Unite.vim
+" Unite.vim {{{2
 
 nnoremap <C-p> :Unite -no-split -auto-resize -buffer-name=MRU_File file_mru<CR>
 
@@ -673,12 +666,12 @@ let g:unite_source_menu_menus.Edit.command_candidates = [
 "     \]
 
 
-" Vim-Bookmark
+" Vim-Bookmark {{{2
 let g:bookmark_sign = '>>'
 let g:bookmark_annotation_sign = '##'
 
 
-" Lightline
+" Lightline {{{2
 
 let g:lightline = {
       \ 'active': {
@@ -739,8 +732,9 @@ function! MyFileencoding()
   return winwidth(0) > 70 ? (strlen(&fenc) ? &fenc : &enc) : ''
 endfunction
 
-" Buftabline
+" Buftabline {{{2
 let g:buftabline_show = 1 " only if there are at least two buffers 
 let g:buftabline_numbers = 1
 let g:buftabline_indicators = 1
 
+" vim:foldmethod=marker:foldlevel=0

@@ -1,0 +1,12 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=2891
+
+This plugin helps insert start fold markers with level numbers: {{{1, {{{2, {{{3, and so on. It creates the following global mappings for Normal and Visual modes:
+
+<Leader>fm         Create start fold marker with level number. It is apppended to the end of current line. The level is set to that of the previous start fold marker with level number (if any). The start fold marker string is obtained from option 'foldmarker'.
+
+<Leader>fM         Create fold marker as child: level number is incremented by 1.
+
+<Leader>cm         Create fold marker as comment according to buffer's filetype.  E.g., if filetype is html, <!--{{{1--> is appended. Dictionary s:commentstrings defines comment strings for a few filetypes.  For all other filetypes, comment strings are obtained from option 'commentstring'. If comment strings are not what you want, you can edit dictionary s:commentstrings.
+
+<Leader>cM         Create fold marker as comment and as child.
+
