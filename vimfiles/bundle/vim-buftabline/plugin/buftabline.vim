@@ -26,9 +26,9 @@ scriptencoding utf-8
 augroup BufTabLine
 autocmd!
 
-hi default link BufTabLineCurrent TabLineSel
-hi default link BufTabLineActive  PmenuSel
-hi default link BufTabLineHidden  TabLine
+hi default link BufTabLineCurrent ErrorMsg
+hi default link BufTabLineActive  Special
+hi default link BufTabLineHidden  String
 hi default link BufTabLineFill    TabLineFill
 
 function! buftabline#user_buffers() " help buffers are always unlisted, but quickfix buffers are not

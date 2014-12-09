@@ -267,12 +267,15 @@ nnoremap <silent> ; :
 " 显示缓冲区清单
 "nnoremap <leader>b <Esc>:Bufferlist<CR>
 nnoremap <F1> :Unite -no-split -auto-resize -quick-match -buffer-name=Buffer_List buffer<CR>
+inoremap <F1> :Unite -no-split -auto-resize -quick-match -buffer-name=Buffer_List buffer<CR>
 
 " 切换显示绝对或相对行号
 nnoremap <F2> <Esc>:call ToggleRelativeNumber()<CR>
+inoremap <F2> <Esc>:call ToggleRelativeNumber()<CR>
 
 " 显示/禁止搜索高亮
 nnoremap <F3> <Esc>:call ToggleHLSearch()<CR>
+inoremap <F3> <Esc>:call ToggleHLSearch()<CR>
 
 " 插入时间戳
 
@@ -281,12 +284,15 @@ inoremap <F4> <C-R>=strftime("%Y-%m-%d %H:%M:%S")<CR>
 
 " UndoTree 显示撤销历史
 nnoremap <F5> <Esc>:UndotreeToggle<CR>
+inoremap <F5> <Esc>:UndotreeToggle<CR>
 
 " 启用/禁止折行
 nnoremap <F6> <Esc>:call ToggleWrap()<CR>
+inoremap <F6> <Esc>:call ToggleWrap()<CR>
 
 " 切换语法高亮
 nnoremap <F7> <Esc>:call ToggleSyntaxHighlight()<CR>
+inoremap <F7> <Esc>:call ToggleSyntaxHighlight()<CR>
 
 function! ToggleSyntaxHighlight()
      if exists("g:syntax_on")
@@ -298,9 +304,15 @@ endfunction
 
 " Locate 搜索清单
 nnoremap <A-F7> <Esc>:L<SPACE>
+inoremap <A-F7> <Esc>:L<SPACE>
 
 " 新建缓冲区
 nnoremap <F10> <Esc>:enew<CR>
+inoremap <F10> <Esc>:enew<CR>
+
+" 关闭缓冲区
+nnoremap <C-F10> <Esc>:bdelete<CR>
+inoremap <C-F10> <Esc>:bdelete<CR>
 
 " 标签页操作
 nnoremap <leader>tn :tabnew<CR>
@@ -308,6 +320,7 @@ nnoremap <leader>tn :tabnew<CR>
 
 " 打开另存为对话框
 nnoremap <F12> <Esc>:browse saveas<CR>
+inoremap <F12> <Esc>:browse saveas<CR>
 
 " 普通模式下 Ctrl+c 复制文件路径
 nnoremap <c-c> :let @* = expand('%:p')<CR>
@@ -435,16 +448,18 @@ endf
 
 
 " 插件管理和配置 {{{1
+
+" Pathogen  {{{2
 call pathogen#infect()
 
-" Calendar插件 {{{2
+" Calendar {{{2
 let g:calendar_monday = 1 "以星期一为开始 
 let g:calendar_focus_today = 1 " 光标在当天的日期上 
 let g:calendar_mark = 'left-fit' "可以让*和数字可靠近 
 
 " Voom Markdown {{{2
 nnoremap <leader>vm <Esc>:VoomToggle markdown<CR>
-noremap <F11> <Esc>:VoomToggle markdown<CR>
+nnoremap <F11> <Esc>:VoomToggle markdown<CR>
 
 " Convenient command to see the difference between the current buffer and the
 " file it was loaded from, thus the changes you made.
@@ -454,6 +469,7 @@ noremap <F11> <Esc>:VoomToggle markdown<CR>
 		  "\ | wincmd p | diffthis
 "endif
 
+" EasyAlign {{{2
 " Start interactive EasyAlign in visual mode
 vmap <Enter> <Plug>(EasyAlign)
 " Start interactive EasyAlign with a Vim movement
@@ -538,8 +554,10 @@ nnoremap <Leader><Leader> :Unite -no-split -auto-resize -buffer-name=Buffer_List
 " Unite Menu
 
 nnoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
+inoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
 
-nnoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line
+nnoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
+inoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
 
 let g:unite_source_menu_menus = {}
 
@@ -737,4 +755,7 @@ let g:buftabline_show = 1 " only if there are at least two buffers
 let g:buftabline_numbers = 1
 let g:buftabline_indicators = 1
 
-" vim:foldmethod=marker:foldlevel=0
+
+
+" vim:foldmethod=marker:foldlevel=0 {{{1
+

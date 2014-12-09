@@ -33,14 +33,14 @@ let g:loaded_create_start_fold_marker = 'v1.0'
 let s:cpo_save = &cpo
 set cpo&vim
 
-nnoremap <silent> <Leader>fm :call <SID>CreateMarker()<CR>
-vnoremap <silent> <Leader>fm :call <SID>CreateMarker()<CR>
-nnoremap <silent> <Leader>fM :call <SID>CreateMarker('as_child')<CR>
-vnoremap <silent> <Leader>fM :call <SID>CreateMarker('as_child')<CR>
-nnoremap <silent> <Leader>cm :call <SID>CreateMarker('as_comment')<CR>
-vnoremap <silent> <Leader>cm :call <SID>CreateMarker('as_comment')<CR>
-nnoremap <silent> <Leader>cM :call <SID>CreateMarker('as_child', 'as_comment')<CR>
-vnoremap <silent> <Leader>cM :call <SID>CreateMarker('as_child', 'as_comment')<CR>
+nnoremap <silent> <leader>f :call <SID>CreateMarker()<CR>
+vnoremap <silent> <leader>f :call <SID>CreateMarker()<CR>
+nnoremap <silent> <leader>fc :call <SID>CreateMarker('as_comment')<CR>
+vnoremap <silent> <leader>fc :call <SID>CreateMarker('as_comment')<CR>
+nnoremap <silent> <leader>ff :call <SID>CreateMarker('as_child')<CR>
+vnoremap <silent> <leader>ff :call <SID>CreateMarker('as_child')<CR>
+nnoremap <silent> <leader>ffc :call <SID>CreateMarker('as_child', 'as_comment')<CR>
+vnoremap <silent> <leader>ffc :call <SID>CreateMarker('as_child', 'as_comment')<CR>
 
 let s:commentstrings = {
     \ 'vim': '"%s',
