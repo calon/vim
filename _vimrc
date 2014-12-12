@@ -261,6 +261,8 @@ endif
 
 " 按键映射 {{{1
 
+" 通用按键映射 {{{2
+
 " 进入命令行
 nnoremap <silent> ; :
 
@@ -412,6 +414,7 @@ setlocal foldlevel=1 " 设置折叠层数
 " set foldclose=all " 设置为自动关闭折叠 
 " nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
 set foldtext=CustomFoldText()
+set foldopen=block,hor,jump,mark,percent,quickfix,search,tag,undo
 
 function! CustomFoldText()
     "get first non-blank line
@@ -457,9 +460,10 @@ let g:calendar_monday = 1 "以星期一为开始
 let g:calendar_focus_today = 1 " 光标在当天的日期上 
 let g:calendar_mark = 'left-fit' "可以让*和数字可靠近 
 
-" Voom Markdown {{{2
+" Voom  {{{2
 nnoremap <leader>vm <Esc>:VoomToggle markdown<CR>
 nnoremap <F11> <Esc>:VoomToggle markdown<CR>
+nnoremap <C-F11> <Esc>:VoomToggle<CR>
 
 " Convenient command to see the difference between the current buffer and the
 " file it was loaded from, thus the changes you made.
@@ -511,10 +515,14 @@ autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
+" complete from all buffers
+let g:neocomplete#same_filetypes = {}
+let g:neocomplete#same_filetypes._ = '_'
+
 " SuperTab {{{2
 
 let g:SuperTabNoCompleteAfter = ['^', ',', '\s', '"', "'"]
-" let g:SuperTabDefaultCompletionType = "<c-n>"
+let g:SuperTabDefaultCompletionType = "<c-n>"
 
 " Vim-Notes
 " nnoremap <F8> <Esc>:Note<CR>
@@ -684,6 +692,9 @@ let g:unite_source_menu_menus.Edit.command_candidates = [
 "     \]
 
 
+" NeoMru
+" let g:neomru#time_format = strftime("[%m-%d %H:%M] ")
+
 " Vim-Bookmark {{{2
 let g:bookmark_sign = '>>'
 let g:bookmark_annotation_sign = '##'
@@ -755,7 +766,6 @@ let g:buftabline_show = 1 " only if there are at least two buffers
 let g:buftabline_numbers = 1
 let g:buftabline_indicators = 1
 
-
-
-" vim:foldmethod=marker:foldlevel=0 {{{1
+" Modeline {{{1
+" vim:foldmethod=marker:foldlevel=0
 
