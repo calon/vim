@@ -3,8 +3,7 @@
 " Brief:        View a file in different encodings
 " Authors:      Ming Bai <mbbill AT gmail DOT com>,
 "               Wu Yongwei <wuyongwei AT gmail DOT com>
-" Last Change:  2008-12-11 22:01:14
-" Version:      4.6
+" Version:      4.9
 " Licence:      LGPL
 "
 "
@@ -56,7 +55,7 @@
 "                 "g:fencview_autodetect"
 "                   Auto detect file encoding when you open a
 "                   file.
-"                   (default: 1)
+"                   (default: 0)
 "
 "                 "g:fencview_auto_patterns"
 "                   Set this variable in your vimrc to decide
@@ -91,6 +90,10 @@ if v:version < 700
      finish
 endif
 
+" Change cpoptions to make sure line continuation works
+let s:cpo_save=&cpo
+set cpo&vim
+
 fun! s:escape(name)
   " shellescape() was added by patch 7.0.111
   if exists("*shellescape")
@@ -99,9 +102,19 @@ fun! s:escape(name)
   return "'" . a:name . "'"
 endfun
 
+fun! s:convert(name)
+  " Patch 7.4.122 converts the file name encoding automatically
+  if has('win32') &&
+        \(v:version < 704 || (v:version == 704 && !has('patch122')))
+    return iconv(a:name, &encoding, g:legacy_encoding)
+  else
+    return a:name
+  endif
+endfun
+
 " variable definition{{{1
 if !exists('g:fencview_autodetect')
-    let g:fencview_autodetect = 1
+    let g:fencview_autodetect = 0
 endif
 if !exists('g:fencview_auto_patterns')
     let g:fencview_auto_patterns='*.txt,*.htm{l\=}'
@@ -574,6 +587,10 @@ endfunction
 
 
 function! s:CheckModelineFileEncoding() "{{{1
+    if exists("b:fencview_modeline_checked")
+        return
+    endif
+    let b:fencview_modeline_checked=1
     if &modified && &fileencoding!=''
         if s:disable_autodetection<2
             let Syn=&syntax
@@ -666,10 +683,10 @@ function! s:EditAutoEncoding(...) "{{{1
         return
     endif
     if a:0==1
-        let filename=iconv(a:1, &encoding, g:legacy_encoding)
+        let filename=s:convert(a:1)
         let filename_e=' '.a:1
     else
-        let filename=iconv(expand('%:p'), &encoding, g:legacy_encoding)
+        let filename=s:convert(expand('%:p'))
         let filename_e=''
     endif
     if a:0==1
@@ -698,7 +715,14 @@ function! s:EditAutoEncoding(...) "{{{1
             endif
             let $VIM_SYSTEM_HIDECONSOLE=1
         endif
+        if exists('+shellslash')
+            let shellslash_save = &shellslash
+            set noshellslash
+        endif
         let result=system($FENCVIEW_TELLENC . ' ' . s:escape(filename))
+        if exists('+shellslash')
+            let &shellslash = shellslash_save
+        endif
     finally
         if has('gui_running')
             let $VIM_SYSTEM_HIDECONSOLE=vim_system_hideconsole_bak
@@ -859,13 +883,7 @@ function! FencMenuSel(fen_name) "{{{1
     if bufname(winnr())==s:FencWinName
         return
     endif
-    try
-        let s:disable_autodetection=2
-        exec "edit ++enc=".a:fen_name
-    finally
-        let s:disable_autodetection=0
-    endtry
-
+    call s:EditManualEncoding(a:fen_name)
 endfunction
 
 
@@ -901,16 +919,6 @@ function! s:FencProbeCp936(c) "{{{1
             let s:cp936_bchar=0x0
             if index(s:cp936TopChars,wc)!=-1
                 let s:cp936_count+=1
-                if s:cp936_count>=s:small_regin && (s:cp936_count-s:cp936_error)>s:cp936_n_count
-                    let s:FencRes="cp936"
-                    return
-                endif
-                if (s:cp936_count-s:cp936_error)>=s:big_regin
-                    let s:FencRes="cp936"
-                    return
-                endif
-            else
-                let s:cp936_n_count+=1
             endif
         endif
     endif
@@ -935,16 +943,6 @@ function! s:FencProbeCp950(c) "{{{1
             let s:cp950_bchar=0x0
             if index(s:cp950TopChars,wc)!=-1
                 let s:cp950_count+=1
-                if s:cp950_count>=s:small_regin && (s:cp950_count-s:cp950_error)>s:cp950_n_count
-                    let s:FencRes="cp950"
-                    return
-                endif
-                if (s:cp950_count-s:cp950_error)>=s:big_regin
-                    let s:FencRes="cp950"
-                    return
-                endif
-            else
-                let s:cp950_n_count+=1
             endif
         endif
     endif
@@ -968,16 +966,6 @@ function! s:FencProbeEuc_tw(c) "{{{1
             let s:euc_tw_bchar=0x0
             if index(s:euc_twTopChars,wc)!=-1
                 let s:euc_tw_count+=1
-                if s:euc_tw_count>=s:small_regin && (s:euc_tw_count-s:euc_tw_error)>s:euc_tw_n_count
-                    let s:FencRes="euc-tw"
-                    return
-                endif
-                if (s:euc_tw_count-s:euc_tw_error)>=s:big_regin
-                    let s:FencRes="euc-tw"
-                    return
-                endif
-            else
-                let s:euc_tw_n_count+=1
             endif
         endif
     endif
@@ -1001,16 +989,6 @@ function! s:FencProbeCp932(c) "{{{1
             let s:cp932_bchar=0x0
             if index(s:cp932TopChars,wc)!=-1
                 let s:cp932_count+=1
-                if s:cp932_count>=s:small_regin && (s:cp932_count-s:cp932_error)>s:cp932_n_count
-                    let s:FencRes="cp932"
-                    return
-                endif
-                if (s:cp932_count-s:cp932_error)>=s:big_regin
-                    let s:FencRes="cp932"
-                    return
-                endif
-            else
-                let s:cp932_n_count+=1
             endif
         endif
     endif
@@ -1034,16 +1012,6 @@ function! s:FencProbeEuc_jp(c) "{{{1
             let s:euc_jp_bchar=0x0
             if index(s:euc_jpTopChars,wc)!=-1
                 let s:euc_jp_count+=1
-                if s:euc_jp_count>=s:small_regin && (s:euc_jp_count-s:euc_jp_error)>s:euc_jp_n_count
-                    let s:FencRes="euc-jp"
-                    return
-                endif
-                if (s:euc_jp_count-s:euc_jp_error)>=s:big_regin
-                    let s:FencRes="euc-jp"
-                    return
-                endif
-            else
-                let s:euc_jp_n_count+=1
             endif
         endif
     endif
@@ -1067,16 +1035,6 @@ function! s:FencProbeCp949(c) "{{{1
             let s:cp949_bchar=0x0
             if index(s:cp949TopChars,wc)!=-1
                 let s:cp949_count+=1
-                if s:cp949_count>=s:small_regin && (s:cp949_count-s:cp949_error)>s:cp949_n_count
-                    let s:FencRes="cp949"
-                    return
-                endif
-                if (s:cp949_count-s:cp949_error)>=s:big_regin
-                    let s:FencRes="cp949"
-                    return
-                endif
-            else
-                let s:cp949_n_count+=1
             endif
         endif
     endif
@@ -1090,6 +1048,12 @@ function! s:FencProbeUTF8(c) "{{{1
 "U-00010000 - U-001FFFFF:  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
 "U-00200000 - U-03FFFFFF:  111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 "U-04000000 - U-7FFFFFFF:  1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+
+    "if error occurs, we do nothing more but return.
+    if s:UTF8_error > 0
+        return
+    endif
+
     if s:UTF8_state=="start"
         if a:c<=0x7f "still start state
             return
@@ -1114,7 +1078,7 @@ function! s:FencProbeUTF8(c) "{{{1
             let s:UTF8_waitNr=5
             return
         else
-            let s:UTF8_error+=1
+            let s:UTF8_error=1
             return
         endif
     else    "s:UTF8_state=="wait"
@@ -1122,18 +1086,10 @@ function! s:FencProbeUTF8(c) "{{{1
             let s:UTF8_waitNr-=1
             if s:UTF8_waitNr==0
                 let s:UTF8_state="start"
-                let s:UTF8_count+=1
-                if (s:UTF8_count>=30) && (s:UTF8_error==0)
-                    let s:FencRes="utf-8"
-                    return
-                elseif s:UTF8_count>=50
-                    let s:FencRes="utf-8"
-                    return
-                endif
             endif
             return
         else
-            let s:UTF8_error+=1
+            let s:UTF8_error=1
             let s:UTF8_waitNr=0
             let s:UTF8_state="start"
             return
@@ -1162,7 +1118,7 @@ function! s:FencHandleData() "{{{1
     if s:FencProbeBOM(fbody[0])==1
         return
     endif
-    "let fbody=getline(1,1110)
+    " check header
     let bodylen=len(fbody)
     let _firstline=fbody[0]
     if _firstline[:7]=="VimCrypt"
@@ -1170,6 +1126,9 @@ function! s:FencHandleData() "{{{1
         return
     endif
     for line in fbody
+        if len(line) > 500 "the line is too long.
+            let line = line[:500]
+        endif
         let lnr+=1
         call s:FencProgressBar(100*lnr/bodylen,' Processing... ',)
         let ci=0
@@ -1206,70 +1165,54 @@ function! s:FencProbeBOM(Firstline) "{{{1
     let a2=char2nr(ah2)
     let a3=char2nr(ah3)
     let a4=char2nr(ah4)
+    let s:FencRes="BOM"
     if a1.a2.a3==0xef.0xbb.0xbf "utf-8
-        let s:FencRes="BOM"
         return 1
-    elseif a1.a2.a3.a4==0xfe.0xff.0x00.0x00 "ucs-4
-        let s:FencRes="BOM"
+    elseif a1.a2==0xfe.0xff "utf-16 (ucs-2)
         return 1
-    elseif a1.a2==0xfe.0xff "utf-16
-        let s:FencRes="BOM"
+    elseif a1.a2==0xff.0xfe "utf-16le (ucs-2le)
         return 1
-    elseif a1.a2.a3.a4==0x00.0x00.0xfe.0xff "utf-32
-        let s:FencRes="BOM"
+    elseif a1.a2.a3.a4==0x00.0x00.0xfe.0xff "utf-32 (ucs-4)
         return 1
-    elseif a1.a2.a3.a4==0x00.0x00.0xff.0xfe" "ucs-4
-        let s:FencRes="BOM"
-        return 1
-    elseif a1.a2.a3.a4==0xff.0xfe.0x00.0x00 "utf-32le
-        let s:FencRes="BOM"
-        return 1
-    elseif a1.a2==0xff.0xfe "utf-16le
-        let s:FencRes="BOM"
+    elseif a1.a2.a3.a4==0xff.0xfe.0x00.0x00 "utf-32le (ucs-4le)
         return 1
     endif
+    let s:FencRes=""
 endfunction
 
 
 function! s:FencInitVar() "{{{1
-    let s:small_regin=15
-    let s:big_regin=30
+    "let s:small_regin=15
+    "let s:big_regin=30
     let s:FencResCount=0
     let s:FencRes=''
     " cp936
     let s:cp936_bchar=''
     let s:cp936_count=0
-    let s:cp936_n_count=0
     let s:cp936_error=0
     " cp950
     let s:cp950_bchar=''
     let s:cp950_count=0
-    let s:cp950_n_count=0
     let s:cp950_error=0
     " euc_tw
     let s:euc_tw_bchar=''
     let s:euc_tw_count=0
-    let s:euc_tw_n_count=0
     let s:euc_tw_error=0
     " cp932
     let s:cp932_bchar=''
     let s:cp932_count=0
-    let s:cp932_n_count=0
     let s:cp932_error=0
     " euc_jp
     let s:euc_jp_bchar=''
     let s:euc_jp_count=0
-    let s:euc_jp_n_count=0
     let s:euc_jp_error=0
     " cp949
     let s:cp949_bchar=''
     let s:cp949_count=0
-    let s:cp949_n_count=0
     let s:cp949_error=0
     " UTF-8
     let s:UTF8_state="start"
     let s:UTF8_waitNr=0
-    let s:UTF8_count=0
     let s:UTF8_error=0
 endfunction
 
@@ -1283,36 +1226,53 @@ function! s:FencDetectFileEncoding() "{{{1
         return
     endif
     call s:FencInitVar()
+
     call s:FencHandleData()
+
+    " VimCrypt
     if s:FencRes=="VimCrypt"
         echohl Error | echomsg "This is Vim encrypted file, decrypt it first!" | echohl None
         return
     endif
-    let Syn=&syntax
-    if s:FencRes!=''
-        if s:FencRes=="BOM"
-            let tmp_fenc=&fencs
-            set fencs=ucs-bom,utf-8,utf-16,latin1
-            exec "e"
-            exec "set fencs=".tmp_fenc
-        else
-            try
-                let s:disable_autodetection=2
-                exec "edit ++enc=".s:FencRes
-            finally
-                let s:disable_autodetection=0
-            endtry
-        endif
-        if Syn!=''
-            let &syntax=Syn
-        endif
+
+    " BOM
+    if s:FencRes=="BOM"
+        let tmp_fenc=&fencs
+        set fencs=ucs-bom,utf-8,utf-16,latin1
+        exec "e"
+        exec "set fencs=".tmp_fenc
         return
-    else
-        " first round
-        if s:FencResCount<(s:UTF8_count-s:UTF8_error)
-            let s:FencResCount=s:UTF8_count
-            let s:FencRes="utf-8"
+    endif
+
+    if s:UTF8_error == 0
+        " even if the file is strict utf-8 format, it is still
+        " possible to be another encoding.
+        let s:FencRes = "utf-8"
+        if s:cp936_error == 0 && s:FencResCount < s:cp936_count
+            let s:FencResCount = s:cp936_count
+            let s:FencRes = "cp936"
         endif
+        if s:cp950_error == 0 && s:FencResCount < s:cp950_count
+            let s:FencResCount=s:cp950_count
+            let s:FencRes = "cp950"
+        endif
+        if s:euc_tw_error == 0 && s:FencResCount < s:euc_tw_count
+            let s:FencResCount=s:euc_tw_count
+            let s:FencRes = "euc-tw"
+        endif
+        if s:cp932_error == 0 && s:FencResCount < s:cp932_count
+            let s:FencResCount=s:cp932_count
+            let s:FencRes = "cp932"
+        endif
+        if s:euc_jp_error == 0 && s:FencResCount < s:euc_jp_count
+            let s:FencResCount=s:euc_jp_count
+            let s:FencRes = "euc-jp"
+        endif
+        if s:cp949_error == 0 && s:FencResCount < s:cp949_count
+            let s:FencResCount=s:cp949_count
+            let s:FencRes = "cp949"
+        endif
+    else
         if s:FencResCount<(s:cp936_count-s:cp936_error)
             let s:FencResCount=s:cp936_count
             let s:FencRes="cp936"
@@ -1337,42 +1297,23 @@ function! s:FencDetectFileEncoding() "{{{1
             let s:FencResCount=s:cp949_count
             let s:FencRes="cp949"
         endif
-        " second round
-        if (s:cp936_count-s:cp936_error)>s:cp936_n_count
-            let s:FencRes="cp936"
-        endif
-        if (s:cp950_count-s:cp936_error)>s:cp950_n_count
-            let s:FencRes="cp950"
-        endif
-        if (s:euc_tw_count-s:cp936_error)>s:euc_tw_n_count
-            let s:FencRes="euc-tw"
-        endif
-        if (s:cp932_count-s:cp936_error)>s:cp932_n_count
-            let s:FencRes="cp932"
-        endif
-        if (s:euc_jp_count-s:cp936_error)>s:euc_jp_n_count
-            let s:FencRes="euc-jp"
-        endif
-        if (s:cp949_count-s:cp936_error)>s:cp949_n_count
-            let s:FencRes="cp949"
-        endif
-        " last
-        if s:FencResCount==0
+
+        if s:FencResCount == 0
             let s:FencRes="ascii"
         endif
     endif
-    if s:FencRes!=''
-        try
-            let s:disable_autodetection=2
-            if s:FencRes=='ascii'
-                exec "edit"
-            else
-                exec "edit ++enc=".s:FencRes
-            endif
-        finally
-            let s:disable_autodetection=0
-        endtry
-    endif
+
+    let Syn=&syntax
+    try
+        let s:disable_autodetection=2
+        if s:FencRes=='ascii'
+            exec "edit"
+        else
+            exec "edit ++enc=".s:FencRes
+        endif
+    finally
+        let s:disable_autodetection=0
+    endtry
     if Syn!=''
         let &syntax=Syn
     endif
@@ -1415,6 +1356,11 @@ if g:fencview_autodetect
                 \' call s:EditAutoEncoding()'
     exec 'au BufWinEnter ' . g:fencview_auto_patterns .
                 \' call s:CheckModelineFileEncoding()'
+    exec 'au BufUnload ' . g:fencview_auto_patterns .
+                \' unlet! b:fencview_modeline_checked'
 endif
+
+" Restore cpoptions
+let &cpo=s:cpo_save
 
 " vim: set et fdm=marker sts=4 sw=4 tw=64:

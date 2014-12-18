@@ -60,7 +60,7 @@ if has('mouse') " 所有模式下允许使用鼠标
   set mouse=a
 endif  
 
-set guioptions=behrv " 菜单、滚动条、工具栏、对话框等的设置，去掉m（菜单栏）和T（工具栏）
+set guioptions=ehrv " 菜单、滚动条、工具栏、对话框等的设置，去掉m（菜单栏）和T（工具栏）
 
 " 屏幕显示 {{{2
 set scrolloff=1 " 光标上下两侧最少保留的屏幕行数。
