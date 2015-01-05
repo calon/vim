@@ -25,7 +25,8 @@ set syntax=txt " 设置默认语法类型
 " else
 "     colorscheme desert256.vim
 " endif
- 
+set synmaxcol=1024
+
 " 字体设置 {{{2
 set guifont=Yahei_Mono:h11 " GUI 版本使用的字体列表。
 set guifontwide=Yahei_Mono:h11 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
@@ -63,9 +64,10 @@ endif
 set guioptions=ehrv " 菜单、滚动条、工具栏、对话框等的设置，去掉m（菜单栏）和T（工具栏）
 
 " 屏幕显示 {{{2
-set scrolloff=1 " 光标上下两侧最少保留的屏幕行数。
+set scrolloff=3 " 光标上下两侧最少保留的屏幕行数
+set sidescrolloff=8 " 光标左右两侧最少保留的屏幕列数
 set whichwrap=b,s,<,>,[,] "对某一个或几个按键开启到头后自动折向下一行的功能
-set lazyredraw " Don't redraw while executing macros (good performance config)
+set lazyredraw " 执行宏、寄存器和其它不通过输入的命令时屏幕不会重画
 set linebreak
 
 " 状态栏设置 {{{2
@@ -124,11 +126,8 @@ set selectmode="" " 指定什么场合开始选择时启动选择模式而不是
 " 备份、临时文件 {{{2
 set backup " 自动生成备份文件
 set writebackup " 覆盖文件前建立备份
-set updatecount=30 " 输入这么多个字符以后，把交换文件写入磁盘
-" set backupdir=E:\\Bak\\txt " 备份目录
-" set directory=E:\\Bak\\txt " 交换目录
-" 失去焦点时自动保存
-" au FocusLost * :wa
+set noswapfile " 取消交换文件
+" set updatecount=30 " 输入这么多个字符以后，把交换文件写入磁盘
 
 " 历史和会话信息 {{{2
 set history=500		" keep 50 lines of command line history
@@ -139,26 +138,9 @@ set hidden " 退出时隐藏而不是卸载缓冲区
 set confirm " 某些因为缓冲区有未保存的改变而失败的操作会弹出对话框要求确认
 
 " 快速切换缓冲区
-" noremap <unique> <script> <leader>1 :1b<CR>
-" noremap <unique> <script> <leader>2 :2b<CR>
-" noremap <unique> <script> <leader>3 :3b<CR>
-" noremap <unique> <script> <leader>4 :4b<CR>
-" noremap <unique> <script> <leader>5 :5b<CR>
-" noremap <unique> <script> <leader>6 :6b<CR>
-" noremap <unique> <script> <leader>7 :7b<CR>
-" noremap <unique> <script> <leader>8 :8b<CR>
-" noremap <unique> <script> <leader>9 :9b<CR>
-" noremap <unique> <script> <leader>0 :0b<CR>
-" inoremap <unique> <script> <leader>1 <Esc>:1b<CR>
-" inoremap <unique> <script> <leader>2 <Esc>:2b<CR>
-" inoremap <unique> <script> <leader>3 <Esc>:3b<CR>
-" inoremap <unique> <script> <leader>4 <Esc>:4b<CR>
-" inoremap <unique> <script> <leader>5 <Esc>:5b<CR>
-" inoremap <unique> <script> <leader>6 <Esc>:6b<CR>
-" inoremap <unique> <script> <leader>7 <Esc>:7b<CR>
-" inoremap <unique> <script> <leader>8 <Esc>:8b<CR>
-" inoremap <unique> <script> <leader>9 <Esc>:9b<CR>
-" inoremap <unique> <script> <leader>0 <Esc>:0b<CR>
+
+nnoremap <Tab> :bnext<CR>
+nnoremap <C-Tab> :bprevious<CR>
 
 let c = 1
 while c <= 49
@@ -216,7 +198,7 @@ set expandtab " 插入模式里: 插入制表符时使用合适数量的空格�
 " set smarttab " use tabs at the start of a line, spaces elsewhere
 set shiftround " 缩进取整到 shiftwidth 的倍数。应用于 > 和 < 命令。
 
-" 语言、字符编码和输入法设置 {{{2
+" 语言、字符编码、输入法设置和排版 {{{2
 let &termencoding=&encoding
 set encoding=utf-8 " 内部使用的字符编码为UTF-8
 set fileencodings=utf-8,chinese,ucs-bom,gb18030,gbk,gb2312,cp936 "编辑已存在文件时，参考此字符编码列表
@@ -227,9 +209,14 @@ source $VIMRUNTIME/menu.vim
 language messages zh_CN.utf-8 " 弹出信息语言选项
 set ambiwidth=double " 把所有的“不明宽度”字符——指的是在 Unicode 字符集中某些同时在东西方语言中使用的字符，如省略号、破折号、书名号和全角引号，在西方文字中通常字符宽度等同于普通 ASCII 字符，而在东方文字中通常字符宽度等同于两倍的普通 ASCII 字符，因而其宽度“不明”——的宽度置为双倍字符宽度（中文字符宽度）。此数值只在 encoding 设为 utf-8 或某一 Unicode 编码时才有效。需要额外注意的是，如果你通过终端使用 Vim 的话，需要令终端也将这些字符显示为双宽度。
 set imcmdline " 开始编辑命令行时总是打开输入方法
-set formatoptions+=mB "打开断行模块对亚洲语言支持。 m 表示允许在两个汉字之间断行， 即使汉字之间没有出现空格。 B 表示将两行合并为一行的时候， 汉字与汉字之间不要补空格。
+set formatoptions+=1Bjmn
 
 " 搜索 {{{2
+
+" 保持搜索结果在屏幕正中
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
 " 开启搜索高亮TrueType Collection
 if &t_Co > 2 || has("gui_running")
   syntax on
@@ -259,12 +246,17 @@ if version >= 700
    set nospell
 endif
 
+" 列块编辑选项 {{{2
+set virtualedit+=block
 " 按键映射 {{{1
 
 " 通用按键映射 {{{2
 
 " 进入命令行
 nnoremap <silent> ; :
+
+" 复制到行末
+nnoremap Y y$
 
 " 显示缓冲区清单
 "nnoremap <leader>b <Esc>:Bufferlist<CR>
@@ -280,7 +272,6 @@ nnoremap <F3> <Esc>:call ToggleHLSearch()<CR>
 inoremap <F3> <Esc>:call ToggleHLSearch()<CR>
 
 " 插入时间戳
-
 nnoremap <F4> a<C-R>=strftime("%Y-%m-%d %H:%M:%S")<CR><Esc>
 inoremap <F4> <C-R>=strftime("%Y-%m-%d %H:%M:%S")<CR>
 
@@ -320,9 +311,13 @@ inoremap <C-F10> <Esc>:bdelete<CR>
 nnoremap <leader>tn :tabnew<CR>
 "nnoremap <leader>tc :tabclose<CR>
 
+" 快速保存 Quick save
+nnoremap <F12> <Esc>:call Quick_save()<CR> 
+inoremap <F12> <Esc>:call Quick_save()<CR> 
+
 " 打开另存为对话框
-nnoremap <F12> <Esc>:browse saveas<CR>
-inoremap <F12> <Esc>:browse saveas<CR>
+nnoremap <C-F12> <Esc>:browse saveas<CR>
+inoremap <C-F12> <Esc>:browse saveas<CR>
 
 " 普通模式下 Ctrl+c 复制文件路径
 nnoremap <c-c> :let @* = expand('%:p')<CR>
@@ -362,13 +357,22 @@ endfunction
 vnoremap < <gv
 vnoremap > >gv
 
+" 粘贴文本后跳到最后的位置
+vnoremap y y`]
+vnoremap p p`]
+nnoremap p p`]
+
 " 移动 {{{2
 
 " 窗口间跳转
-" map <C-j> <C-W>j
-" map <C-k> <C-W>k
-" map <C-h> <C-W>h
-" map <C-l> <C-W>l
+map <C-j> <C-W>j
+map <C-k> <C-W>k
+map <C-h> <C-W>h
+map <C-l> <C-W>l
+nnoremap <S-Up> <C-W><Up>
+nnoremap <S-Down> <C-W><Down>
+nnoremap <S-Left> <C-W><Left>
+nnoremap <S-Right> <C-W><Right>
 
 " 上下移动
 nnoremap <silent> k gk
@@ -380,24 +384,16 @@ inoremap <silent> <Down> <Esc>gja
 nnoremap <Space> <C-F>
 nnoremap <BackSpace> <C-B>
 
-nnoremap <S-Up> <C-W><Up>
-nnoremap <S-Down> <C-W><Down>
-nnoremap <S-Left> <C-W><Left>
-nnoremap <S-Right> <C-W><Right>
-
-
-" Next Tab
-"nnoremap <silent> <C-Right> :tabnext<CR>
-
-" Previous Tab
-"nnoremap <silent> <C-Left> :tabprevious<CR>
+" 标签页跳转
+nnoremap <silent> <C-Right> :tabnext<CR>
+nnoremap <silent> <C-Left> :tabprevious<CR>
 
 
 " 在插入模式下移动方向
-inoremap <C-h> <Left>
-inoremap <C-l> <Right>
-inoremap <C-j> <Down>
-inoremap <C-k> <Up>
+" inoremap <C-h> <Left>
+" inoremap <C-l> <Right>
+" inoremap <C-j> <Down>
+" inoremap <C-k> <Up>
 
 " 快速跳转缓冲区
 let i = 1
@@ -407,7 +403,7 @@ while i <= 99
 endwhile  
 
 " 折叠 {{{2
-nnoremap f za
+nnoremap <CR> za
 set foldenable " 开始折叠
 set foldmethod=marker " 设置语法折叠
 setlocal foldlevel=1 " 设置折叠层数
@@ -521,8 +517,8 @@ let g:neocomplete#same_filetypes._ = '_'
 
 " SuperTab {{{2
 
-let g:SuperTabNoCompleteAfter = ['^', ',', '\s', '"', "'"]
-let g:SuperTabDefaultCompletionType = "<c-n>"
+" let g:SuperTabNoCompleteAfter = ['^', ',', '\s', '"', "'"]
+" let g:SuperTabDefaultCompletionType = "<c-n>"
 
 " Vim-Notes
 " nnoremap <F8> <Esc>:Note<CR>
@@ -765,6 +761,7 @@ endfunction
 let g:buftabline_show = 1 " only if there are at least two buffers 
 let g:buftabline_numbers = 1
 let g:buftabline_indicators = 1
+
 
 " Modeline {{{1
 " vim:foldmethod=marker:foldlevel=0

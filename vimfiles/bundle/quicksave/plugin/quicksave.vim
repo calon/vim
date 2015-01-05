@@ -50,6 +50,8 @@ if has("autocmd") && g:auto_save_option == 1
 endif
 
 " Define shortcut to quick save
-nnoremap <silent> <leader>s :call Quick_save()<CR>
+if !mapcheck("<leader>s", "n")
+    nnoremap <silent> <leader>s :call Quick_save()<CR>
+endif
 
 let g:save_first_line_as_title = 1
