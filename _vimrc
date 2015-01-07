@@ -403,7 +403,8 @@ while i <= 99
 endwhile  
 
 " 折叠 {{{2
-nnoremap <CR> za
+nnoremap f za
+nnoremap , f
 set foldenable " 开始折叠
 set foldmethod=marker " 设置语法折叠
 setlocal foldlevel=1 " 设置折叠层数
