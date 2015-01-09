@@ -312,8 +312,8 @@ nnoremap <leader>tn :tabnew<CR>
 "nnoremap <leader>tc :tabclose<CR>
 
 " 快速保存 Quick save
-nnoremap <F12> <Esc>:call Quick_save()<CR> 
-inoremap <F12> <Esc>:call Quick_save()<CR> 
+nnoremap <F12> <Esc>:call Quick_save()<CR>
+inoremap <F12> <Esc>:call Quick_save()<CR>a
 
 " 打开另存为对话框
 nnoremap <C-F12> <Esc>:browse saveas<CR>
