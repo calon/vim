@@ -6,6 +6,7 @@ behave mswin " 使用更接近 Windows 的操作配置
 set t_Co=256
 source $VIM/vimrc_path.vim
 set browsedir=buffer
+cd $VIM
 
 " 界面 {{{1
 
@@ -139,8 +140,10 @@ set confirm " 某些因为缓冲区有未保存的改变而失败的操作会弹
 
 " 快速切换缓冲区
 
-nnoremap <Tab> :bnext<CR>
-nnoremap <C-Tab> :bprevious<CR>
+" nnoremap <Tab> :bnext<CR>
+" nnoremap <C-Tab> :bprevious<CR>
+nnoremap <C-Right> :bnext<CR>
+nnoremap <C-Left> :bprevious<CR>
 
 let c = 1
 while c <= 49
@@ -258,10 +261,8 @@ nnoremap <silent> ; :
 " 复制到行末
 nnoremap Y y$
 
-" 显示缓冲区清单
-"nnoremap <leader>b <Esc>:Bufferlist<CR>
-nnoremap <F1> :Unite -no-split -auto-resize -quick-match -buffer-name=Buffer_List buffer<CR>
-inoremap <F1> :Unite -no-split -auto-resize -quick-match -buffer-name=Buffer_List buffer<CR>
+" 切换当前目录
+nnoremap <F1> :lcd %:p:h<CR>
 
 " 切换显示绝对或相对行号
 nnoremap <F2> <Esc>:call ToggleRelativeNumber()<CR>
@@ -385,8 +386,8 @@ nnoremap <Space> <C-F>
 nnoremap <BackSpace> <C-B>
 
 " 标签页跳转
-nnoremap <silent> <C-Right> :tabnext<CR>
-nnoremap <silent> <C-Left> :tabprevious<CR>
+" nnoremap <silent> <C-Right> :tabnext<CR>
+" nnoremap <silent> <C-Left> :tabprevious<CR>
 
 
 " 在插入模式下移动方向
@@ -606,8 +607,8 @@ let g:unite_source_menu_menus.View.command_candidates = [
         \'ColorToggle'],
     \[' > 设置为纯文本类型           :set filetype=txt ',
         \'set filetype=txt'],
-    \[' > 显示缓冲区                 <F1> ',
-        \'Unite -no-split -auto-resize -quick-match -buffer-name=Buffer_List buffer'],
+    \[' > 切换当前窗口工作目录       <F1> ',
+        \'lcd %:p:h'],
     \[' > 切换行号显示模式           <F2> ',
         \'call ToggleRelativeNumber()'],
     \[' > 切换搜索结果高亮显示       <F3> ',
@@ -655,8 +656,6 @@ let g:unite_source_menu_menus.Edit.command_candidates = [
         \'exe "normal! ~"'],
     \[' > 显示光标位置，并统计字词        g<Ctrl-g> ',
         \'exe "normal! g\<c-g>"'],
-    \[' > Locate 列出搜索清单             :L[!] /<pattern1>/<pattern2>/.../[<flags>]） ',
-        \'echo ":L[!] /{pattern1}/{pattern2}/.../[{flags}]" '],
     \[' > EasyAlign 对齐                  <Enter>*<Delimiter>，<CTRL-/> 或 <CTRL-X> 输入正则表达式 ',
         \'echo "<Enter>*<Delimiter>，<CTRL-/> 或 <CTRL-X> 输入正则表达式" '],
     \[' > Mark 标记当前词                 <Leader>m ',
@@ -667,30 +666,31 @@ let g:unite_source_menu_menus.Edit.command_candidates = [
         \'TOhtml'],
     \]
 
+let g:unite_source_menu_menus.Search = {
+    \ 'description' : ' > 搜索（Search）
+        \                            ',
+    \}
 
-" let g:unite_source_menu_menus.Note = {
-"     \ 'description' : ' > 笔记管理（Note）
-"         \                            ',
-"     \}
-
-" let g:unite_source_menu_menus.Note.command_candidates = [
-"     \[' > 列出近期笔记                    :RecentNotes ',
-"         \'RecentNotes'],
-"     \[' > 新建或打开笔记                  <F8> 或 :Note [title] ',
-"         \'Note'],
-"     \[' > 根据选定文本新建或打开笔记      :NoteFromSelectedText ',
-"         \'echo ":NoteFromSelectedText" '],
-"     \[' > 删除笔记                        :DeleteNote [title] ',
-"         \'DeleteNote'],
-"     \[' > 搜索笔记                        :SearchNotes keyword or pattern ',
-"         \'echo ":SearchNotes keyword or pattern" '],
-"     \[' > 列出反向引用的笔记              :RelatedNotes ',
-"         \'RelatedNotes'],
-"     \]
+let g:unite_source_menu_menus.Search.command_candidates = [
+    \[' > 遍历搜索文件内容     Ctrl-/ 或 :Ag [Options] Pattern [Path] ',
+        \'echo ":Ag [Options] Pattern [Path]" （--context 展示上下文）'],
+    \[' > 遍历搜索文件         :Ag [Options] -l Pattern [Path] ',
+        \'echo ":Ag [Options] -l Pattern [Path]" '],
+    \[' > Locate 列出搜索清单  :L[!] /<pattern1>/<pattern2>/.../[<flags>]） ',
+        \'echo ":L[!] /{pattern1}/{pattern2}/.../[{flags}]" '],
+    \]
 
 
 " NeoMru
 " let g:neomru#time_format = strftime("[%m-%d %H:%M] ")
+
+" Vimfiler {{{2
+nnoremap <C-\> :VimFiler -force-quit -toggle -split -horizontal -buffer-name=VimFiler -sort-type=Time<CR>
+" autocmd VimEnter * if !argc() | VimFiler | endif
+let g:vimfiler_enable_auto_cd = 1
+call vimfiler#custom#profile('default', 'context', {
+		\   'sort_type' : 'Time'
+		\ })
 
 " Vim-Bookmark {{{2
 let g:bookmark_sign = '>>'
@@ -763,6 +763,29 @@ let g:buftabline_show = 1 " only if there are at least two buffers
 let g:buftabline_numbers = 1
 let g:buftabline_indicators = 1
 
+
+" Platinum Searcher  {{{2
+let g:ackprg = "pt"
+let g:ack_default_options = " --smart-case --nocolor"
+let g:ackhighlight = 1
+nnoremap <Leader>g <Esc>:Ack!<Space>
+nnoremap <Leader>gw <Esc>:AckWindow!<Space>
+
+let g:ack_mappings = { "<Esc>": ":q<CR>" }
+
+" The Nerd Tree
+" nnoremap <C-\> :NERDTreeToggle<CR>
+" let NERDTreeShowBookmarks = 1
+" let NERDTreeChDirMode = 2
+
+" Need Vimproc
+" nnoremap <silent> <Leader>g :<C-u>Unite grep:. -buffer-name=Search<CR>
+" if executable('pt')
+"   let g:unite_source_grep_command = 'pt'
+"   let g:unite_source_grep_default_opts = '--smart-case --nogroup --nocolor'
+"   let g:unite_source_grep_recursive_opt = ''
+"   let g:unite_source_grep_encoding = 'utf-8'
+" endif
 
 " Modeline {{{1
 " vim:foldmethod=marker:foldlevel=0
