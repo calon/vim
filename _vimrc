@@ -6,7 +6,6 @@ behave mswin " 使用更接近 Windows 的操作配置
 set t_Co=256
 source $VIM/vimrc_path.vim
 set browsedir=buffer
-cd $VIM
 
 " 界面 {{{1
 
@@ -578,7 +577,7 @@ let g:unite_source_menu_menus.Unite.command_candidates = [
     \[' > 筛选当前缓冲区内容   Ctrl-l',
         \'Unite -no-split -auto-resize -buffer-name=Lines line'],
     \[' > 查看当前目录文件 ',
-        \'Unite -no-split -auto-resize -start-insert -buffer-name=File_List file'],
+        \'lcd %:p:h | Unite -no-split -auto-resize -start-insert -buffer-name=File_List file'],
     \[' > 查看缓冲区 ',
         \'Unite -no-split -quick-match -auto-resize -buffer-name=Buffer_List buffer'],
     \[' > 增加文件书签        :UniteBookmarkAdd ',
@@ -685,7 +684,7 @@ let g:unite_source_menu_menus.Search.command_candidates = [
 " let g:neomru#time_format = strftime("[%m-%d %H:%M] ")
 
 " Vimfiler {{{2
-nnoremap <C-\> :VimFiler -force-quit -toggle -split -horizontal -buffer-name=VimFiler -sort-type=Time<CR>
+nnoremap <C-\> :lcd %:p:h <Bar> VimFiler -force-quit -toggle -split -horizontal -buffer-name=VimFiler -sort-type=Time<CR>
 " autocmd VimEnter * if !argc() | VimFiler | endif
 let g:vimfiler_enable_auto_cd = 1
 call vimfiler#custom#profile('default', 'context', {
@@ -769,7 +768,7 @@ let g:ackprg = "pt"
 let g:ack_default_options = " --smart-case --nocolor"
 let g:ackhighlight = 1
 nnoremap <Leader>g <Esc>:Ack!<Space>
-nnoremap <Leader>gw <Esc>:AckWindow!<Space>
+nnoremap <Leader>gw <Esc>:lcd %:p:h <Bar> AckWindow!<Space>
 
 let g:ack_mappings = { "<Esc>": ":q<CR>" }
 
