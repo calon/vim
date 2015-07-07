@@ -199,6 +199,8 @@ set shiftwidth=4 " 缩进一步对应的空格数
 set expandtab " 插入模式里: 插入制表符时使用合适数量的空格。如果 'autoindent' 打开，'>' 和 '<' 命令使用空格进行缩进。
 " set smarttab " use tabs at the start of a line, spaces elsewhere
 set shiftround " 缩进取整到 shiftwidth 的倍数。应用于 > 和 < 命令。
+" 针对 Web 开发，统一缩进2个空格
+autocmd BufNewFile,BufRead *.html,*.htm,*.css,*.js set tabstop=2 softtabstop=2 shiftwidth=2
 
 " 语言、字符编码、输入法设置和排版 {{{2
 let &termencoding=&encoding
@@ -490,6 +492,8 @@ let g:acp_enableAtStartup = 0
 let g:neocomplete#enable_at_startup = 1
 " Set minimum syntax keyword length.
 let g:neocomplete#sources#syntax#min_keyword_length = 3
+" Disbale ignore case
+let g:neocomplete#enable_ignore_case = 0
 
 " Recommended key-mappings.
 " <CR>: close popup and save indent.
