@@ -434,6 +434,7 @@ function! CustomFoldText()
     return line . expansionString . foldSizeStr . foldPercentage . foldLevelStr
 endf
 
+let g:html_dynamic_folds = 1
 
 " function! NeatFoldText()
 "   let line = ' ' . substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
@@ -472,9 +473,9 @@ nnoremap <C-F11> <Esc>:VoomToggle<CR>
 
 " EasyAlign {{{2
 " Start interactive EasyAlign in visual mode
-vmap <Enter> <Plug>(EasyAlign)
+" vmap <Enter> <Plug>(EasyAlign)
 " Start interactive EasyAlign with a Vim movement
-nmap <Leader>a <Plug>(EasyAlign)
+" nmap <Leader>a <Plug>(EasyAlign)
 
 " MiniBufExpl {{{2
 " let g:miniBufExplCheckDupeBufs = 0
@@ -645,18 +646,18 @@ let g:unite_source_menu_menus.Edit.command_candidates = [
         \'%s#<[^>]\+>##g'],
     \[' > Pathogen 更新插件帮助文档       :Helptags ',
         \'Helptags'],
-    \[' > 转换为 GB2312 编码              :set encoding=cp936 fileencoding=cp936 ',
-        \'set encoding=cp936 fileencoding=cp936'],
-    \[' > 转换为 UTF-8 编码               :set encoding=utf-8 fileencoding=utf-8 ',
-        \'set encoding=utf-8 fileencoding=utf-8'],
+    \[' > 转换为 GB2312 编码              :set fileencoding=cp936 ',
+        \'set fileencoding=cp936'],
+    \[' > 转换为 UTF-8 编码               :set fileencoding=utf-8 ',
+        \'set fileencoding=utf-8'],
     \[' > 跳回最后编辑的位置              `. ',
         \'exe "normal! `."'],
     \[' > Case Switch 切换大小写           ~ ',
         \'exe "normal! ~"'],
     \[' > 显示光标位置，并统计字词        g<Ctrl-g> ',
         \'exe "normal! g\<c-g>"'],
-    \[' > EasyAlign 对齐                  <Enter>*<Delimiter>，<CTRL-/> 或 <CTRL-X> 输入正则表达式 ',
-        \'echo "<Enter>*<Delimiter>，<CTRL-/> 或 <CTRL-X> 输入正则表达式" '],
+    \[' > Align 对齐                      :Tabularize ',
+        \'echo ":Tabularize " '],
     \[' > Mark 标记当前词                 <Leader>m ',
         \'call mark#MarkCurrentWord()<CR>'],
     \[' > Mark 标记指定模式               :Mark {pattern} ',
