@@ -301,8 +301,8 @@ endfunction
 nnoremap <A-F7> <Esc>:L<SPACE>
 inoremap <A-F7> <Esc>:L<SPACE>
 
-" TagList Toggle
-nnoremap <F8> :TlistToggle<CR>
+" Tagbar Toggle
+nnoremap <F8> :TagbarToggle<CR>
 
 
 " 新建缓冲区
@@ -535,11 +535,16 @@ let g:neocomplete#same_filetypes._ = '_'
 " let g:notes_suffix = '.txt'
 " let g:notes_tab_indents = 0
 
-" TagList
+" TagList {{{2
 
-let Tlist_Show_One_File = 1
-let Tlist_Exit_OnlyWindow = 1
-let Tlist_Show_Menu = 1
+" let Tlist_Show_One_File = 1
+" let Tlist_Exit_OnlyWindow = 1
+" let Tlist_Show_Menu = 1
+
+" Tagbar {{{2
+let g:tagbar_sort = 0
+let g:tagbar_left = 1
+let g:tagbar_foldlevel = 0
 
 " Unite.vim {{{2
 
@@ -634,7 +639,7 @@ let g:unite_source_menu_menus.View.command_candidates = [
     \[' > 切换语法高亮显示           <F7> ',
         \'call ToggleSyntaxHighlight()'],
     \[' > 打开 TagList               <F8> ',
-        \'TlistToggle'],
+        \'TagbarToggle'],
     \[' > 切换缩进标志显示           :IndentLinesToggle',
         \'IndentLinesToggle'],
     \]
