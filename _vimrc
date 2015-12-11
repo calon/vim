@@ -70,6 +70,7 @@ set whichwrap=b,s,<,>,[,] "对某一个或几个按键开启到头后自动折�
 set lazyredraw " 执行宏、寄存器和其它不通过输入的命令时屏幕不会重画
 set linebreak
 
+
 " 状态栏设置 {{{2
 set laststatus=2 " 总是显示状态行
 
@@ -257,7 +258,7 @@ set virtualedit+=block
 " 通用按键映射 {{{2
 
 " 进入命令行
-nnoremap <silent> ; :
+nnoremap ; :
 
 " 复制到行末
 nnoremap Y y$
@@ -381,13 +382,13 @@ nnoremap <S-Left> <C-W><Left>
 nnoremap <S-Right> <C-W><Right>
 
 " 上下移动
-nnoremap <silent> k gk
-nnoremap <silent> j gj
-inoremap <silent> <Up> <Esc>gka
-inoremap <silent> <Down> <Esc>gja
+nnoremap k gk
+nnoremap j gj
+inoremap <Up> <Esc>gka
+inoremap <Down> <Esc>gja
 
 " 上下翻页
-nnoremap <Space> <C-F>
+nnoremap <Enter> <C-F>
 nnoremap <BackSpace> <C-B>
 
 " 标签页跳转
@@ -409,8 +410,7 @@ while i <= 99
 endwhile  
 
 " 折叠 {{{2
-nnoremap f za
-nnoremap , f
+nnoremap <Space> za
 set foldenable " 开始折叠
 set foldmethod=marker " 设置语法折叠
 setlocal foldlevel=1 " 设置折叠层数
@@ -501,7 +501,7 @@ let g:neocomplete#enable_ignore_case = 0
 
 " Recommended key-mappings.
 " <CR>: close popup and save indent.
-inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+inoremap <CR> <C-r>=<SID>my_cr_function()<CR>
 function! s:my_cr_function()
   return neocomplete#close_popup() . "\<CR>"
   " For no inserting <CR> key.
