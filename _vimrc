@@ -259,6 +259,9 @@ set virtualedit+=block
 
 " 进入命令行
 nnoremap ; :
+nnoremap ； :
+nnoremap ： :
+nnoremap 、 \
 
 " 复制到行末
 nnoremap Y y$
