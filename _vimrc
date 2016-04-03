@@ -30,6 +30,8 @@ set synmaxcol=1024
 " 字体设置 {{{2
 set guifont=Yahei_Mono:h11 " GUI 版本使用的字体列表。
 set guifontwide=Yahei_Mono:h11 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
+" set guifont=SimHei:h16 " GUI 版本使用的字体列表。
+" set guifontwide=SimHei:h16 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
 
 
 " 提示信息 {{{2
@@ -485,6 +487,10 @@ nnoremap <C-F11> <Esc>:VoomToggle<CR>
 " vmap <Enter> <Plug>(EasyAlign)
 " Start interactive EasyAlign with a Vim movement
 " nmap <Leader>a <Plug>(EasyAlign)
+
+" HTML  "{{{2
+let g:no_html_tab_mapping = 'yes'
+
 
 " MiniBufExpl {{{2
 " let g:miniBufExplCheckDupeBufs = 0
