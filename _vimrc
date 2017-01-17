@@ -269,7 +269,7 @@ nnoremap 、 \
 nnoremap Y y$
 
 " 切换当前目录
-nnoremap <F1> :lcd %:p:h<CR>
+nnoremap <F12> :lcd %:p:h<CR>
 
 " 切换显示绝对或相对行号
 nnoremap <F2> <Esc>:call ToggleRelativeNumber()<CR>
@@ -324,12 +324,12 @@ nnoremap <leader>tn :tabnew<CR>
 "nnoremap <leader>tc :tabclose<CR>
 
 " 快速保存 Quick save
-nnoremap <F12> <Esc>:call Quick_save()<CR>
-inoremap <F12> <Esc>:call Quick_save()<CR>a
+nnoremap <F1> <Esc>:call Quick_save()<CR>
+inoremap <F1> <Esc>:call Quick_save()<CR>a
 
 " 打开另存为对话框
-nnoremap <C-F12> <Esc>:browse saveas<CR>
-inoremap <C-F12> <Esc>:browse saveas<CR>
+nnoremap <C-F1> <Esc>:browse saveas<CR>
+inoremap <C-F1> <Esc>:browse saveas<CR>
 
 " 普通模式下 Ctrl+c 复制文件路径
 nnoremap <c-c> :let @* = expand('%:p')<CR>
@@ -591,7 +591,6 @@ nnoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
 inoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
 
 nnoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
-inoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
 
 let g:unite_source_menu_menus = {}
 
@@ -815,6 +814,9 @@ let g:ack_mappings = { "<Esc>": ":q<CR>" }
 "   let g:unite_source_grep_recursive_opt = ''
 "   let g:unite_source_grep_encoding = 'utf-8'
 " endif
+
+" Vim-Workspace {{{2
+let g:workspace_autosave_untrailspaces = 0
 
 " Modeline {{{1
 " vim:foldmethod=marker:foldlevel=0
