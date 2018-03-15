@@ -28,10 +28,10 @@ set syntax=txt " 设置默认语法类型
 set synmaxcol=1024
 
 " 字体设置 {{{2
-set guifont=Yahei_Mono:h11 " GUI 版本使用的字体列表。
-set guifontwide=Yahei_Mono:h11 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
-" set guifont=SimHei:h16 " GUI 版本使用的字体列表。
-" set guifontwide=SimHei:h16 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
+" set guifont=Yahei_Mono:h11 " GUI 版本使用的字体列表。
+" set guifontwide=Yahei_Mono:h11 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
+set guifont=SimHei:h14 " GUI 版本使用的字体列表。
+set guifontwide=SimHei:h14 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
 
 
 " 提示信息 {{{2
@@ -464,6 +464,9 @@ let g:html_dynamic_folds = 1
 " Pathogen  {{{2
 call pathogen#infect()
 
+" Colorizer {{{2
+let g:colorizer_startup = 0
+
 " Calendar {{{2
 let g:calendar_monday = 1 "以星期一为开始 
 let g:calendar_focus_today = 1 " 光标在当天的日期上 
@@ -490,7 +493,6 @@ nnoremap <C-F11> <Esc>:VoomToggle<CR>
 
 " HTML  "{{{2
 let g:no_html_tab_mapping = 'yes'
-
 
 " MiniBufExpl {{{2
 " let g:miniBufExplCheckDupeBufs = 0
@@ -591,6 +593,7 @@ nnoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
 inoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
 
 nnoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
+inoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
 
 let g:unite_source_menu_menus = {}
 
@@ -814,9 +817,6 @@ let g:ack_mappings = { "<Esc>": ":q<CR>" }
 "   let g:unite_source_grep_recursive_opt = ''
 "   let g:unite_source_grep_encoding = 'utf-8'
 " endif
-
-" Vim-Workspace {{{2
-let g:workspace_autosave_untrailspaces = 0
 
 " Modeline {{{1
 " vim:foldmethod=marker:foldlevel=0
