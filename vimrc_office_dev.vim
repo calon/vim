@@ -10,3 +10,6 @@ let g:tagbar_ctags_bin = 'd:/Application/ctags/ctags.exe'
 " set shellcmdflag=""
 " let g:notes_directories = ['d:\Data\Share\Dropbox\Note\Vim-Notes\']
 
+" 字体设置
+set guifont=Yahei_Mono:h11 " GUI 版本使用的字体列表。
+set guifontwide=Yahei_Mono:h11 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。

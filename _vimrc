@@ -4,7 +4,9 @@ set nocompatible " 如果使用兼容模式，后续设置会使用 Vi 的一些
 source $VIMRUNTIME/mswin.vim
 behave mswin " 使用更接近 Windows 的操作配置
 set t_Co=256
-source $VIM/vimrc_path.vim
+source $VIM/vimrc_surface3.vim
+" source $VIM/vimrc_office_dev.vim
+" source $VIM/vimrc_office_primary.vim
 set browsedir=buffer
 
 " 界面 {{{1
@@ -30,8 +32,8 @@ set synmaxcol=1024
 " 字体设置 {{{2
 " set guifont=Yahei_Mono:h11 " GUI 版本使用的字体列表。
 " set guifontwide=Yahei_Mono:h11 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
-set guifont=SimHei:h14 " GUI 版本使用的字体列表。
-set guifontwide=SimHei:h14 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
+" set guifont=SimHei:h14 " GUI 版本使用的字体列表。
+" set guifontwide=SimHei:h14 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
 
 
 " 提示信息 {{{2
