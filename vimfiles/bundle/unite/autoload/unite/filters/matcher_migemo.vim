@@ -1,32 +1,13 @@
 "=============================================================================
 " FILE: matcher_migemo.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! unite#filters#matcher_migemo#define() "{{{
+function! unite#filters#matcher_migemo#define() abort "{{{
   if !has('migemo') && !executable('cmigemo')
     " Not supported.
     return {}
@@ -44,7 +25,7 @@ function! unite#filters#matcher_migemo#define() "{{{
   return s:matcher
 endfunction"}}}
 
-function! s:search_dict()
+function! s:search_dict() abort
   let dict = s:search_dict2('cmigemo/'.&encoding.'/migemo-dict')
   if dict == ''
     let dict = s:search_dict2('migemo/'.&encoding.'/migemo-dict')
@@ -59,7 +40,7 @@ function! s:search_dict()
   return dict
 endfunction
 
-function! s:search_dict2(name)
+function! s:search_dict2(name) abort
   let path = $VIM . ',' . &runtimepath
   let dict = globpath(path, 'dict/'.a:name)
   if dict == ''
@@ -85,7 +66,7 @@ let s:matcher = {
       \ 'description' : 'migemo matcher',
       \}
 
-function! s:matcher.filter(candidates, context) "{{{
+function! s:matcher.filter(candidates, context) abort "{{{
   if a:context.input == ''
     return a:candidates
   endif
@@ -118,11 +99,11 @@ function! s:matcher.filter(candidates, context) "{{{
 
   return candidates
 endfunction"}}}
-function! s:matcher.pattern(input) "{{{
+function! s:matcher.pattern(input) abort "{{{
   return s:get_migemo_pattern(a:input)
 endfunction"}}}
 
-function! s:get_migemo_pattern(input)
+function! s:get_migemo_pattern(input) abort
   if has('migemo')
     " Use migemo().
     return migemo(a:input)

@@ -1,5 +1,12 @@
-[![Stories in Ready](https://badge.waffle.io/Shougo/unite.vim.png)](https://waffle.io/Shougo/unite.vim)  
+[![Stories in Ready](https://badge.waffle.io/Shougo/unite.vim.png)](https://waffle.io/Shougo/unite.vim)
 ![Unite.vim](https://s3.amazonaws.com/github-csexton/unite-brand.png)
+
+
+**Note**: Active development on unite.vim has stopped. The only future changes
+will be bug fixes.
+
+Please see [Denite.nvim](https://github.com/Shougo/denite.nvim).
+
 
 The unite or unite.vim plug-in can search and display information from
 arbitrary sources like files, buffers, recently used files or registers.  You
@@ -12,6 +19,8 @@ sources and you can create new interfaces using unite.
 ![](https://s3.amazonaws.com/github-csexton/unite-01.gif)
 
 ## Usage
+
+[![Join the chat at https://gitter.im/Shougo/unite.vim](https://badges.gitter.im/Shougo/unite.vim.svg)](https://gitter.im/Shougo/unite.vim?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Run unite to display files and buffers as sources to pick from.
 
@@ -73,9 +82,6 @@ handy in case you select files with unite.
 
 See also `unite_default_key_mappings` for other actions.
 
-There is also a screencast available which shows unite in action. Thanks to
-ujihisa! http://www.ustream.tv/recorded/11240673
-
 ## Install
 
 Install the distributed files into your Vim script directory which is usually
@@ -98,14 +104,10 @@ https://github.com/Shougo/neomru.vim
 * [Replacing All The Things with Unite.vim — Codeography](http://www.codeography.com/2013/06/17/replacing-all-the-things-with-unite-vim.html)
 * [Beginner's Guide to Unite](http://usevim.com/2013/06/19/unite/)
 * [Standards: How to make a Unite plugin](http://ujihisa.blogspot.jp/2010/11/how-to-make-unite-plugin.html)
-* [FAQ (`:h unite-faq`)](https://github.com/Shougo/unite.vim/blob/master/doc/unite.txt#L3325)
+* [FAQ (`:h unite-faq`)](https://github.com/Shougo/unite.vim/blob/master/doc/unite.txt#L3608)
 
 
 ## Screen shots
-
-unite file source
------------------
-![Unite file source.](http://gyazo.com/7379f1041084632c66faef9caf3e1f09.png)
 
 unite action source
 -------------------
@@ -127,41 +129,44 @@ unite menu source with customization
 ------------------------------------
 ![Unite menu source with customization.](https://f.cloud.github.com/assets/390964/734885/82b91006-e2e1-11e2-9957-fb279bc71311.png)
 
-	let g:unite_source_menu_menus.git = {
-	    \ 'description' : '            gestionar repositorios git
-	        \                            ⌘ [espacio]g',
-	    \}
-	let g:unite_source_menu_menus.git.command_candidates = [
-	    \['▷ tig                                                        ⌘ ,gt',
-	        \'normal ,gt'],
-	    \['▷ git status       (Fugitive)                                ⌘ ,gs',
-	        \'Gstatus'],
-	    \['▷ git diff         (Fugitive)                                ⌘ ,gd',
-	        \'Gdiff'],
-	    \['▷ git commit       (Fugitive)                                ⌘ ,gc',
-	        \'Gcommit'],
-	    \['▷ git log          (Fugitive)                                ⌘ ,gl',
-	        \'exe "silent Glog | Unite quickfix"'],
-	    \['▷ git blame        (Fugitive)                                ⌘ ,gb',
-	        \'Gblame'],
-	    \['▷ git stage        (Fugitive)                                ⌘ ,gw',
-	        \'Gwrite'],
-	    \['▷ git checkout     (Fugitive)                                ⌘ ,go',
-	        \'Gread'],
-	    \['▷ git rm           (Fugitive)                                ⌘ ,gr',
-	        \'Gremove'],
-	    \['▷ git mv           (Fugitive)                                ⌘ ,gm',
-	        \'exe "Gmove " input("destino: ")'],
-	    \['▷ git push         (Fugitive, salida por buffer)             ⌘ ,gp',
-	        \'Git! push'],
-	    \['▷ git pull         (Fugitive, salida por buffer)             ⌘ ,gP',
-	        \'Git! pull'],
-	    \['▷ git prompt       (Fugitive, salida por buffer)             ⌘ ,gi',
-	        \'exe "Git! " input("comando git: ")'],
-	    \['▷ git cd           (Fugitive)',
-	        \'Gcd'],
-	    \]
-	nnoremap <silent>[menu]g :Unite -silent -start-insert menu:git<CR>
+```viml
+let g:unite_source_menu_menus = get(g:,'unite_source_menu_menus',{})
+let g:unite_source_menu_menus.git = {
+    \ 'description' : '            gestionar repositorios git
+        \                            ⌘ [espacio]g',
+    \}
+let g:unite_source_menu_menus.git.command_candidates = [
+    \['▷ tig                                                        ⌘ ,gt',
+        \'normal ,gt'],
+    \['▷ git status       (Fugitive)                                ⌘ ,gs',
+        \'Gstatus'],
+    \['▷ git diff         (Fugitive)                                ⌘ ,gd',
+        \'Gdiff'],
+    \['▷ git commit       (Fugitive)                                ⌘ ,gc',
+        \'Gcommit'],
+    \['▷ git log          (Fugitive)                                ⌘ ,gl',
+        \'exe "silent Glog | Unite quickfix"'],
+    \['▷ git blame        (Fugitive)                                ⌘ ,gb',
+        \'Gblame'],
+    \['▷ git stage        (Fugitive)                                ⌘ ,gw',
+        \'Gwrite'],
+    \['▷ git checkout     (Fugitive)                                ⌘ ,go',
+        \'Gread'],
+    \['▷ git rm           (Fugitive)                                ⌘ ,gr',
+        \'Gremove'],
+    \['▷ git mv           (Fugitive)                                ⌘ ,gm',
+        \'exe "Gmove " input("destino: ")'],
+    \['▷ git push         (Fugitive, salida por buffer)             ⌘ ,gp',
+        \'Git! push'],
+    \['▷ git pull         (Fugitive, salida por buffer)             ⌘ ,gP',
+        \'Git! pull'],
+    \['▷ git prompt       (Fugitive, salida por buffer)             ⌘ ,gi',
+        \'exe "Git! " input("comando git: ")'],
+    \['▷ git cd           (Fugitive)',
+        \'Gcd'],
+    \]
+nnoremap <silent>[menu]g :Unite -silent -start-insert menu:git<CR>
+```
 
 ## Video
 

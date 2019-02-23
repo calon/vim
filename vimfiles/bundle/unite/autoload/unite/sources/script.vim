@@ -2,26 +2,7 @@
 " FILE: script.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu at gmail.com>
 "          hakobe <hakobe at gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 " see http://d.hatena.ne.jp/hakobe932
@@ -32,16 +13,16 @@ let s:source = {
       \ 'default_kind' : 'command',
       \ }
 
-function! s:source.hooks.on_init(args, context) "{{{
+function! s:source.hooks.on_init(args, context) abort "{{{
   let a:context.source__path = expand('%')
 endfunction"}}}
-function! s:source.hooks.on_close(args, context) "{{{
+function! s:source.hooks.on_close(args, context) abort "{{{
   if has_key(a:context, 'source__proc')
     call a:context.source__proc.kill()
   endif
 endfunction "}}}
 
-function! s:source.gather_candidates(args, context) "{{{
+function! s:source.gather_candidates(args, context) abort "{{{
   if len(a:args) < 2
     call unite#print_source_error(
           \ ':Unite script:command:path', s:source.name)
@@ -81,7 +62,7 @@ function! s:source.gather_candidates(args, context) "{{{
   return []
 endfunction"}}}
 
-function! s:source.async_gather_candidates(args, context) "{{{
+function! s:source.async_gather_candidates(args, context) abort "{{{
   if !has_key(a:context, 'source__proc')
     let a:context.is_async = 0
     return []
@@ -90,7 +71,7 @@ function! s:source.async_gather_candidates(args, context) "{{{
   let stderr = a:context.source__proc.stderr
   if !stderr.eof
     " Print error.
-    let errors = filter(unite#util#read_lines(stderr, 100),
+    let errors = filter(unite#util#read_lines(stderr, 200),
           \ "v:val !~ '^\\s*$'")
     if !empty(errors)
       call unite#print_source_error(errors, s:source.name)
@@ -109,7 +90,7 @@ function! s:source.async_gather_candidates(args, context) "{{{
           \    v:val, 'char', &encoding))")
 endfunction"}}}
 
-function! s:source.complete(args, context, arglead, cmdline, cursorpos) "{{{
+function! s:source.complete(args, context, arglead, cmdline, cursorpos) abort "{{{
   if len(a:args) < 1
     let path = substitute($PATH,
           \ (unite#util#is_windows() ? ';' : ':'), ',', 'g')
@@ -123,7 +104,7 @@ function! s:source.complete(args, context, arglead, cmdline, cursorpos) "{{{
   endif
 endfunction"}}}
 
-function! s:create_candidate(val) "{{{
+function! s:create_candidate(val) abort "{{{
   let matches = matchlist(a:val, '^\(.*\)\t\(.*\)$')
 
   if empty(matches)
@@ -136,7 +117,7 @@ function! s:create_candidate(val) "{{{
         \ }
 endfunction"}}}
 
-function! unite#sources#script#define()
+function! unite#sources#script#define() abort
   return s:source
 endfunction
 

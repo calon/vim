@@ -2,26 +2,7 @@
 " FILE: alias.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu at gmail.com>
 "          tacroe <tacroe at gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
@@ -29,11 +10,11 @@ set cpo&vim
 
 call unite#util#set_default('g:unite_source_alias_aliases', {})
 
-function! unite#sources#alias#define()
+function! unite#sources#alias#define() abort
   return s:make_aliases()
 endfunction
 
-function! s:make_aliases()
+function! s:make_aliases() abort
   let aliases = []
 
   let user_aliases = map(copy(g:unite_source_alias_aliases),
@@ -52,7 +33,7 @@ function! s:make_aliases()
     let alias.source__args = args
     let alias.hooks = {}
 
-    function! alias.hooks.on_pre_init(args, context)
+    function! alias.hooks.on_pre_init(args, context) abort
       let config = a:context.source.source__config
       let original_source =
             \ (!has_key(config, 'source') ||
@@ -120,7 +101,7 @@ function! s:make_aliases()
   return aliases
 endfunction
 
-function! s:make_default_description(source_name, args)
+function! s:make_default_description(source_name, args) abort
   let desc = 'alias for "' . a:source_name
   if empty(a:args)
     return desc . '"'

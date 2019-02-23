@@ -1,26 +1,7 @@
 "=============================================================================
 " FILE: variables.vim
 " AUTHOR: Shougo Matsushita <Shougo.Matsu@gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
@@ -30,7 +11,7 @@ if !exists('s:use_current_unite')
   let s:use_current_unite = 1
 endif
 
-function! unite#variables#current_unite() "{{{
+function! unite#variables#current_unite() abort "{{{
   if !exists('s:current_unite')
     let s:current_unite = {}
   endif
@@ -38,23 +19,23 @@ function! unite#variables#current_unite() "{{{
   return s:current_unite
 endfunction"}}}
 
-function! unite#variables#set_current_unite(unite) "{{{
+function! unite#variables#set_current_unite(unite) abort "{{{
   let s:current_unite = a:unite
 endfunction"}}}
 
-function! unite#variables#use_current_unite() "{{{
+function! unite#variables#use_current_unite() abort "{{{
   return s:use_current_unite
 endfunction"}}}
 
-function! unite#variables#enable_current_unite() "{{{
+function! unite#variables#enable_current_unite() abort "{{{
   let s:use_current_unite = 1
 endfunction"}}}
 
-function! unite#variables#disable_current_unite() "{{{
+function! unite#variables#disable_current_unite() abort "{{{
   let s:use_current_unite = 0
 endfunction"}}}
 
-function! unite#variables#static() "{{{
+function! unite#variables#static() abort "{{{
   if !exists('s:static')
     let s:static = {}
     let s:static.sources = {}
@@ -65,7 +46,7 @@ function! unite#variables#static() "{{{
   return s:static
 endfunction"}}}
 
-function! unite#variables#dynamic() "{{{
+function! unite#variables#dynamic() abort "{{{
   if !exists('s:dynamic')
     let s:dynamic = {}
     let s:dynamic.sources = {}
@@ -76,7 +57,7 @@ function! unite#variables#dynamic() "{{{
   return s:dynamic
 endfunction"}}}
 
-function! unite#variables#loaded_defaults() "{{{
+function! unite#variables#loaded_defaults() abort "{{{
   if !exists('s:loaded_defaults')
     let s:loaded_defaults = {}
   endif
@@ -84,7 +65,7 @@ function! unite#variables#loaded_defaults() "{{{
   return s:loaded_defaults
 endfunction"}}}
 
-function! unite#variables#options() "{{{
+function! unite#variables#options() abort "{{{
   if !exists('s:options')
     let s:options = map(filter(items(unite#variables#default_context()),
           \ "v:val[0] !~ '^unite__'"),
@@ -100,7 +81,7 @@ function! unite#variables#options() "{{{
   return s:options
 endfunction"}}}
 
-function! unite#variables#kinds(...) "{{{
+function! unite#variables#kinds(...) abort "{{{
   if a:0 == 0
     call unite#init#_default_scripts('kinds', [])
   else
@@ -111,7 +92,7 @@ function! unite#variables#kinds(...) "{{{
   return (a:0 == 0) ? kinds : get(kinds, a:1, {})
 endfunction"}}}
 
-function! unite#variables#sources(...) "{{{
+function! unite#variables#sources(...) abort "{{{
   let unite = unite#get_current_unite()
   if !has_key(unite, 'sources')
     return {}
@@ -124,7 +105,7 @@ function! unite#variables#sources(...) "{{{
   return unite#util#get_name(unite.sources, a:1, {})
 endfunction"}}}
 
-function! unite#variables#all_sources(...) "{{{
+function! unite#variables#all_sources(...) abort "{{{
   if a:0 == 0
     return unite#init#_sources()
   endif
@@ -139,7 +120,7 @@ function! unite#variables#all_sources(...) "{{{
         \ 'v:val.name ==# a:1'), 0, {}) : source
 endfunction"}}}
 
-function! unite#variables#filters(...) "{{{
+function! unite#variables#filters(...) abort "{{{
   if a:0 == 0
     call unite#init#_default_scripts('filters', [])
   else
@@ -155,14 +136,14 @@ function! unite#variables#filters(...) "{{{
   return get(filters, a:1, {})
 endfunction"}}}
 
-function! unite#variables#loaded_sources(...) "{{{
+function! unite#variables#loaded_sources(...) abort "{{{
   " Initialize load.
   let unite = unite#get_current_unite()
   return a:0 == 0 ? unite.sources :
         \ get(filter(copy(unite.sources), 'v:val.name ==# a:1'), 0, {})
 endfunction"}}}
 
-function! unite#variables#default_context() "{{{
+function! unite#variables#default_context() abort "{{{
   if !exists('s:default_context')
     call s:initialize_default()
   endif
@@ -170,18 +151,19 @@ function! unite#variables#default_context() "{{{
   return s:default_context
 endfunction"}}}
 
-function! s:initialize_default() "{{{
+function! s:initialize_default() abort "{{{
   let s:default_context = {
         \ 'input' : '',
         \ 'path' : '',
+        \ 'prompt' : '',
         \ 'start_insert' : 0,
         \ 'complete' : 0,
         \ 'script' : 0,
         \ 'col' : -1,
         \ 'quit' : 1,
+        \ 'file_quit' : 0,
         \ 'buffer_name' : 'default',
         \ 'profile_name' : '',
-        \ 'prompt' : '> ',
         \ 'default_action' : 'default',
         \ 'winwidth' : 90,
         \ 'winheight' : 20,
@@ -201,7 +183,7 @@ function! s:initialize_default() "{{{
         \ 'toggle' : 0,
         \ 'quick_match' : 0,
         \ 'create' : 0,
-        \ 'cursor_line_highlight' : 'PmenuSel',
+        \ 'cursor_line_highlight' : 'CursorLine',
         \ 'abbr_highlight' : 'Normal',
         \ 'cursor_line' : 1,
         \ 'update_time' : 200,
@@ -217,16 +199,19 @@ function! s:initialize_default() "{{{
         \ 'wrap' : 0,
         \ 'select' : -1,
         \ 'log' : 0,
-        \ 'truncate' : 0,
+        \ 'truncate' : 1,
+        \ 'truncate_width' : 50,
         \ 'tab' : 0,
         \ 'sync' : 0,
         \ 'unique' : 0,
         \ 'execute_command' : '',
         \ 'prompt_direction' : '',
         \ 'prompt_visible' : 0,
+        \ 'prompt_focus' : 0,
         \ 'short_source_names' : 0,
         \ 'candidate_icon' : ' ',
         \ 'marked_icon' : '*',
+        \ 'hide_icon' : 1,
         \ 'cursor_line_time' : '0.10',
         \ 'is_redraw' : 0,
         \ 'wipe' : 0,
@@ -234,6 +219,13 @@ function! s:initialize_default() "{{{
         \ 'smartcase' : &smartcase,
         \ 'restore' : 1,
         \ 'vertical_preview' : 0,
+        \ 'force_redraw' : 0,
+        \ 'previewheight' : &previewheight,
+        \ 'buffer' : 1,
+        \ 'match_input' : 1,
+        \ 'bufnr' : bufnr('%'),
+        \ 'firstline' : -1,
+        \ 'lastline' : -1,
         \ 'unite__old_buffer_info' : [],
         \ 'unite__direct_switch' : 0,
         \ 'unite__is_interactive' : 1,
@@ -246,6 +238,7 @@ function! s:initialize_default() "{{{
         \ 'unite__not_buffer' : 0,
         \ 'unite__is_resize' : 0,
         \ 'unite__is_restart' : 0,
+        \ 'unite__is_manual' : 0,
         \ }
 
   " For compatibility(deprecated variables)

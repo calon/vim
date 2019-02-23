@@ -1,26 +1,7 @@
 "=============================================================================
 " FILE: process.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
@@ -31,7 +12,7 @@ call unite#util#set_default(
       \ 'g:unite_source_process_enable_confirm', 1)
 "}}}
 
-function! unite#sources#process#define() "{{{
+function! unite#sources#process#define() abort "{{{
   return executable('ps') || (unite#util#is_windows() && executable('tasklist')) ?
         \ s:source : {}
 endfunction"}}}
@@ -44,7 +25,7 @@ let s:source = {
       \ 'alias_table' : { 'delete' : 'sigkill' },
       \ }
 
-function! s:source.gather_candidates(args, context) "{{{
+function! s:source.gather_candidates(args, context) abort "{{{
   " Get process list.
   let _ = []
 
@@ -91,7 +72,7 @@ let s:source.action_table.sigkill = {
       \ 'is_quit' : 0,
       \ 'is_selectable' : 1,
       \ }
-function! s:source.action_table.sigkill.func(candidates) "{{{
+function! s:source.action_table.sigkill.func(candidates) abort "{{{
   call s:kill('KILL', a:candidates)
 endfunction"}}}
 
@@ -101,7 +82,7 @@ let s:source.action_table.sigterm = {
       \ 'is_quit' : 0,
       \ 'is_selectable' : 1,
       \ }
-function! s:source.action_table.sigterm.func(candidates) "{{{
+function! s:source.action_table.sigterm.func(candidates) abort "{{{
   call s:kill('TERM', a:candidates)
 endfunction"}}}
 
@@ -111,7 +92,7 @@ let s:source.action_table.sigint = {
       \ 'is_quit' : 0,
       \ 'is_selectable' : 1,
       \ }
-function! s:source.action_table.sigint.func(candidates) "{{{
+function! s:source.action_table.sigint.func(candidates) abort "{{{
   call s:kill('INT', a:candidates)
 endfunction"}}}
 
@@ -120,7 +101,7 @@ let s:source.action_table.unite__new_candidate = {
       \ 'is_invalidate_cache' : 1,
       \ 'is_quit' : 0,
       \ }
-function! s:source.action_table.unite__new_candidate.func(candidate) "{{{
+function! s:source.action_table.unite__new_candidate.func(candidate) abort "{{{
   let cmdline = unite#util#input(
         \ 'Please input command args : ', '', 'shellcmd')
 
@@ -131,7 +112,7 @@ function! s:source.action_table.unite__new_candidate.func(candidate) "{{{
   endif
 endfunction"}}}
 
-function! s:kill(signal, candidates) "{{{
+function! s:kill(signal, candidates) abort "{{{
   if g:unite_source_process_enable_confirm
     if !unite#util#input_yesno(
           \ 'Really send the ' . a:signal .' signal to the processes?')

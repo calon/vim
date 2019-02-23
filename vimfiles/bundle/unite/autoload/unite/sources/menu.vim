@@ -1,26 +1,7 @@
 "=============================================================================
 " FILE: menu.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu at gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
@@ -28,7 +9,7 @@ set cpo&vim
 
 call unite#util#set_default('g:unite_source_menu_menus', {})
 
-function! unite#sources#menu#define()
+function! unite#sources#menu#define() abort
   return s:source
 endfunction
 
@@ -38,7 +19,7 @@ let s:source = {
       \ 'sorters' : 'sorter_nothing',
       \}
 
-function! s:source.gather_candidates(args, context) "{{{
+function! s:source.gather_candidates(args, context) abort "{{{
   let menu_name = get(a:args, 0, '')
   if menu_name == ''
     " All menus.
@@ -66,21 +47,26 @@ function! s:source.gather_candidates(args, context) "{{{
           \ menu.description, s:source.name)
   endif
 
-  if has_key(menu, 'command_candidates')
+  if has_key(menu, 'file_candidates')
+    let candidates = map(copy(menu.file_candidates), "{
+          \       'word' : v:val[0],
+          \       'kind' : (isdirectory(unite#util#expand(v:val[1])) ?
+          \                'directory' : 'file'),
+          \       'action__path' : unite#util#expand(v:val[1]),
+          \     }")
+  elseif has_key(menu, 'command_candidates')
     " Use default map().
-    if type(menu.command_candidates) == type([])
-      let candidates = map(copy(menu.command_candidates), "{
-            \       'word' : v:val[0], 'kind' : 'command',
-            \       'action__command' : v:val[1],
-            \     }")
-    else
-      let candidates = map(copy(menu.command_candidates), "{
-            \       'word' : v:key, 'kind' : 'command',
-            \       'action__command' : v:val,
-            \     }")
-    endif
+    let command_candidates = type(menu.command_candidates) == type({}) ?
+          \ map(copy(menu.command_candidates), '[v:key, v:val]') :
+          \ copy(menu.command_candidates)
+    let candidates = map(command_candidates, "{
+          \       'word' : v:val[0], 'kind' : 'command',
+          \       'action__command' : v:val[1],
+          \     }")
   elseif has_key(menu, 'candidates')
-    if type(menu.candidates) == type([])
+    if !has_key(menu, 'map')
+      let candidates = menu.candidates
+    elseif type(menu.candidates) == type([])
       let candidates = []
       let key = 1
       for value in menu.candidates
@@ -92,7 +78,7 @@ function! s:source.gather_candidates(args, context) "{{{
             \ "menu.map(v:key, v:val)")
     endif
   else
-    let candidates = copy(get(menu, 'candidates', []))
+    let candidates = []
   endif
 
   if type(candidates) == type({})
@@ -104,7 +90,7 @@ function! s:source.gather_candidates(args, context) "{{{
   return candidates
 endfunction"}}}
 
-function! s:source.complete(args, context, arglead, cmdline, cursorpos) "{{{
+function! s:source.complete(args, context, arglead, cmdline, cursorpos) abort "{{{
   return a:arglead =~ ':' ? [] : keys(g:unite_source_menu_menus)
 endfunction"}}}
 

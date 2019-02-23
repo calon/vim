@@ -1,26 +1,7 @@
 "=============================================================================
 " FILE: command.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
@@ -29,7 +10,7 @@ set cpo&vim
 " Variables  "{{{
 "}}}
 
-function! unite#sources#command#define() "{{{
+function! unite#sources#command#define() abort "{{{
   return s:source
 endfunction"}}}
 
@@ -44,7 +25,11 @@ let s:source = {
       \ 'syntax' : 'uniteSource__Command',
       \ }
 
-function! s:source.hooks.on_syntax(args, context) "{{{
+function! s:source.hooks.on_init(args, context) abort "{{{
+  " Get command list.
+  let a:context.source__command = unite#util#redir('command')
+endfunction"}}}
+function! s:source.hooks.on_syntax(args, context) abort "{{{
   syntax match uniteSource__Command_DescriptionLine
         \ / -- .*$/
         \ contained containedin=uniteSource__Command
@@ -60,17 +45,12 @@ function! s:source.hooks.on_syntax(args, context) "{{{
 endfunction"}}}
 
 let s:cached_result = []
-function! s:source.gather_candidates(args, context) "{{{
-  if !a:context.is_redraw && !empty(s:cached_result)
-    return s:cached_result
+function! s:source.gather_candidates(args, context) abort "{{{
+  if a:context.is_redraw || empty(s:cached_result)
+    let s:cached_result = s:make_cache_commands()
   endif
 
-  " Get command list.
-  redir => result
-  silent! command
-  redir END
-
-  let s:cached_result = []
+  let result = copy(s:cached_result)
   let completions = [ 'augroup', 'buffer', 'behave',
         \ 'color', 'command', 'compiler', 'cscope',
         \ 'dir', 'environment', 'event', 'expression',
@@ -79,14 +59,14 @@ function! s:source.gather_candidates(args, context) "{{{
         \ 'mapping', 'menu', 'option', 'shellcmd', 'sign',
         \ 'syntax', 'tag', 'tag_listfiles',
         \ 'var', 'custom', 'customlist' ]
-  for line in split(result, '\n')[1:]
-    let word = matchstr(line, '\a\w*')
+  for line in split(a:context.source__command, '\n')[1:]
+    let word = matchstr(line, '\u\w*')
 
     " Analyze prototype.
-    let end = matchend(line, '\a\w*')
+    let end = matchend(line, '\u\w*')
     let args = matchstr(line, '[[:digit:]?+*]', end)
     if args != '0'
-      let prototype = matchstr(line, '\a\w*', end)
+      let prototype = matchstr(line, '\u\w*', end)
 
       if index(completions, prototype) < 0
         let prototype = 'arg'
@@ -113,16 +93,12 @@ function! s:source.gather_candidates(args, context) "{{{
           \ }
     let dict.action__description = dict.abbr
 
-    call add(s:cached_result, dict)
+    call add(result, dict)
   endfor
-  let s:cached_result += s:make_cache_commands()
 
-  let s:cached_result = unite#util#sort_by(
-        \ s:cached_result, 'tolower(v:val.word)')
-
-  return s:cached_result
+  return unite#util#sort_by(result, 'tolower(v:val.word)')
 endfunction"}}}
-function! s:source.change_candidates(args, context) "{{{
+function! s:source.change_candidates(args, context) abort "{{{
   let dummy = substitute(a:context.input, '[*\\]', '', 'g')
   if len(split(dummy)) > 1
     " Add dummy result.
@@ -138,32 +114,7 @@ function! s:source.change_candidates(args, context) "{{{
   return []
 endfunction"}}}
 
-function! s:caching_from_neocomplcache_dict() "{{{
-  let dict_files = split(globpath(&runtimepath,
-        \ 'autoload/neocomplcache/sources/vim_complete/commands.dict'), '\n')
-  if empty(dict_files)
-    return []
-  endif
-
-  let keyword_pattern =
-        \'^\%(-\h\w*\%(=\%(\h\w*\|[01*?+%]\)\?\)\?\|'
-        \'<\h[[:alnum:]_-]*>\?\|\h[[:alnum:]_:#\[]*\%([!\]]\+\|()\?\)\?\)'
-  let keyword_list = []
-  for line in readfile(dict_files[0])
-    let word = substitute(
-          \ matchstr(line, keyword_pattern), '[\[\]]', '', 'g')
-    call add(keyword_list, {
-          \ 'word' : line,
-          \ 'action__command' : word . ' ',
-          \ 'action__description' : line,
-          \ 'source__command' : ':'.word,
-          \ 'action__histadd' : 1,
-          \})
-  endfor
-
-  return keyword_list
-endfunction"}}}
-function! s:make_cache_commands() "{{{
+function! s:make_cache_commands() abort "{{{
   let helpfile = expand(findfile('doc/index.txt', &runtimepath))
   if !filereadable(helpfile)
     return []
@@ -178,8 +129,7 @@ function! s:make_cache_commands() "{{{
     let _ = matchlist(desc, '^|:\(.\{-}\)|\s\+:\S\+\s\+\(.*\)')
     if !empty(_)
       call add(commands, {
-            \ 'word' : _[1],
-            \ 'abbr' : printf('%-16s -- %s', _[1], _[2]),
+            \ 'word' : printf('%-16s -- %s', _[1], _[2]),
             \ 'action__command' : _[1] . ' ',
             \ 'source__command' : ':'._[1],
             \ 'action__histadd' : 1,
@@ -195,7 +145,7 @@ let s:source.action_table.preview = {
       \ 'description' : 'view the help documentation',
       \ 'is_quit' : 0,
       \ }
-function! s:source.action_table.preview.func(candidate) "{{{
+function! s:source.action_table.preview.func(candidate) abort "{{{
   let winnr = winnr()
 
   try
@@ -203,7 +153,6 @@ function! s:source.action_table.preview.func(candidate) "{{{
     normal! zv
     normal! zt
     setlocal previewwindow
-    setlocal winfixheight
   catch /^Vim\%((\a\+)\)\?:E149/
     " Ignore
   endtry

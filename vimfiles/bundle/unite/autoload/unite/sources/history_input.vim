@@ -1,32 +1,13 @@
 "=============================================================================
 " FILE: history_input.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu at gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! unite#sources#history_input#define()
+function! unite#sources#history_input#define() abort
   return s:source
 endfunction
 
@@ -38,7 +19,7 @@ let s:source = {
       \ 'is_listed' : 0,
       \}
 
-function! s:source.gather_candidates(args, context) "{{{
+function! s:source.gather_candidates(args, context) abort "{{{
   let context = unite#get_context()
   let inputs = unite#get_profile(
         \ context.unite__old_buffer_info[0].profile_name, 'unite__inputs')
@@ -57,7 +38,7 @@ let s:source.action_table.narrow = {
       \ 'description' : 'narrow by history',
       \ 'is_quit' : 0,
       \ }
-function! s:source.action_table.narrow.func(candidate) "{{{
+function! s:source.action_table.narrow.func(candidate) abort "{{{
   call unite#force_quit_session()
   call unite#mappings#narrowing(a:candidate.word, 0)
 endfunction"}}}
@@ -68,7 +49,7 @@ let s:source.action_table.delete = {
       \ 'is_quit' : 0,
       \ 'is_invalidate_cache' : 1,
       \ }
-function! s:source.action_table.delete.func(candidates) "{{{
+function! s:source.action_table.delete.func(candidates) abort "{{{
   let context = unite#get_context()
   let inputs = unite#get_profile(
         \ context.unite__old_buffer_info[0].profile_name, 'unite__inputs')

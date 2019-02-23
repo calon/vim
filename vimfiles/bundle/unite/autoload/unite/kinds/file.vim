@@ -1,26 +1,7 @@
 "=============================================================================
 " FILE: file.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
@@ -30,14 +11,14 @@ set cpo&vim
 call unite#util#set_default(
       \ 'g:unite_kind_file_delete_file_command',
       \ unite#util#is_windows() && !executable('rm') ? '' :
-      \ executable('trash-put') ? 'trash-put $srcs' :
       \ executable('rmtrash') ? 'rmtrash $srcs' :
+      \ executable('trash-put') ? 'trash-put $srcs' :
       \ 'rm $srcs')
 call unite#util#set_default(
       \ 'g:unite_kind_file_delete_directory_command',
       \ unite#util#is_windows() && !executable('rm') ? '' :
-      \ executable('trash-put') ? 'trash-put $srcs' :
       \ executable('rmtrash') ? 'rmtrash $srcs' :
+      \ executable('trash-put') ? 'trash-put $srcs' :
       \ 'rm -r $srcs')
 call unite#util#set_default(
       \ 'g:unite_kind_file_copy_file_command',
@@ -55,7 +36,7 @@ call unite#util#set_default('g:unite_kind_file_use_trashbox',
       \ unite#util#is_windows() && unite#util#has_vimproc())
 "}}}
 
-function! unite#kinds#file#define() "{{{
+function! unite#kinds#file#define() abort "{{{
   return s:kind
 endfunction"}}}
 
@@ -69,7 +50,7 @@ let s:kind = {
       \              'file_vimfiler_base', 'cdable', 'uri'],
       \}
 
-function! s:external(command, dest_dir, src_files) "{{{
+function! s:external(command, dest_dir, src_files) abort "{{{
   let dest_dir = a:dest_dir
   if dest_dir =~ '[^:]/$'
     " Delete last /.
@@ -91,9 +72,9 @@ function! s:external(command, dest_dir, src_files) "{{{
 
   return unite#util#get_last_status()
 endfunction"}}}
-function! s:input_overwrite_method(dest, src) "{{{
+function! s:input_overwrite_method(dest, src) abort "{{{
   redraw
-  echo 'File is already exists!'
+  echo 'File already exists!'
   echo printf('dest: %s %d bytes %s', a:dest, getfsize(a:dest),
         \ strftime('%y/%m/%d %H:%M', getftime(a:dest)))
   echo printf('src:  %s %d bytes %s', a:src, getfsize(a:src),
@@ -111,11 +92,11 @@ function! s:input_overwrite_method(dest, src) "{{{
 
   return method
 endfunction"}}}
-function! unite#kinds#file#complete_overwrite_method(arglead, cmdline, cursorpos) "{{{
+function! unite#kinds#file#complete_overwrite_method(arglead, cmdline, cursorpos) abort "{{{
   return filter(['force', 'time', 'underbar', 'no', 'rename'],
         \ 'stridx(v:val, a:arglead) == 0')
 endfunction"}}}
-function! s:check_over_write(dest_dir, filename, overwrite_method, is_reset_method) "{{{
+function! s:check_over_write(dest_dir, filename, overwrite_method, is_reset_method) abort "{{{
   let is_reset_method = a:is_reset_method
   let dest_filename = a:dest_dir . fnamemodify(a:filename, ':t')
   let is_continue = 0
@@ -165,9 +146,9 @@ function! s:check_over_write(dest_dir, filename, overwrite_method, is_reset_meth
 
   return [dest_filename, overwrite_method, is_reset_method, is_continue]
 endfunction"}}}
-function! unite#kinds#file#do_rename(old_filename, new_filename) "{{{
+function! unite#kinds#file#do_rename(old_filename, new_filename) abort "{{{
   if a:old_filename ==# a:new_filename
-    return
+    return 0
   endif
 
   if a:old_filename !=? a:new_filename &&
@@ -175,7 +156,7 @@ function! unite#kinds#file#do_rename(old_filename, new_filename) "{{{
     " Failed.
     call unite#print_error(
           \ printf('file: "%s" is already exists!', a:new_filename))
-    return
+    return 1
   endif
 
   " Convert to relative path.
@@ -195,7 +176,12 @@ function! unite#kinds#file#do_rename(old_filename, new_filename) "{{{
     let new_filename = unite#util#substitute_path_separator(
           \ fnamemodify(new_filename, ':.'))
 
-    let bufnr = bufnr(old_filename)
+    " create if the destination directory does not exist
+    if !isdirectory(fnamemodify(new_filename, ':h'))
+      call mkdir(fnamemodify(new_filename, ':h'), 'p')
+    endif
+
+    let bufnr = get(filter(range(bufnr('$')), 'bufname(v:val) ==# old_filename'), 0, -1)
     if bufnr > 0
       " Buffer rename.
       setlocal hidden
@@ -205,26 +191,27 @@ function! unite#kinds#file#do_rename(old_filename, new_filename) "{{{
             \ fnameescape(new_filename)
       if &l:buftype == ''
         " Remove old buffer.
-        silent bdelete! #
+        silent! bdelete! #
       endif
       noautocmd silent execute 'buffer' bufnr_save
     endif
 
-    if rename(old_filename, new_filename)
+    if !unite#util#move(old_filename, new_filename)
       call unite#print_error(
-            \ printf('Failed file rename: "%s" to "%s".',
+            \ printf('Failed rename: "%s" to "%s".',
             \   a:old_filename, a:new_filename))
+      return 1
     endif
   finally
     " Restore path.
-    if isdirectory(current_dir_save)
-      call unite#util#lcd(current_dir_save)
-    endif
+    call unite#util#lcd(current_dir_save)
     let &l:hidden = hidden_save
   endtry
+
+  return 0
 endfunction"}}}
 
-function! unite#kinds#file#do_action(candidates, dest_dir, action_name) "{{{
+function! unite#kinds#file#do_action(candidates, dest_dir, action_name) abort "{{{
   let overwrite_method = ''
   let is_reset_method = 1
   let dest_filename = ''
@@ -296,11 +283,11 @@ function! unite#kinds#file#do_action(candidates, dest_dir, action_name) "{{{
   endif
   return dest_filename
 endfunction"}}}
-function! s:check_delete_func(filename) "{{{
+function! s:check_delete_func(filename) abort "{{{
   return isdirectory(a:filename) ?
         \ 'delete_directory' : 'delete_file'
 endfunction"}}}
-function! s:check_copy_func(filename) "{{{
+function! s:check_copy_func(filename) abort "{{{
   return isdirectory(a:filename) ?
         \ 'copy_directory' : 'copy_file'
 endfunction"}}}

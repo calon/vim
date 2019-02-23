@@ -1,32 +1,13 @@
 "=============================================================================
 " FILE: common.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! unite#kinds#common#define() "{{{
+function! unite#kinds#common#define() abort "{{{
   return s:kind
 endfunction"}}}
 
@@ -41,7 +22,7 @@ let s:kind = {
 let s:kind.action_table.nop = {
       \ 'description' : 'no operation',
       \ }
-function! s:kind.action_table.nop.func(candidate) "{{{
+function! s:kind.action_table.nop.func(candidate) abort "{{{
 endfunction"}}}
 
 let s:kind.action_table.yank = {
@@ -49,11 +30,13 @@ let s:kind.action_table.yank = {
       \ 'is_selectable' : 1,
       \ 'is_quit' : 0,
       \ }
-function! s:kind.action_table.yank.func(candidates) "{{{
+function! s:kind.action_table.yank.func(candidates) abort "{{{
   let text = join(map(copy(a:candidates),
         \ 's:get_candidate_text(v:val)'), "\n")
   let @" = text
-  echo 'Yanked: ' . text
+
+  echohl Question | echo 'Yanked:' | echohl Normal
+  echo text
 
   if has('clipboard')
     call setreg(v:register, text)
@@ -63,7 +46,7 @@ endfunction"}}}
 let s:kind.action_table.yank_escape = {
       \ 'description' : 'yank escaped word or text',
       \ }
-function! s:kind.action_table.yank_escape.func(candidate) "{{{
+function! s:kind.action_table.yank_escape.func(candidate) abort "{{{
   let @" = escape(s:get_candidate_text(a:candidate), " *?[{`$\\%#\"|!<>")
 endfunction"}}}
 
@@ -71,7 +54,7 @@ let s:kind.action_table.ex = {
       \ 'description' : 'insert candidates into command line',
       \ 'is_selectable' : 1,
       \ }
-function! s:kind.action_table.ex.func(candidates) "{{{
+function! s:kind.action_table.ex.func(candidates) abort "{{{
   " Result is ':| {candidate}', here '|' means the cursor position.
   call feedkeys(printf(": %s\<C-b>",
         \ join(map(map(copy(a:candidates),
@@ -82,15 +65,23 @@ endfunction"}}}
 let s:kind.action_table.insert = {
       \ 'description' : 'insert word or text',
       \ }
-function! s:kind.action_table.insert.func(candidate) "{{{
-  call unite#kinds#common#insert_word(s:get_candidate_text(a:candidate),
+function! s:kind.action_table.insert.func(candidate) abort "{{{
+  call s:paste(s:get_candidate_text(a:candidate), 'P',
+        \ { 'regtype' : get(a:candidate, 'action__regtype', 'v')})
+endfunction"}}}
+
+let s:kind.action_table.append = {
+      \ 'description' : 'append word or text',
+      \ }
+function! s:kind.action_table.append.func(candidate) abort "{{{
+  call s:paste(s:get_candidate_text(a:candidate), 'p',
         \ { 'regtype' : get(a:candidate, 'action__regtype', 'v')})
 endfunction"}}}
 
 let s:kind.action_table.insert_directory = {
       \ 'description' : 'insert directory',
       \ }
-function! s:kind.action_table.insert_directory.func(candidate) "{{{
+function! s:kind.action_table.insert_directory.func(candidate) abort "{{{
   if has_key(a:candidate,'action__directory')
       let directory = a:candidate.action__directory
   elseif has_key(a:candidate, 'action__path')
@@ -101,14 +92,14 @@ function! s:kind.action_table.insert_directory.func(candidate) "{{{
       return
   endif
 
-  call unite#kinds#common#insert_word(directory)
+  call s:paste(directory, 'P', {})
 endfunction"}}}
 
 let s:kind.action_table.preview = {
       \ 'description' : 'preview word',
       \ 'is_quit' : 0,
       \ }
-function! s:kind.action_table.preview.func(candidate) "{{{
+function! s:kind.action_table.preview.func(candidate) abort "{{{
   redraw
   echo s:get_candidate_text(a:candidate)
 endfunction"}}}
@@ -117,35 +108,16 @@ let s:kind.action_table.echo = {
       \ 'description' : 'echo candidates for debug',
       \ 'is_selectable' : 1,
       \ }
-function! s:kind.action_table.echo.func(candidates) "{{{
+function! s:kind.action_table.echo.func(candidates) abort "{{{
   echomsg string(a:candidates)
 endfunction"}}}
 "}}}
 
-function! unite#kinds#common#insert_word(word, ...) "{{{
+function! unite#kinds#common#insert_word(word, ...) abort "{{{
   let unite = unite#get_current_unite()
   let context = unite.context
   let opt = get(a:000, 0, {})
   let col = get(opt, 'col', context.col)
-  let regtype = get(opt, 'regtype', 'v')
-
-  if !context.complete
-    " Paste.
-    let old_reg = [getreg('"'), getregtype('"')]
-
-    call setreg('"', a:word, regtype)
-    try
-      execute 'normal! ""'.(
-            \ regtype !=# 'v' || (col('$') - col('.') <= 1) ? 'p' : 'P')
-    finally
-      call setreg('"', old_reg[0], old_reg[1])
-    endtry
-
-    " Open folds.
-    normal! zv
-
-    return
-  endif
 
   let cur_text = col < 0 ? '' :
         \ matchstr(getline('.'), '^.*\%' . col . 'c.')
@@ -163,7 +135,23 @@ function! unite#kinds#common#insert_word(word, ...) "{{{
     startinsert!
   endif
 endfunction"}}}
-function! s:get_candidate_text(candidate) "{{{
+function! s:paste(word, command, opt) abort "{{{
+  let regtype = get(a:opt, 'regtype', 'v')
+
+  " Paste.
+  let old_reg = [getreg('"'), getregtype('"')]
+
+  call setreg('"', a:word, regtype)
+  try
+    execute 'normal! ""' . a:command
+  finally
+    call setreg('"', old_reg[0], old_reg[1])
+  endtry
+
+  " Open folds.
+  normal! zv
+endfunction"}}}
+function! s:get_candidate_text(candidate) abort "{{{
   return get(a:candidate, 'action__text', a:candidate.word)
 endfunction"}}}
 

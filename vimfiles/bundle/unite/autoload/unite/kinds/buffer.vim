@@ -1,32 +1,13 @@
 "=============================================================================
 " FILE: buffer.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! unite#kinds#buffer#define() "{{{
+function! unite#kinds#buffer#define() abort "{{{
   return s:kind
 endfunction"}}}
 
@@ -42,16 +23,18 @@ let s:kind.action_table.open = {
       \ 'description' : 'open buffer',
       \ 'is_selectable' : 1,
       \ }
-function! s:kind.action_table.open.func(candidates) "{{{
+function! s:kind.action_table.open.func(candidates) abort "{{{
   for candidate in a:candidates
-    execute 'buffer' candidate.action__buffer_nr
+    if bufexists(candidate.action__buffer_nr)
+      execute 'buffer' candidate.action__buffer_nr
+    endif
   endfor
 endfunction"}}}
 
 let s:kind.action_table.goto = {
       \ 'description' : 'goto buffer tab',
       \ }
-function! s:kind.action_table.goto.func(candidate) "{{{
+function! s:kind.action_table.goto.func(candidate) abort "{{{
   for i in range(tabpagenr('$'))
     let tabnr = i + 1
     for nr in tabpagebuflist(tabnr)
@@ -73,7 +56,7 @@ let s:kind.action_table.delete = {
       \ 'is_quit' : 0,
       \ 'is_selectable' : 1,
       \ }
-function! s:kind.action_table.delete.func(candidates) "{{{
+function! s:kind.action_table.delete.func(candidates) abort "{{{
   for candidate in a:candidates
     call s:delete('bdelete', candidate)
   endfor
@@ -85,7 +68,7 @@ let s:kind.action_table.fdelete = {
       \ 'is_quit' : 0,
       \ 'is_selectable' : 1,
       \ }
-function! s:kind.action_table.fdelete.func(candidates) "{{{
+function! s:kind.action_table.fdelete.func(candidates) abort "{{{
   for candidate in a:candidates
     call s:delete('bdelete!', candidate)
   endfor
@@ -97,7 +80,7 @@ let s:kind.action_table.wipeout = {
       \ 'is_quit' : 0,
       \ 'is_selectable' : 1,
       \ }
-function! s:kind.action_table.wipeout.func(candidates) "{{{
+function! s:kind.action_table.wipeout.func(candidates) abort "{{{
   for candidate in a:candidates
     call s:delete('bwipeout', candidate)
   endfor
@@ -109,7 +92,7 @@ let s:kind.action_table.unload = {
       \ 'is_quit' : 0,
       \ 'is_selectable' : 1,
       \ }
-function! s:kind.action_table.unload.func(candidates) "{{{
+function! s:kind.action_table.unload.func(candidates) abort "{{{
   for candidate in a:candidates
     call s:delete('unload', candidate)
   endfor
@@ -119,7 +102,7 @@ let s:kind.action_table.preview = {
       \ 'description' : 'preview buffer',
       \ 'is_quit' : 0,
       \ }
-function! s:kind.action_table.preview.func(candidate) "{{{
+function! s:kind.action_table.preview.func(candidate) abort "{{{
   call unite#view#_preview_file(a:candidate.action__path)
 
   let filetype = getbufvar(a:candidate.action__buffer_nr, '&filetype')
@@ -137,7 +120,7 @@ let s:kind.action_table.rename = {
       \ 'is_quit' : 0,
       \ 'is_selectable' : 1,
       \ }
-function! s:kind.action_table.rename.func(candidates) "{{{
+function! s:kind.action_table.rename.func(candidates) abort "{{{
   for candidate in a:candidates
     if getbufvar(candidate.action__buffer_nr, '&buftype') =~ 'nofile'
       " Skip nofile buffer.
@@ -156,7 +139,7 @@ endfunction"}}}
 "}}}
 
 " Misc
-function! s:delete(delete_command, candidate) "{{{
+function! s:delete(delete_command, candidate) abort "{{{
   " Not to close window, move to alternate buffer.
 
   let winnr = 1

@@ -1,32 +1,13 @@
 "=============================================================================
 " FILE: action.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu at gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! unite#sources#action#define()
+function! unite#sources#action#define() abort
   return s:source
 endfunction
 
@@ -40,7 +21,7 @@ let s:source = {
       \ 'is_listed' : 0,
       \}
 
-function! s:source.hooks.on_syntax(args, context) "{{{
+function! s:source.hooks.on_syntax(args, context) abort "{{{
   syntax match uniteSource__ActionDescriptionLine / -- .*$/
         \ contained containedin=uniteSource__Action
   syntax match uniteSource__ActionDescription /.*$/
@@ -55,7 +36,7 @@ function! s:source.hooks.on_syntax(args, context) "{{{
 endfunction"}}}
 
 " @vimlint(EVL102, 1, l:sources)
-function! s:source.gather_candidates(args, context) "{{{
+function! s:source.gather_candidates(args, context) abort "{{{
   if empty(a:args)
     return []
   endif
@@ -64,7 +45,9 @@ function! s:source.gather_candidates(args, context) "{{{
 
   " Print candidates.
   call unite#print_source_message(map(copy(candidates),
-        \ "'candidates: '.v:val.unite__abbr.'('.v:val.source.')'"), self.name)
+        \ "'candidates: '.get(v:val, 'unite__abbr',
+        \                     get(v:val, 'abbr', v:val.word))
+        \  .'('.v:val.source.')'"), self.name)
 
   " Print default action.
   let default_actions = []
@@ -110,7 +93,7 @@ function! s:source.gather_candidates(args, context) "{{{
 endfunction"}}}
 " @vimlint(EVL102, 0, l:sources)
 
-function! s:compare_word(i1, i2)
+function! s:compare_word(i1, i2) abort
   return (a:i1.word ># a:i2.word) ? 1 : -1
 endfunction
 
@@ -118,7 +101,7 @@ endfunction
 let s:source.action_table.do = {
       \ 'description' : 'do action',
       \ }
-function! s:source.action_table.do.func(candidate) "{{{
+function! s:source.action_table.do.func(candidate) abort "{{{
   let context = a:candidate.source__context
 
   if !empty(context.unite__old_buffer_info)
@@ -167,7 +150,7 @@ function! s:source.action_table.do.func(candidate) "{{{
 endfunction"}}}
 "}}}
 
-function! s:get_actions(candidates, sources) "{{{
+function! s:get_actions(candidates, sources) abort "{{{
   let actions = unite#action#_get_candidate_action_table(
         \ a:candidates[0], a:sources)
 

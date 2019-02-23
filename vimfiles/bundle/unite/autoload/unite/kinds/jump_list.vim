@@ -1,26 +1,7 @@
 "=============================================================================
 " FILE: jump_list.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
@@ -35,13 +16,13 @@ else
 endif
 "}}}
 
-function! unite#kinds#jump_list#define() "{{{
+function! unite#kinds#jump_list#define() abort "{{{
   let kind = {
         \ 'name' : 'jump_list',
         \ 'default_action' : 'open',
         \ 'action_table': {},
         \ 'alias_table' : { 'rename' : 'replace' },
-        \ 'parents': ['openable'],
+        \ 'parents': ['common', 'openable'],
         \}
 
   " Actions "{{{
@@ -49,7 +30,7 @@ function! unite#kinds#jump_list#define() "{{{
         \ 'description' : 'jump to this position',
         \ 'is_selectable' : 1,
         \ }
-  function! kind.action_table.open.func(candidates) "{{{
+  function! kind.action_table.open.func(candidates) abort "{{{
     for candidate in a:candidates
       " Save current line in jump_list
       execute 'normal!' line('.').'G'
@@ -65,15 +46,23 @@ function! unite#kinds#jump_list#define() "{{{
       " Open folds.
       normal! zv
       call s:adjust_scroll(s:best_winline())
-      call s:clear_highlight()
+      call unite#view#_clear_match_highlight()
     endfor
+
+    " Add search history
+    let context = unite#get_context()
+    if has_key(context, 'input_list')
+          \ && len(context.input_list) == 1
+          \ && context.input != ''
+      call histadd("search", context.input)
+    endif
   endfunction"}}}
 
   let kind.action_table.preview = {
         \ 'description' : 'preview this position',
         \ 'is_quit' : 0,
         \ }
-  function! kind.action_table.preview.func(candidate) "{{{
+  function! kind.action_table.preview.func(candidate) abort "{{{
     let filename = s:get_filename(a:candidate)
     let bufwinnr = bufwinnr(filename)
     let buflisted = buflisted(filename)
@@ -87,12 +76,8 @@ function! unite#kinds#jump_list#define() "{{{
     wincmd P
     try
       let bufnr = s:open(a:candidate)
-      if bufwinnr < 0
-        doautocmd BufRead
-        setlocal nomodified
-        if !buflisted
-          call unite#add_previewed_buffer_list(bufnr)
-        endif
+      if bufwinnr < 0 && !buflisted
+        call unite#add_previewed_buffer_list(bufnr)
       endif
       call s:jump(a:candidate, 1)
     finally
@@ -104,19 +89,12 @@ function! unite#kinds#jump_list#define() "{{{
         \ 'description' : 'highlight this position',
         \ 'is_quit' : 0,
         \ }
-  function! kind.action_table.highlight.func(candidate) "{{{
+  function! kind.action_table.highlight.func(candidate) abort "{{{
     let candidate_winnr = bufwinnr(s:get_bufnr(a:candidate))
 
     if candidate_winnr > 0
       let unite = unite#get_current_unite()
-      let context = unite.context
       let current_winnr = winnr()
-
-      if context.vertical
-          setlocal winfixwidth
-      else
-          setlocal winfixheight
-      endif
 
       noautocmd execute candidate_winnr 'wincmd w'
 
@@ -136,7 +114,7 @@ function! unite#kinds#jump_list#define() "{{{
         \ 'description' : 'replace with qfreplace',
         \ 'is_selectable' : 1,
         \ }
-  function! kind.action_table.replace.func(candidates) "{{{
+  function! kind.action_table.replace.func(candidates) abort "{{{
     if globpath(&runtimepath, 'autoload/qfreplace.vim') == ''
       echo 'qfreplace.vim is not installed.'
       return
@@ -167,7 +145,7 @@ endfunction"}}}
 "}}}
 
 " Misc.
-function! s:jump(candidate, is_highlight) "{{{
+function! s:jump(candidate, is_highlight) abort "{{{
   let line = get(a:candidate, 'action__line', 1)
   let pattern = get(a:candidate, 'action__pattern', '')
 
@@ -176,26 +154,15 @@ function! s:jump(candidate, is_highlight) "{{{
     let line = 1
   endif
   if line !~ '^\d\+$'
-    call unite#print_error('unite: jump_list: Invalid action__line format.')
+    call unite#print_error('jump_list: Invalid action__line format.')
     return
   endif
 
   if !has_key(a:candidate, 'action__pattern')
     " Jump to the line number.
-    let col = get(a:candidate, 'action__col', 0)
-    if col == 0 && has_key(a:candidate, 'action__col_pattern')
-      " Search col pattern.
-      let pattern = a:candidate.action__col_pattern
-      if pattern == ''
-        " Use context.input
-        let pattern = unite#get_context().input
-      endif
+    call cursor(line, 0)
 
-      let col = 0
-      silent! let col = match(getline(line), pattern) + 1
-    endif
-
-    call cursor(line, col)
+    call s:jump_column(a:candidate)
 
     call s:open_current_line(a:is_highlight)
     return
@@ -208,11 +175,13 @@ function! s:jump(candidate, is_highlight) "{{{
     " Not found signature.
     if line != '' && getline(line) =~# pattern
       if line('.') != line
-        execute line
+        call cursor(line, 0)
       endif
     else
       silent! call search(pattern, 'w')
     endif
+
+    call s:jump_column(a:candidate)
 
     call s:open_current_line(a:is_highlight)
     return
@@ -233,7 +202,7 @@ function! s:jump(candidate, is_highlight) "{{{
       if lnum == start_lnum
         " Not found.
         call unite#print_error(
-              \ "unite: jump_list: Target position is not found.")
+              \ 'jump_list: Target position is not found.')
         call cursor(1, 1)
         return
       endif
@@ -243,11 +212,28 @@ function! s:jump(candidate, is_highlight) "{{{
   call s:open_current_line(a:is_highlight)
 endfunction"}}}
 
-function! s:best_winline() "{{{
+function! s:best_winline() abort "{{{
   return max([1, winheight(0) * g:unite_kind_jump_list_after_jump_scroll / 100])
 endfunction"}}}
 
-function! s:adjust_scroll(best_winline) "{{{
+function! s:jump_column(candidate) abort "{{{
+  let col = get(a:candidate, 'action__col', 0)
+  if col == 0 && has_key(a:candidate, 'action__col_pattern')
+    " Search col pattern.
+    let pattern = a:candidate.action__col_pattern
+    if pattern == ''
+      " Use context.input
+      let pattern = unite#get_context().input
+    endif
+
+    let col = 0
+    silent! let col = match(getline('.'), pattern) + 1
+  endif
+
+  call cursor(0, col)
+endfunction"}}}
+
+function! s:adjust_scroll(best_winline) abort "{{{
   normal! zt
   let save_cursor = getpos('.')
   let winl = 1
@@ -267,23 +253,23 @@ function! s:adjust_scroll(best_winline) "{{{
   call setpos('.', save_cursor)
 endfunction"}}}
 
-function! s:open_current_line(is_highlight) "{{{
+function! s:open_current_line(is_highlight) abort "{{{
   normal! zv
   normal! zz
   if a:is_highlight
-    call s:clear_highlight()
-    call unite#view#_match_line('Search', line('.'), 10)
+    call unite#view#_clear_match_highlight()
+    call unite#view#_match_line('Search', line('.'))
   endif
 endfunction"}}}
 
-function! s:open(candidate) "{{{
+function! s:open(candidate) abort "{{{
   let bufnr = s:get_bufnr(a:candidate)
   if bufnr != bufnr('%')
     if has_key(a:candidate, 'action__buffer_nr')
       silent execute 'keepjumps buffer' bufnr
     else
-      call unite#util#smart_execute_command(
-            \ 'keepjumps edit!', unite#util#substitute_path_separator(
+      silent call unite#util#smart_execute_command(
+            \ 'keepjumps edit!', unite#util#expand(
             \   fnamemodify(a:candidate.action__path, ':~:.')))
       let bufnr = bufnr('%')
     endif
@@ -291,21 +277,18 @@ function! s:open(candidate) "{{{
 
   return bufnr
 endfunction"}}}
-function! s:get_filename(candidate) "{{{
+function! s:get_filename(candidate) abort "{{{
   return has_key(a:candidate, 'action__path') ?
             \ a:candidate.action__path :
             \ bufname(a:candidate.action__buffer_nr)
 endfunction"}}}
-function! s:get_bufnr(candidate) "{{{
+function! s:get_bufnr(candidate) abort "{{{
   return has_key(a:candidate, 'action__buffer_nr') ?
         \ a:candidate.action__buffer_nr :
         \ bufnr(a:candidate.action__path)
 endfunction"}}}
-function! s:convert_path(path) "{{{
+function! s:convert_path(path) abort "{{{
   return unite#util#substitute_path_separator(fnamemodify(a:path, ':p'))
-endfunction"}}}
-function! s:clear_highlight() "{{{
-  silent! call matchdelete(10)
 endfunction"}}}
 
 let &cpo = s:save_cpo

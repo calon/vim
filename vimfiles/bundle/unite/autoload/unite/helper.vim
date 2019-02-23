@@ -1,57 +1,43 @@
 "=============================================================================
 " FILE: helpers.vim
 " AUTHOR: Shougo Matsushita <Shougo.Matsu@gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! unite#helper#call_hook(sources, hook_name) "{{{
+function! unite#helper#call_hook(sources, hook_name) abort "{{{
   let context = unite#get_context()
   if context.unite__disable_hooks
     return
   endif
 
+  let custom = unite#custom#get()
   for source in a:sources
-    if !has_key(source.hooks, a:hook_name)
-      continue
-    endif
+    let custom_source = get(custom.sources, source.name, {})
 
     try
-      call call(source.hooks[a:hook_name],
-            \ [source.args, source.unite__context], source.hooks)
+      if has_key(source.hooks, a:hook_name)
+        call call(source.hooks[a:hook_name],
+              \ [source.args, source.unite__context], source.hooks)
+      endif
+      if has_key(custom_source, a:hook_name)
+        call call(custom_source[a:hook_name],
+              \ [source.args, source.unite__context])
+      endif
     catch
       call unite#print_error(v:throwpoint)
       call unite#print_error(v:exception)
       call unite#print_error(
-            \ '[unite.vim] Error occured in calling hook "' . a:hook_name . '"!')
+            \ 'Error occurred in calling hook "' . a:hook_name . '"!')
       call unite#print_error(
-            \ '[unite.vim] Source name is ' . source.name)
+            \ 'Source name is ' . source.name)
     endtry
   endfor
 endfunction"}}}
 
-function! unite#helper#get_substitute_input(input) "{{{
+function! unite#helper#get_substitute_input(input) abort "{{{
   let unite = unite#get_current_unite()
 
   let input = a:input
@@ -80,7 +66,7 @@ function! unite#helper#get_substitute_input(input) "{{{
 
   return map(inputs, 'head . v:val')
 endfunction"}}}
-function! unite#helper#get_substitute_input_loop(input, substitute_patterns) "{{{
+function! unite#helper#get_substitute_input_loop(input, substitute_patterns) abort "{{{
   if empty(a:substitute_patterns)
     return [a:input]
   endif
@@ -112,7 +98,7 @@ function! unite#helper#get_substitute_input_loop(input, substitute_patterns) "{{
   return inputs
 endfunction"}}}
 
-function! unite#helper#adjustments(currentwinwidth, the_max_source_name, size) "{{{
+function! unite#helper#adjustments(currentwinwidth, the_max_source_name, size) abort "{{{
   let max_width = a:currentwinwidth - a:the_max_source_name - a:size
   if max_width < 20
     return [a:currentwinwidth - a:size, 0]
@@ -121,10 +107,15 @@ function! unite#helper#adjustments(currentwinwidth, the_max_source_name, size) "
   endif
 endfunction"}}}
 
-function! unite#helper#parse_options(args) "{{{
+function! unite#helper#parse_options(cmdline) abort "{{{
   let args = []
   let options = {}
-  for arg in split(a:args, '\%(\\\@<!\s\)\+')
+
+  " Eval
+  let cmdline = (a:cmdline =~ '\\\@<!`.*\\\@<!`') ?
+        \ s:eval_cmdline(a:cmdline) : a:cmdline
+
+  for arg in split(cmdline, '\%(\\\@<!\s\)\+')
     let arg = substitute(arg, '\\\( \)', '\1', 'g')
     let arg_key = substitute(arg, '=\zs.*$', '', '')
 
@@ -141,9 +132,9 @@ function! unite#helper#parse_options(args) "{{{
 
   return [args, options]
 endfunction"}}}
-function! unite#helper#parse_options_args(args) "{{{
+function! unite#helper#parse_options_args(cmdline) abort "{{{
   let _ = []
-  let [args, options] = unite#helper#parse_options(a:args)
+  let [args, options] = unite#helper#parse_options(a:cmdline)
   for arg in args
     " Add source name.
     let source_name = matchstr(arg, '^[^:]*')
@@ -156,27 +147,86 @@ function! unite#helper#parse_options_args(args) "{{{
 
   return [_, options]
 endfunction"}}}
+function! unite#helper#parse_options_user(args) abort "{{{
+  " Add for history/unite.
+  let [args, options] = unite#helper#parse_options_args(a:args)
+  let options.unite__is_manual = 1
+  return [args, options]
+endfunction"}}}
+function! s:eval_cmdline(cmdline) abort "{{{
+  let cmdline = ''
+  let prev_match = 0
+  let match = match(a:cmdline, '\\\@<!`.\{-}\\\@<!`')
+  while match >= 0
+    if match - prev_match > 0
+      let cmdline .= a:cmdline[prev_match : match - 1]
+    endif
+    let prev_match = matchend(a:cmdline,
+          \ '\\\@<!`.\{-}\\\@<!`', match)
+    let cmdline .= escape(eval(a:cmdline[match+1 : prev_match - 2]), '\: ')
 
-function! unite#helper#parse_project_bang(args) "{{{
-  let args = filter(copy(a:args), "v:val != '!'")
+    let match = match(a:cmdline, '\\\@<!`.\{-}\\\@<!`', prev_match)
+  endwhile
+  if prev_match >= 0
+    let cmdline .= a:cmdline[prev_match :]
+  endif
+
+  return cmdline
+endfunction"}}}
+
+function! unite#helper#parse_source_args(args) abort "{{{
+  let args = copy(a:args)
   if empty(args)
-    let args = ['']
+    return []
   endif
 
-  if get(a:args, 0, '') == '!'
-    " Use project directory.
-    let args[0] = unite#util#path2project_directory(args[0], 1)
-  endif
-
+  let args[0] = unite#helper#parse_source_path(args[0])
   return args
 endfunction"}}}
 
-function! unite#helper#get_marked_candidates() "{{{
+function! unite#helper#parse_source_path(path) abort "{{{
+  " Expand ?!/buffer_project_subdir, !/project_subdir and ?/buffer_subdir
+  if a:path =~ '^?!'
+    " Use project directory from buffer directory
+    let path = unite#helper#get_buffer_directory(bufnr('%'))
+    let path = unite#util#substitute_path_separator(
+      \ unite#util#path2project_directory(path) . a:path[2:])
+  elseif a:path =~ '^!'
+    " Use project directory from cwd
+    let path = &filetype ==# 'vimfiler' ?
+          \ b:vimfiler.current_dir :
+          \ unite#util#substitute_path_separator(getcwd())
+    let path = unite#util#substitute_path_separator(
+      \ unite#util#path2project_directory(path) . a:path[1:])
+  elseif a:path =~ '^?'
+    " Use buffer directory
+    let path = unite#util#substitute_path_separator(
+      \ unite#helper#get_buffer_directory(bufnr('%')) . a:path[1:])
+  else
+    let path = a:path
+  endif
+
+  " Don't assume empty path means current directory.
+  " Let the sources customize default rules.
+  if path != ''
+    let pathlist = path =~ "\n" ? split(path, "\n") : [path]
+    for pathitem in pathlist
+      " resolve .. in the paths
+      let pathitem = resolve(unite#util#substitute_path_separator(
+            \ fnamemodify(unite#util#expand(pathitem), ':p')))
+    endfor
+    let path = join(pathlist, "\n")
+  endif
+
+  return path
+endfunction"}}}
+
+function! unite#helper#get_marked_candidates() abort "{{{
   return unite#util#sort_by(filter(copy(unite#get_unite_candidates()),
         \ 'v:val.unite__is_marked'), 'v:val.unite__marked_time')
 endfunction"}}}
 
-function! unite#helper#get_input(...) "{{{
+function! unite#helper#get_input(...) abort "{{{
   let is_force = get(a:000, 0, 0)
   let unite = unite#get_current_unite()
   if !is_force && mode() !=# 'i'
@@ -188,29 +238,32 @@ function! unite#helper#get_input(...) "{{{
   endif
 
   " Prompt check.
-  if stridx(getline(unite.prompt_linenr), unite.prompt) != 0
+  if unite.context.prompt != '' &&
+        \ getline(unite.prompt_linenr)[: len(unite.context.prompt)-1]
+        \   !=# unite.context.prompt
     let modifiable_save = &l:modifiable
     setlocal modifiable
 
     " Restore prompt.
-    call setline(unite.prompt_linenr, unite.prompt)
+    call setline(unite.prompt_linenr, unite.context.prompt)
 
     let &l:modifiable = modifiable_save
   endif
 
-  return getline(unite.prompt_linenr)[len(unite.prompt):]
+  return getline(unite.prompt_linenr)[len(unite.context.prompt):]
 endfunction"}}}
 
-function! unite#helper#get_source_names(sources) "{{{
+function! unite#helper#get_source_names(sources) abort "{{{
   return map(map(copy(a:sources),
         \ "type(v:val) == type([]) ? v:val[0] : v:val"),
         \ "type(v:val) == type('') ? v:val : v:val.name")
 endfunction"}}}
 
-function! unite#helper#get_postfix(prefix, is_create, ...) "{{{
+function! unite#helper#get_postfix(prefix, is_create, ...) abort "{{{
+  let prefix = substitute(a:prefix, '@\d\+$', '', '')
   let buffers = get(a:000, 0, range(1, bufnr('$')))
   let buflist = sort(filter(map(buffers,
-        \ 'bufname(v:val)'), 'stridx(v:val, a:prefix) >= 0'))
+        \ 'bufname(v:val)'), 'stridx(v:val, prefix) >= 0'), 's:sort_buffer_name')
   if empty(buflist)
     return ''
   endif
@@ -219,7 +272,11 @@ function! unite#helper#get_postfix(prefix, is_create, ...) "{{{
         \ : matchstr(buflist[-1], '@\d\+$')
 endfunction"}}}
 
-function! unite#helper#convert_source_name(source_name) "{{{
+function! s:sort_buffer_name(lhs, rhs) abort "{{{
+  return matchstr(a:lhs, '@\zs\d\+$') - matchstr(a:rhs, '@\zs\d\+$')
+endfunction"}}}
+
+function! unite#helper#convert_source_name(source_name) abort "{{{
   let unite = unite#get_current_unite()
   return (len(unite.sources) == 1 ||
         \  !unite.context.short_source_names) ? a:source_name :
@@ -227,24 +284,7 @@ function! unite#helper#convert_source_name(source_name) "{{{
         \ substitute(a:source_name, '\a\zs\a\+', '', 'g')
 endfunction"}}}
 
-function! unite#helper#loaded_source_names_with_args() "{{{
-  let len_source = len(unite#loaded_sources_list())
-  return map(copy(unite#loaded_sources_list()), "
-        \ (len_source == 0) ? ['interactive'] :
-        \ (len_source > 1 && v:val.unite__len_candidates == 0) ? '_' :
-        \ join(insert(filter(copy(v:val.args),
-        \  'type(v:val) <= 1'),
-        \   unite#helper#convert_source_name(v:val.name)), ':')
-        \ . (v:val.unite__len_candidates == 0 ? '' :
-        \      v:val.unite__orig_len_candidates ==
-        \            v:val.unite__len_candidates ?
-        \            '(' .  v:val.unite__len_candidates . ')' :
-        \      printf('(%s/%s)', v:val.unite__len_candidates,
-        \      v:val.unite__orig_len_candidates))
-        \ ")
-endfunction"}}}
-
-function! unite#helper#invalidate_cache(source_name)  "{{{
+function! unite#helper#invalidate_cache(source_name) abort  "{{{
   for source in unite#get_current_unite().sources
     if source.name ==# a:source_name
       let source.unite__is_invalidate = 1
@@ -252,7 +292,7 @@ function! unite#helper#invalidate_cache(source_name)  "{{{
   endfor
 endfunction"}}}
 
-function! unite#helper#get_unite_winnr(buffer_name) "{{{
+function! unite#helper#get_unite_winnr(buffer_name) abort "{{{
   for winnr in filter(range(1, winnr('$')),
         \ "getbufvar(winbufnr(v:val), '&filetype') ==# 'unite'")
     let buffer_context = get(getbufvar(
@@ -271,7 +311,7 @@ function! unite#helper#get_unite_winnr(buffer_name) "{{{
 
   return -1
 endfunction"}}}
-function! unite#helper#get_unite_bufnr(buffer_name) "{{{
+function! unite#helper#get_unite_bufnr(buffer_name) abort "{{{
   for bufnr in filter(range(1, bufnr('$')),
         \ "getbufvar(v:val, '&filetype') ==# 'unite'")
     let buffer_context = get(getbufvar(bufnr, 'unite'), 'context', {})
@@ -291,7 +331,7 @@ function! unite#helper#get_unite_bufnr(buffer_name) "{{{
   return -1
 endfunction"}}}
 
-function! unite#helper#get_current_candidate(...) "{{{
+function! unite#helper#get_current_candidate(...) abort "{{{
   let linenr = a:0 >= 1? a:1 : line('.')
   let unite = unite#get_current_unite()
   if unite.context.prompt_direction ==# 'below'
@@ -309,26 +349,35 @@ function! unite#helper#get_current_candidate(...) "{{{
   return get(unite#get_unite_candidates(), num, {})
 endfunction"}}}
 
-function! unite#helper#get_current_candidate_linenr(num) "{{{
-  let num = 0
-
+function! unite#helper#get_current_candidate_linenr(num) abort "{{{
   let candidate_num = 0
+  let num = 0
   for candidate in unite#get_unite_candidates()
     if !candidate.is_dummy
       let candidate_num += 1
     endif
 
-    let num += 1
-
-    if candidate_num >= a:num+1
+    if candidate_num > a:num
       break
     endif
+
+    let num += 1
   endfor
 
-  return unite#get_current_unite().prompt_linenr + num
+  let unite = unite#get_current_unite()
+  if unite.context.prompt_direction ==# 'below'
+    let num = num * -1
+    if unite.prompt_linenr == 0
+      let num += line('$') + 1
+    endif
+  else
+    let num += 1
+  endif
+
+  return unite.prompt_linenr + num
 endfunction"}}}
 
-function! unite#helper#call_filter(filter_name, candidates, context) "{{{
+function! unite#helper#call_filter(filter_name, candidates, context) abort "{{{
   let filter = unite#get_filters(a:filter_name)
   if empty(filter)
     return a:candidates
@@ -336,13 +385,28 @@ function! unite#helper#call_filter(filter_name, candidates, context) "{{{
 
   return filter.filter(a:candidates, a:context)
 endfunction"}}}
+function! unite#helper#call_source_filters(filters, candidates, context, source) abort "{{{
+  let candidates = a:candidates
+  for l:Filter in a:filters
+    if type(l:Filter) == type('')
+      let candidates = unite#helper#call_filter(
+            \ l:Filter, candidates, a:context)
+    else
+      let candidates = call(l:Filter, [candidates, a:context], a:source)
+    endif
 
-function! unite#helper#get_source_args(sources) "{{{
+    unlet l:Filter
+  endfor
+
+  return candidates
+endfunction"}}}
+
+function! unite#helper#get_source_args(sources) abort "{{{
   return map(copy(a:sources),
         \ 'type(v:val) == type([]) ? [v:val[0], v:val[1:]] : [v:val, []]')
 endfunction"}}}
 
-function! unite#helper#choose_window() "{{{
+function! unite#helper#choose_window() abort "{{{
   " Create key table.
   let keys = {}
   for [key, number] in items(g:unite_quick_match_table)
@@ -353,7 +417,11 @@ function! unite#helper#choose_window() "{{{
   let save_statuslines = map(unite#helper#get_choose_windows(),
         \ "[v:val, getbufvar(winbufnr(v:val), '&statusline')]")
 
+  let save_laststatus = &laststatus
+
   try
+    let &laststatus = 2
+
     let winnr_save = winnr()
     for [winnr, statusline] in save_statuslines
       noautocmd execute winnr.'wincmd w'
@@ -379,6 +447,8 @@ function! unite#helper#choose_window() "{{{
       echo ''
     endwhile
   finally
+    let &laststatus = save_laststatus
+
     echo ''
 
     let winnr_save = winnr()
@@ -393,15 +463,18 @@ function! unite#helper#choose_window() "{{{
   endtry
 endfunction"}}}
 
-function! unite#helper#get_choose_windows() "{{{
-  return filter(range(1, winnr('$')), "v:val != winnr()
-        \ && !getwinvar(v:val, '&previewwindow')
+function! unite#helper#get_choose_windows() abort "{{{
+  return filter(range(1, winnr('$')), "
+        \ !getwinvar(v:val, '&previewwindow')
+        \ && getwinvar(v:val, '&filetype') !=# 'vimfiler'
+        \ && getwinvar(v:val, '&filetype') !=# 'unite'
+        \ && getwinvar(v:val, '&buftype') !~# 'terminal'
         \ && (getwinvar(v:val, '&buftype') !~# 'nofile'
         \   || getwinvar(v:val, '&buftype') =~# 'acwrite')
-        \ && !getwinvar(v:val, '&filetype') !=# 'qf'")
+        \ && getwinvar(v:val, '&filetype') !=# 'qf'")
 endfunction"}}}
 
-function! unite#helper#get_buffer_directory(bufnr) "{{{
+function! unite#helper#get_buffer_directory(bufnr) abort "{{{
   let filetype = getbufvar(a:bufnr, '&filetype')
   if filetype ==# 'vimfiler'
     let dir = getbufvar(a:bufnr, 'vimfiler').current_dir
@@ -417,14 +490,14 @@ function! unite#helper#get_buffer_directory(bufnr) "{{{
   return dir
 endfunction"}}}
 
-function! unite#helper#cursor_prompt() "{{{
+function! unite#helper#cursor_prompt() abort "{{{
   " Move to prompt linenr.
   let unite = unite#get_current_unite()
   call cursor((unite.context.prompt_direction ==# 'below' ?
         \ line('$') : unite.init_prompt_linenr), 0)
 endfunction"}}}
 
-function! unite#helper#skip_prompt() "{{{
+function! unite#helper#skip_prompt() abort "{{{
   " Skip prompt linenr.
   let unite = unite#get_current_unite()
   if line('.') == unite.prompt_linenr
@@ -434,7 +507,7 @@ function! unite#helper#skip_prompt() "{{{
 endfunction"}}}
 
 if unite#util#has_lua()
-  function! unite#helper#paths2candidates(paths) "{{{
+  function! unite#helper#paths2candidates(paths) abort "{{{
     let candidates = []
   lua << EOF
 do
@@ -452,7 +525,7 @@ EOF
     return candidates
   endfunction"}}}
 else
-  function! unite#helper#paths2candidates(paths) "{{{
+  function! unite#helper#paths2candidates(paths) abort "{{{
     return map(copy(a:paths), "{
           \ 'word' : v:val,
           \ 'action__path' : v:val,
@@ -460,17 +533,119 @@ else
   endfunction"}}}
 endif
 
-function! unite#helper#get_candidate_directory(candidate) "{{{
+function! unite#helper#get_candidate_directory(candidate) abort "{{{
   return has_key(a:candidate, 'action__directory') ?
         \ a:candidate.action__directory :
         \ unite#util#path2directory(a:candidate.action__path)
 endfunction"}}}
 
-function! unite#helper#is_prompt(line) "{{{
+function! unite#helper#is_prompt(line) abort "{{{
   let prompt_linenr = unite#get_current_unite().prompt_linenr
   let context = unite#get_context()
   return (context.prompt_direction ==# 'below' && a:line >= prompt_linenr)
         \ || (context.prompt_direction !=# 'below' && a:line <= prompt_linenr)
+endfunction"}}}
+
+function! unite#helper#relative_target(target) abort "{{{
+  let target = unite#util#substitute_path_separator(fnamemodify(
+        \ substitute(a:target, '[^:]\zs/$', '', ''), ':.'))
+  if target == unite#util#substitute_path_separator(getcwd())
+    return '.'
+  endif
+  if unite#util#is_windows()
+    let drive_letter = matchstr(a:target, '^\a:')
+    let target = strpart(target, 0, 1) ==# '/' && drive_letter !=# '' ?
+          \ drive_letter . target : target
+  endif
+  return target
+endfunction"}}}
+
+function! unite#helper#join_targets(targets) abort "{{{
+  return join(map(copy(a:targets),
+        \    "unite#util#escape_shell(unite#helper#relative_target(v:val))"))
+endfunction"}}}
+
+function! unite#helper#is_pty(command) abort "{{{
+  " Note: "pt" and "ack" and "ag" and "hw" needs pty.
+  " It is too bad.
+  return fnamemodify(a:command, ':t:r') =~#
+        \ '^pt$\|^ack\%(-grep\)\?$\|^ag$\|^hw$'
+endfunction"}}}
+
+function! unite#helper#complete_search_history(arglead, cmdline, cursorpos) abort "{{{
+  return filter(map(unite#util#uniq(s:histget('search')
+        \                           + s:histget('input')),
+        \           "substitute(v:val, '\\c^\\(\\\\[cmv<]\\)*\\|\\\\>$', '', 'g')"),
+        \ "stridx(tolower(v:val), tolower(a:arglead)) == 0")
+endfunction"}}}
+
+function! unite#helper#get_input_list(input) abort "{{{
+  return map(split(a:input, '\\\@<! ', 1), "
+        \ substitute(unite#util#expand(v:val), '\\\\ ', ' ', 'g')")
+endfunction"}}}
+
+function! s:histget(type) abort "{{{
+  return filter(map(reverse(range(1, histnr(a:type))),
+        \           'histget(a:type, v:val)'),
+        \       'v:val != ""')
+endfunction"}}}
+
+function! unite#helper#ignore_candidates(candidates, context) abort "{{{
+  let candidates = copy(a:candidates)
+
+  if a:context.ignore_pattern != ''
+    let candidates = unite#filters#vim_filter_pattern(
+          \   candidates, a:context.ignore_pattern)
+  endif
+
+  if !empty(a:context.ignore_globs)
+    let candidates = unite#filters#filter_patterns(candidates,
+          \ unite#filters#globs2patterns(a:context.ignore_globs),
+          \ unite#filters#globs2patterns(a:context.white_globs))
+  endif
+
+  return candidates
+endfunction"}}}
+
+function! unite#helper#call_unite(command, args, line1, line2) abort "{{{
+  let [args, context] = unite#helper#parse_options_user(a:args)
+  if a:command ==# 'UniteWithCurrentDir'
+        \ && !has_key(context, 'path')
+    let path = &filetype ==# 'vimfiler' ?
+          \ b:vimfiler.current_dir :
+          \ unite#util#substitute_path_separator(fnamemodify(getcwd(), ':p'))
+    let context.path = path
+  elseif a:command ==# 'UniteWithBufferDir'
+        \ && !has_key(context, 'path')
+    let context.path = unite#helper#get_buffer_directory(bufnr('%'))
+  elseif a:command ==# 'UniteWithProjectDir'
+        \ && !has_key(context, 'path')
+    let path = &filetype ==# 'vimfiler' ?
+          \ b:vimfiler.current_dir :
+          \ unite#util#substitute_path_separator(getcwd())
+    let context.path = unite#util#path2project_directory(path)
+  elseif a:command ==# 'UniteWithInputDirectory'
+        \ && !has_key(context, 'path')
+    let context.path = unite#helper#parse_source_path(
+          \ input('Input narrowing directory: ', '', 'dir'))
+  elseif a:command ==# 'UniteWithCursorWord'
+        \ && !has_key(context, 'input')
+    let context.input = expand('<cword>')
+  elseif a:command ==# 'UniteWithInput'
+        \ && !has_key(context, 'input')
+    let context.input = input('Input narrowing text: ', '')
+  endif
+
+  let context.firstline = a:line1
+  let context.lastline = a:line2
+  let context.bufnr = bufnr('%')
+
+  call unite#start(args, context)
+endfunction"}}}
+function! unite#helper#call_unite_resume(args) abort "{{{
+  let [args, context] = unite#helper#parse_options(a:args)
+
+  call unite#resume(join(args), context)
 endfunction"}}}
 
 let &cpo = s:save_cpo

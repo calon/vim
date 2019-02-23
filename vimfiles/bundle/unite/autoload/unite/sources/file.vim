@@ -1,26 +1,7 @@
 "=============================================================================
 " FILE: file.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
 let s:save_cpo = &cpo
@@ -35,11 +16,11 @@ call unite#util#set_default(
 let s:cache_files = {}
 "}}}
 
-function! unite#sources#file#define() "{{{
+function! unite#sources#file#define() abort "{{{
   return [s:source_file, s:source_file_new, s:source_file_async]
 endfunction"}}}
 
-function! unite#sources#file#get_file_source() "{{{
+function! unite#sources#file#get_file_source() abort "{{{
   return s:source_file
 endfunction"}}}
 
@@ -56,19 +37,19 @@ let s:source_file = {
       \ 'hooks' : {},
       \}
 
-function! s:source_file.change_candidates(args, context) "{{{
+function! s:source_file.change_candidates(args, context) abort "{{{
   let path = unite#sources#file#_get_path(a:args, a:context)
 
   if !isdirectory(path) && filereadable(path)
     return [ unite#sources#file#create_file_dict(
-          \      path, path !~ '^\%(/\|\a\+:/\)') ]
+          \      path, a:context.input) ]
   endif
 
   let input = unite#sources#file#_get_input(path, a:context)
   return map(unite#sources#file#_get_files(input, a:context),
-          \ 'unite#sources#file#create_file_dict(v:val, 0)')
+          \ 'unite#sources#file#create_file_dict(v:val, a:context.input)')
 endfunction"}}}
-function! s:source_file.vimfiler_check_filetype(args, context) "{{{
+function! s:source_file.vimfiler_check_filetype(args, context) abort "{{{
   let path = s:parse_path(a:args)
 
   if isdirectory(path)
@@ -77,7 +58,7 @@ function! s:source_file.vimfiler_check_filetype(args, context) "{{{
   elseif filereadable(path)
     let type = 'file'
     let info = [readfile(path),
-          \ unite#sources#file#create_file_dict(path, 0)]
+          \ unite#sources#file#create_file_dict(path, '')]
   else
     " Ignore.
     return []
@@ -85,7 +66,7 @@ function! s:source_file.vimfiler_check_filetype(args, context) "{{{
 
   return [type, info]
 endfunction"}}}
-function! s:source_file.vimfiler_gather_candidates(args, context) "{{{
+function! s:source_file.vimfiler_gather_candidates(args, context) abort "{{{
   let path = s:parse_path(a:args)
 
   if isdirectory(path)
@@ -95,11 +76,11 @@ function! s:source_file.vimfiler_gather_candidates(args, context) "{{{
     let context.is_vimfiler = 1
     let context.path .= path
     let candidates = self.change_candidates(a:args, context)
-    call filter(candidates, 'v:val.word !~ "/\\.\\.\\?$"')
+    call filter(candidates, 'v:val.action__path !~ "/\\.\\.\\?$"')
 
     " echomsg reltimestr(reltime(start))
   elseif filereadable(path)
-    let candidates = [ unite#sources#file#create_file_dict(path, 0) ]
+    let candidates = [ unite#sources#file#create_file_dict(path, '') ]
   else
     let candidates = []
   endif
@@ -109,7 +90,6 @@ function! s:source_file.vimfiler_gather_candidates(args, context) "{{{
 
   let old_dir = getcwd()
   if path !=# old_dir
-        \ && isdirectory(path)
     try
       call unite#util#lcd(path)
     catch
@@ -124,13 +104,12 @@ function! s:source_file.vimfiler_gather_candidates(args, context) "{{{
   endfor
 
   if path !=# old_dir
-        \ && isdirectory(path)
     call unite#util#lcd(old_dir)
   endif
 
   return candidates
 endfunction"}}}
-function! s:source_file.vimfiler_dummy_candidates(args, context) "{{{
+function! s:source_file.vimfiler_dummy_candidates(args, context) abort "{{{
   let path = s:parse_path(a:args)
 
   if path == ''
@@ -139,38 +118,34 @@ function! s:source_file.vimfiler_dummy_candidates(args, context) "{{{
 
   let old_dir = getcwd()
   if path !=# old_dir
-        \ && isdirectory(path)
     call unite#util#lcd(path)
   endif
 
   let exts = s:is_windows ?
         \ escape(substitute($PATHEXT . ';.LNK', ';', '\\|', 'g'), '.') : ''
 
-  let is_relative_path = path !~ '^\%(/\|\a\+:/\)'
-
   " Set vimfiler property.
-  let candidates = [ unite#sources#file#create_file_dict(path, is_relative_path) ]
+  let candidates = [ unite#sources#file#create_file_dict(path, '') ]
   for candidate in candidates
     call unite#sources#file#create_vimfiler_dict(candidate, exts)
   endfor
 
   if path !=# old_dir
-        \ && isdirectory(path)
     call unite#util#lcd(old_dir)
   endif
 
   return candidates
 endfunction"}}}
-function! s:source_file.complete(args, context, arglead, cmdline, cursorpos) "{{{
+function! s:source_file.complete(args, context, arglead, cmdline, cursorpos) abort "{{{
   return unite#sources#file#complete_file(
         \ a:args, a:context, a:arglead, a:cmdline, a:cursorpos)
 endfunction"}}}
-function! s:source_file.vimfiler_complete(args, context, arglead, cmdline, cursorpos) "{{{
+function! s:source_file.vimfiler_complete(args, context, arglead, cmdline, cursorpos) abort "{{{
   return self.complete(
         \ a:args, a:context, a:arglead, a:cmdline, a:cursorpos)
 endfunction"}}}
 
-function! s:source_file.hooks.on_close(args, context) "{{{
+function! s:source_file.hooks.on_close(args, context) abort "{{{
   call unite#sources#file#_clear_cache()
 endfunction "}}}
 
@@ -180,7 +155,7 @@ let s:source_file_new = {
       \ 'default_kind' : 'file',
       \ }
 
-function! s:source_file_new.change_candidates(args, context) "{{{
+function! s:source_file_new.change_candidates(args, context) abort "{{{
   let path = unite#sources#file#_get_path(a:args, a:context)
   let input = unite#sources#file#_get_input(path, a:context)
   let input = substitute(input, '\*', '', 'g')
@@ -189,20 +164,21 @@ function! s:source_file_new.change_candidates(args, context) "{{{
     return []
   endif
 
-  return [unite#sources#file#create_file_dict(input, 0, 1)]
+  return [unite#sources#file#create_file_dict(
+        \ input, a:context.input, 1)]
 endfunction"}}}
 
 let s:source_file_async = deepcopy(s:source_file)
 let s:source_file_async.name = 'file/async'
 let s:source_file_async.description = 'asynchronous candidates from file list'
 
-function! s:source_file_async.hooks.on_close(args, context) "{{{
+function! s:source_file_async.hooks.on_close(args, context) abort "{{{
   if has_key(a:context, 'source__proc')
     call a:context.source__proc.kill()
   endif
 endfunction "}}}
 
-function! s:source_file_async.change_candidates(args, context) "{{{
+function! s:source_file_async.change_candidates(args, context) abort "{{{
   if !has_key(a:context, 'source__cache') || a:context.is_redraw
         \ || a:context.is_invalidate
     " Initialize cache.
@@ -252,11 +228,11 @@ function! s:source_file_async.change_candidates(args, context) "{{{
   return []
 endfunction"}}}
 
-function! s:source_file_async.async_gather_candidates(args, context) "{{{
+function! s:source_file_async.async_gather_candidates(args, context) abort "{{{
   let stderr = a:context.source__proc.stderr
   if !stderr.eof
     " Print error.
-    let errors = filter(unite#util#read_lines(stderr, 100),
+    let errors = filter(unite#util#read_lines(stderr, 200),
           \ "v:val !~ '^\\s*$'")
     if !empty(errors)
       call unite#print_source_error(errors, self.name)
@@ -275,6 +251,11 @@ function! s:source_file_async.async_gather_candidates(args, context) "{{{
   endif
 
   let candidates = unite#helper#paths2candidates(paths)
+  for candidate in filter(copy(candidates),
+        \ 'isdirectory(v:val.action__path)')
+    let candidate.abbr = candidate.action__path .  '/'
+    let candidate.kind = 'directory'
+  endfor
   let a:context.source__candidates += candidates
 
   if stdout.eof
@@ -286,7 +267,7 @@ function! s:source_file_async.async_gather_candidates(args, context) "{{{
   return deepcopy(candidates)
 endfunction"}}}
 
-function! unite#sources#file#_get_path(args, context) "{{{
+function! unite#sources#file#_get_path(args, context) abort "{{{
   let path = unite#util#substitute_path_separator(
         \ unite#util#expand(join(a:args, ':')))
   if path == ''
@@ -299,7 +280,7 @@ function! unite#sources#file#_get_path(args, context) "{{{
   return path
 endfunction"}}}
 
-function! unite#sources#file#_get_input(path, context) "{{{
+function! unite#sources#file#_get_input(path, context) abort "{{{
   let input = unite#util#expand(a:context.input)
   if input !~ '^\%(/\|\a\+:/\)' && a:path != ''
     let input = a:path . input
@@ -313,7 +294,7 @@ function! unite#sources#file#_get_input(path, context) "{{{
   return input
 endfunction"}}}
 
-function! unite#sources#file#_get_files(input, context) "{{{
+function! unite#sources#file#_get_files(input, context) abort "{{{
   " Glob by directory name.
   let input = substitute(a:input, '[^/]*$', '', '')
 
@@ -352,12 +333,12 @@ function! unite#sources#file#_get_files(input, context) "{{{
 
   return copy(files)
 endfunction"}}}
-function! unite#sources#file#_clear_cache() "{{{
+function! unite#sources#file#_clear_cache() abort "{{{
   " Don't save cache when using glob
   call filter(s:cache_files, "stridx(v:val.input, '*') < 0")
 endfunction"}}}
 
-function! s:parse_path(args) "{{{
+function! s:parse_path(args) abort "{{{
   let path = unite#util#substitute_path_separator(
         \ unite#util#expand(join(a:args, ':')))
   let path = unite#util#substitute_path_separator(
@@ -366,18 +347,20 @@ function! s:parse_path(args) "{{{
   return path
 endfunction"}}}
 
-function! unite#sources#file#create_file_dict(file, is_relative_path, ...) "{{{
+function! unite#sources#file#create_file_dict(file, input, ...) abort "{{{
   let is_newfile = get(a:000, 0, 0)
 
   let dict = {
-        \ 'word' : a:file, 'abbr' : a:file,
+        \ 'word' : a:file,
         \ 'action__path' : a:file,
         \}
+  if a:input !~ '/'
+    let dict.word = fnamemodify(a:file, ':t')
+  endif
+  let dict.abbr = dict.word
+  let dict.vimfiler__is_directory = isdirectory(dict.action__path)
 
-  let dict.vimfiler__is_directory =
-        \ isdirectory(dict.action__path)
-
-  if a:is_relative_path
+  if a:file !~ '^\%(/\|\a\+:/\)'
     let dict.action__path = unite#util#substitute_path_separator(
         \                    fnamemodify(a:file, ':p'))
   endif
@@ -407,7 +390,7 @@ function! unite#sources#file#create_file_dict(file, is_relative_path, ...) "{{{
 
   return dict
 endfunction"}}}
-function! unite#sources#file#create_vimfiler_dict(candidate, exts) "{{{
+function! unite#sources#file#create_vimfiler_dict(candidate, exts) abort "{{{
   try
     if len(a:candidate.action__path) > 200
       " Convert to relative path.
@@ -449,11 +432,10 @@ function! unite#sources#file#create_vimfiler_dict(candidate, exts) "{{{
           \ filewritable(a:candidate.action__path)
   endif
 
-  let a:candidate.vimfiler__filetime =
-        \ s:get_filetime(a:candidate.action__path)
+  let a:candidate.vimfiler__filetime = getftime(a:candidate.action__path)
 endfunction"}}}
 
-function! unite#sources#file#complete_file(args, context, arglead, cmdline, cursorpos) "{{{
+function! unite#sources#file#complete_file(args, context, arglead, cmdline, cursorpos) abort "{{{
   let files = filter(unite#util#glob(a:arglead . '*'),
         \ "stridx(tolower(v:val), tolower(a:arglead)) == 0")
   if a:arglead =~ '^\~'
@@ -465,7 +447,7 @@ function! unite#sources#file#complete_file(args, context, arglead, cmdline, curs
   call map(files, "escape(v:val, ' \\')")
   return files
 endfunction"}}}
-function! unite#sources#file#complete_directory(args, context, arglead, cmdline, cursorpos) "{{{
+function! unite#sources#file#complete_directory(args, context, arglead, cmdline, cursorpos) abort "{{{
   let files = unite#util#glob(a:arglead . '*')
   let files = filter(files, 'isdirectory(v:val)')
   if a:arglead =~ '^\~'
@@ -477,13 +459,13 @@ function! unite#sources#file#complete_directory(args, context, arglead, cmdline,
   return files
 endfunction"}}}
 
-function! unite#sources#file#copy_files(dest, srcs) "{{{
+function! unite#sources#file#copy_files(dest, srcs) abort "{{{
   return unite#kinds#file#do_action(a:srcs, a:dest, 'copy')
 endfunction"}}}
-function! unite#sources#file#move_files(dest, srcs) "{{{
+function! unite#sources#file#move_files(dest, srcs) abort "{{{
   return unite#kinds#file#do_action(a:srcs, a:dest, 'move')
 endfunction"}}}
-function! unite#sources#file#delete_files(srcs) "{{{
+function! unite#sources#file#delete_files(srcs) abort "{{{
   return unite#kinds#file#do_action(a:srcs, '', 'delete')
 endfunction"}}}
 
@@ -493,7 +475,7 @@ let s:cdable_action_file = {
       \ 'is_start' : 1,
       \}
 
-function! s:cdable_action_file.func(candidate)
+function! s:cdable_action_file.func(candidate) abort
   call unite#start_script([['file',
         \ unite#helper#get_candidate_directory(a:candidate)]])
 endfunction
@@ -501,31 +483,6 @@ endfunction
 call unite#custom_action('cdable', 'file', s:cdable_action_file)
 unlet! s:cdable_action_file
 "}}}
-
-function! s:get_filetime(filename) "{{{
-  let filetime = getftime(a:filename)
-  if !has('python3')
-    return filetime
-  endif
-
-  if filetime < 0 && getftype(a:filename) !=# 'link' "{{{
-    " Use python3 interface.
-python3 <<END
-import os
-import os.path
-import vim
-os.stat_float_times(False)
-try:
-  ftime = os.path.getmtime(vim.eval(\
-    'unite#util#iconv(a:filename, &encoding, "char")'))
-except:
-  ftime = -1
-vim.command('let filetime = ' + str(ftime))
-END
-  endif"}}}
-
-  return filetime
-endfunction"}}}
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

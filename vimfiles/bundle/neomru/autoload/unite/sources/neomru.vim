@@ -2,36 +2,14 @@
 " FILE: neomru.vim
 " AUTHOR:  Zhao Cai <caizhaoff@gmail.com>
 "          Shougo Matsushita <Shougo.Matsu at gmail.com>
-" License: MIT license  {{{
-"     Permission is hereby granted, free of charge, to any person obtaining
-"     a copy of this software and associated documentation files (the
-"     "Software"), to deal in the Software without restriction, including
-"     without limitation the rights to use, copy, modify, merge, publish,
-"     distribute, sublicense, and/or sell copies of the Software, and to
-"     permit persons to whom the Software is furnished to do so, subject to
-"     the following conditions:
-"
-"     The above copyright notice and this permission notice shall be included
-"     in all copies or substantial portions of the Software.
-"
-"     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-"     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-"     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-"     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-"     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-"     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-"     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-" }}}
+" License: MIT license
 "=============================================================================
 
-let s:save_cpo = &cpo
-set cpo&vim
-
-" Source  "{{{
+" Source
 call neomru#init()
-function! unite#sources#neomru#define() "{{{
+function! unite#sources#neomru#define() abort
   return [s:file_mru_source, s:dir_mru_source]
-endfunction"}}}
+endfunction
 let s:file_mru_source = {
       \ 'name' : 'neomru/file',
       \ 'description' : 'candidates from file MRU list',
@@ -56,22 +34,22 @@ let s:dir_mru_source = {
       \ 'max_candidates' : 200,
       \}
 
-function! s:file_mru_source.hooks.on_syntax(args, context) "{{{
+function! s:file_mru_source.hooks.on_syntax(args, context) abort
   syntax match uniteSource__FileMru_Time
         \ /([^)]*)\s\+/
         \ contained containedin=uniteSource__FileMru
   highlight default link uniteSource__FileMru_Time Statement
-endfunction"}}}
-function! s:dir_mru_source.hooks.on_syntax(args, context) "{{{
+endfunction
+function! s:dir_mru_source.hooks.on_syntax(args, context) abort
   syntax match uniteSource__DirectoryMru_Time
         \ /([^)]*)\s\+/
         \ contained containedin=uniteSource__DirectoryMru
   highlight default link uniteSource__DirectoryMru_Time Statement
-endfunction"}}}
-function! s:file_mru_source.hooks.on_post_filter(args, context) "{{{
+endfunction
+function! s:file_mru_source.hooks.on_post_filter(args, context) abort
   return s:on_post_filter(a:args, a:context)
-endfunction"}}}
-function! s:dir_mru_source.hooks.on_post_filter(args, context) "{{{
+endfunction
+function! s:dir_mru_source.hooks.on_post_filter(args, context) abort
   for candidate in a:context.candidates
     if !has_key(candidate, 'abbr')
       let candidate.abbr = candidate.word
@@ -81,26 +59,38 @@ function! s:dir_mru_source.hooks.on_post_filter(args, context) "{{{
     endif
   endfor
   return s:on_post_filter(a:args, a:context)
-endfunction"}}}
-function! s:file_mru_source.gather_candidates(args, context) "{{{
+endfunction
+function! s:file_mru_source.gather_candidates(args, context) abort
   let mru = neomru#_get_mrus().file
-  return mru.gather_candidates(a:args, a:context)
-endfunction"}}}
-function! s:dir_mru_source.gather_candidates(args, context) "{{{
+  let candidates = mru.gather_candidates(a:args, a:context)
+  return exists('*unite#helper#paths2candidates') ?
+        \ unite#helper#paths2candidates(candidates) :
+        \ map(copy(candidates), "{
+        \ 'word' : v:val,
+        \ 'action__path' : v:val,
+        \}")
+endfunction
+function! s:dir_mru_source.gather_candidates(args, context) abort
   let mru = neomru#_get_mrus().directory
-  return mru.gather_candidates(a:args, a:context)
-endfunction"}}}
-"}}}
-" Actions "{{{
+  let candidates = mru.gather_candidates(a:args, a:context)
+  return exists('*unite#helper#paths2candidates') ?
+        \ unite#helper#paths2candidates(candidates) :
+        \ map(copy(candidates), "{
+        \ 'word' : v:val,
+        \ 'action__path' : v:val,
+        \}")
+endfunction
+
+" Actions
 let s:file_mru_source.action_table.delete = {
       \ 'description' : 'delete from file_mru list',
       \ 'is_invalidate_cache' : 1,
       \ 'is_quit' : 0,
       \ 'is_selectable' : 1,
       \ }
-function! s:file_mru_source.action_table.delete.func(candidates) "{{{
+function! s:file_mru_source.action_table.delete.func(candidates) abort
   call neomru#_get_mrus().file.delete(a:candidates)
-endfunction"}}}
+endfunction
 
 let s:dir_mru_source.action_table.delete = {
       \ 'description' : 'delete from directory_mru list',
@@ -108,13 +98,13 @@ let s:dir_mru_source.action_table.delete = {
       \ 'is_quit' : 0,
       \ 'is_selectable' : 1,
       \ }
-function! s:dir_mru_source.action_table.delete.func(candidates) "{{{
+function! s:dir_mru_source.action_table.delete.func(candidates) abort
   call neomru#_get_mrus().directory.delete(a:candidates)
-endfunction"}}}
-"}}}
+endfunction
 
-" Filters "{{{
-function! s:converter(candidates, context) "{{{
+
+" Filters
+function! s:converter(candidates, context) abort
   if g:neomru#filename_format == '' && g:neomru#time_format == ''
     return a:candidates
   endif
@@ -129,34 +119,24 @@ function! s:converter(candidates, context) "{{{
     endif
 
     " Set default abbr.
-    let candidate.abbr = (g:neomru#time_format == '') ? '' :
-          \ strftime(g:neomru#time_format,
-          \ getftime(candidate.action__path))
-    let candidate.abbr .= path
+    let candidate.abbr = neomru#_abbr(path, getftime(candidate.action__path))
   endfor
 
   return a:candidates
-endfunction"}}}
-function! s:file_mru_source.source__converter(candidates, context) "{{{
+endfunction
+function! s:file_mru_source.source__converter(candidates, context) abort
   return s:converter(a:candidates, a:context)
-endfunction"}}}
+endfunction
 let s:file_mru_source.converters = [ s:file_mru_source.source__converter ]
-function! s:dir_mru_source.source__converter(candidates, context) "{{{
+function! s:dir_mru_source.source__converter(candidates, context) abort
   return s:converter(a:candidates, a:context)
-endfunction"}}}
+endfunction
 let s:dir_mru_source.converters = [ s:dir_mru_source.source__converter ]
-"}}}
 
-" Misc "{{{
-function! s:on_post_filter(args, context) "{{{
+" Misc
+function! s:on_post_filter(args, context) abort
   for candidate in a:context.candidates
     let candidate.action__directory =
           \ unite#util#path2directory(candidate.action__path)
   endfor
-endfunction"}}}
-"}}}
-"
-let &cpo = s:save_cpo
-unlet s:save_cpo
-
-" vim: foldmethod=marker
+endfunction
