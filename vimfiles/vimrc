@@ -4,10 +4,10 @@ set nocompatible " 如果使用兼容模式，后续设置会使用 Vi 的一些
 source $VIMRUNTIME/mswin.vim
 behave mswin " 使用更接近 Windows 的操作配置
 set t_Co=256
-" source $VIM/vimrc_hp.vim
-" source $VIM/vimrc_surface3.vim
-source $VIM/vimrc_office_dev.vim
-" source $VIM/vimrc_office_primary.vim
+source $HOME/vimfiles/vimrc_hp.vim
+" source $HOME/vimfiles/vimrc_surface3.vim
+" source $HOME/vimfiles/vimrc_office_dev.vim
+" source $HOME/vimfiles/vimrc_office_primary.vim
 set browsedir=buffer
 
 " 界面 {{{1
@@ -213,7 +213,7 @@ let &termencoding=&encoding
 set encoding=utf-8 " 内部使用的字符编码为UTF-8
 set fileencodings=utf-8,chinese,ucs-bom,gb18030,gbk,gb2312,cp936 "编辑已存在文件时，参考此字符编码列表
 set helplang=cn " 帮助文件语言为中文
-set langmenu=zh_CN.UTF-8 " 菜单语言选项
+set langmenu=zh_CN.utf-8 " 菜单语言选项
 source $VIMRUNTIME/delmenu.vim
 source $VIMRUNTIME/menu.vim
 language messages zh_CN.utf-8 " 弹出信息语言选项
@@ -338,9 +338,9 @@ inoremap <C-F1> <Esc>:browse saveas<CR>
 nnoremap <c-c> :let @* = expand('%:p')<CR>
 
 " 编辑配置文件
-nnoremap <leader>ev :e $MYVIMRC<CR>
+nnoremap <leader>ev :e $HOME/vimfiles/vimrc<CR>
 
-nnoremap <leader>sv :source $MYVIMRC<CR>
+nnoremap <leader>sv :source $HOME/vimfiles/vimrc<CR>
 
 function! ToggleWrap()
      if &wrap
