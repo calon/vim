@@ -45,12 +45,12 @@ set list " 显示特殊字符
 set listchars=tab:>-,nbsp:.
 
 " 光标和标尺 {{{2
+
 " set cursorline " 显示光标所在行背景颜色
 " set ruler " 显示光标位置的行号和列号
 set number " 显示行号
 autocmd BufWinLeave * setlocal nocursorline " 非当前缓冲区取消高亮光标所在行
 autocmd BufWinEnter * setlocal cursorline " 当前缓冲区高亮光标所在行
-
 
 set backspace=2 " 退格会删除缩进、换行符和插入的起始位置
 set iskeyword+=_,$,@,%,#,- " 定义一个word中可以包含哪些字符。"@"在这里代指所有的字母。
@@ -73,8 +73,7 @@ set scrolloff=3 " 光标上下两侧最少保留的屏幕行数
 set sidescrolloff=8 " 光标左右两侧最少保留的屏幕列数
 set whichwrap=b,s,<,>,[,] "对某一个或几个按键开启到头后自动折向下一行的功能
 set lazyredraw " 执行宏、寄存器和其它不通过输入的命令时屏幕不会重画
-set linebreak
-
+set nolinebreak
 
 " 状态栏设置 {{{2
 set laststatus=2 " 总是显示状态行
@@ -119,6 +118,7 @@ if has('title') && (has('gui_running') || &title)
     set titlestring+=\ -\ %{v:progname} " program name
 endif
 
+set report=0
 
 " 命令行 {{{2
 set wildmenu " 打开命令行补全功能
@@ -136,12 +136,13 @@ set noswapfile " 取消交换文件
 " set updatecount=30 " 输入这么多个字符以后，把交换文件写入磁盘
 
 " 历史和会话信息 {{{2
-set history=500		" keep 50 lines of command line history
+set history=500
 set sessionoptions=blank,curdir,folds,help,resize,tabpages,winpos,winsize " 保存和恢复会话时，同时保存和恢复的设置类型
 
 " 缓冲区 {{{2
 set hidden " 退出时隐藏而不是卸载缓冲区
 set confirm " 某些因为缓冲区有未保存的改变而失败的操作会弹出对话框要求确认
+set switchbuf=usetab,usetab
 
 " 快速切换缓冲区
 
