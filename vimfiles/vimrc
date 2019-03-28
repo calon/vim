@@ -94,22 +94,6 @@ set laststatus=2 " 总是显示状态行
   "set statusline+=[%{strftime(\"%Y\-%m\-%d\ %H\:%M\",getftime(expand(\"%:p\")))}]
 "endif
 
-" let g:airline_powerline_fonts = 1
-" let g:airline#extensions#tabline#enabled = 1
-" let g:airline#extensions#tabline#show_buffers = 1
-" let g:airline#extensions#tabline#show_tab_nr = 1
-" let g:airline#extensions#tabline#show_tab_type = 1
-" let g:airline#extensions#tabline#buffer_idx_mode = 1
-"   nmap <leader>1 <Plug>AirlineSelectTab1
-"   nmap <leader>2 <Plug>AirlineSelectTab2
-"   nmap <leader>3 <Plug>AirlineSelectTab3
-"   nmap <leader>4 <Plug>AirlineSelectTab4
-"   nmap <leader>5 <Plug>AirlineSelectTab5
-"   nmap <leader>6 <Plug>AirlineSelectTab6
-"   nmap <leader>7 <Plug>AirlineSelectTab7
-"   nmap <leader>8 <Plug>AirlineSelectTab8
-"   nmap <leader>9 <Plug>AirlineSelectTab9
-
 " 窗口标题设置 {{{2
 if has('title') && (has('gui_running') || &title)
     set titlestring=
@@ -117,8 +101,6 @@ if has('title') && (has('gui_running') || &title)
     set titlestring+=%h%m%r%w " flag
     set titlestring+=\ -\ %{v:progname} " program name
 endif
-
-set report=0
 
 " 命令行 {{{2
 set wildmenu " 打开命令行补全功能
@@ -143,11 +125,10 @@ set sessionoptions=blank,curdir,folds,help,resize,tabpages,winpos,winsize " 保�
 set hidden " 退出时隐藏而不是卸载缓冲区
 set confirm " 某些因为缓冲区有未保存的改变而失败的操作会弹出对话框要求确认
 set switchbuf=usetab,usetab
+set showtabline=0
 
 " 快速切换缓冲区
 
-" nnoremap <Tab> :bnext<CR>
-" nnoremap <C-Tab> :bprevious<CR>
 nnoremap <C-Right> :bnext<CR>
 nnoremap <C-Left> :bprevious<CR>
 
@@ -272,8 +253,13 @@ nnoremap 、 \
 " 复制到行末
 nnoremap Y y$
 
-" 切换当前目录
-nnoremap <F12> :lcd %:p:h<CR>
+" 快速保存 Quick save
+nnoremap <F1> <Esc>:call Quick_save()<CR>
+inoremap <F1> <Esc>:call Quick_save()<CR>a
+
+" 打开另存为对话框
+nnoremap <C-F1> <Esc>:browse saveas<CR>
+inoremap <C-F1> <Esc>:browse saveas<CR>
 
 " 切换显示绝对或相对行号
 nnoremap <F2> <Esc>:call ToggleRelativeNumber()<CR>
@@ -314,6 +300,7 @@ inoremap <A-F7> <Esc>:L<SPACE>
 " Tagbar Toggle
 nnoremap <F8> :TagbarToggle<CR>
 
+" F9 for Unite
 
 " 新建缓冲区
 nnoremap <F10> <Esc>:enew<CR>
@@ -323,20 +310,29 @@ inoremap <F10> <Esc>:enew<CR>
 nnoremap <C-F10> <Esc>:bdelete<CR>
 inoremap <C-F10> <Esc>:bdelete<CR>
 
+" BufferList
+map <silent> <F12> :call BufferList()<CR>
+
+" BufferTabLine
+map <silent> <C-F12> :call ToggleBufTabLine()<CR>
+
+function! ToggleBufTabLine()
+     if (g:buftabline_show==0)
+          let g:buftabline_show=1
+     else
+          let g:buftabline_show=0
+     endif
+endfunction
+
+" 切换当前目录
+nnoremap <leader>cd :lcd %:p:h<CR>
+
 " 标签页操作
 nnoremap <leader>tn :tabnew<CR>
 "nnoremap <leader>tc :tabclose<CR>
 
-" 快速保存 Quick save
-nnoremap <F1> <Esc>:call Quick_save()<CR>
-inoremap <F1> <Esc>:call Quick_save()<CR>a
-
-" 打开另存为对话框
-nnoremap <C-F1> <Esc>:browse saveas<CR>
-inoremap <C-F1> <Esc>:browse saveas<CR>
-
 " 普通模式下 Ctrl+c 复制文件路径
-nnoremap <c-c> :let @* = expand('%:p')<CR>
+nnoremap <C-c> :let @* = expand('%:p')<CR>
 
 " 编辑配置文件
 nnoremap <leader>ev :e $HOME/vimfiles/vimrc<CR>
@@ -360,7 +356,7 @@ function! ToggleHLSearch()
 endfunction
 
 function! ToggleRelativeNumber()
-    if( &nu == 1 )
+    if (&nu == 1)
         set nonu
         set rnu
     else
@@ -641,7 +637,7 @@ let g:unite_source_menu_menus.View.command_candidates = [
         \'ColorToggle'],
     \[' > 设置为纯文本类型           :set filetype=txt ',
         \'set filetype=txt'],
-    \[' > 切换当前窗口工作目录       <F1> ',
+    \[' > 切换当前窗口工作目录       <leader>cd ',
         \'lcd %:p:h'],
     \[' > 切换行号显示模式           <F2> ',
         \'call ToggleRelativeNumber()'],
@@ -655,6 +651,8 @@ let g:unite_source_menu_menus.View.command_candidates = [
         \'call ToggleSyntaxHighlight()'],
     \[' > 打开 TagList               <F8> ',
         \'TagbarToggle'],
+    \[' > 打开 BufferList            <F12> ',
+        \'call BufferList()'],
     \[' > 切换缩进标志显示           :IndentLinesToggle',
         \'IndentLinesToggle'],
     \]
@@ -662,7 +660,6 @@ let g:unite_source_menu_menus.Edit = {
     \ 'description' : ' > 编辑操作（Edit）
         \                            ',
     \}
-
 
 let g:unite_source_menu_menus.Edit.command_candidates = [
     \[' > 剔重排序，带 [!] 则反向排序     :sort[!] u ',
@@ -796,10 +793,16 @@ function! MyFileencoding()
 endfunction
 
 " Buftabline {{{2
-let g:buftabline_show = 1 " only if there are at least two buffers 
+let g:buftabline_show = 0
 let g:buftabline_numbers = 1
 let g:buftabline_indicators = 1
 
+" Wintabs {{{2
+" let g:wintabs_display = 'tabline'
+" let g:wintabs_autoclose = 2
+" let g:wintabs_autoclose_vim = 1
+" let g:wintabs_autoclose_vimtab = 1
+" let g:wintabs_ui_buffer_name_format = '%n %t'
 
 " Platinum Searcher  {{{2
 let g:ackprg = "pt"
