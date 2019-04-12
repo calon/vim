@@ -39,6 +39,10 @@ if !exists('g:BufferListMaxWidth')
   let g:BufferListMaxWidth = 40
 endif
 
+function! User_buffers() " help buffers are always unlisted, but quickfix buffers are not
+  return filter(range(1,bufnr('$')),'buflisted(v:val) && "quickfix" !=? getbufvar(v:val, "&buftype")')
+endfunction
+
 " toggled the buffer list on/off
 function! BufferList()
   " if we get called and the list is open --> close it
@@ -54,12 +58,19 @@ function! BufferList()
   let l:buflist = ''
   let l:bufnumbers = ''
   let l:width = g:BufferListWidth
+  let l:bufnums = User_buffers()
 
   " iterate through the buffers
-  let l:i = 0 | while l:i <= l:bufcount | let l:i = l:i + 1
+  " let l:i = 0 | while l:i <= l:bufcount | let l:i = l:i + 1
+  for l:i in l:bufnums
     let l:bufname = bufname(l:i)
-    if strlen(l:bufname)
-      \&& getbufvar(l:i, '&modifiable')
+    " if strlen(l:bufname)
+    "   \&& getbufvar(l:i, '&modifiable')
+    if strlen(l:bufname) == 0
+        let l:bufname = 'unsaved'
+    endif
+
+    if getbufvar(l:i, '&modifiable')
       \&& getbufvar(l:i, '&buflisted')
 
       " adapt width and/or buffer name
@@ -94,7 +105,8 @@ function! BufferList()
       " add the name to the list
       let l:buflist = l:buflist . '  ' .l:bufname . "\n"
     endif
-  endwhile
+  " endwhile
+  endfor
 
   " generate a variable to fill the buffer afterwards
   " (we need this for "full window" color :)
