@@ -141,6 +141,10 @@ endwhile
 nnoremap <leader>x :bd<CR>
 
 " 撤销文件 {{{2
+
+" 每次在插入模式改变文本就打断撤销序列，确保可以灵活地撤销
+autocmd TextChangedI * call feedkeys("\<C-G>u")
+
 " set undodir=E:\\Bak\\txt " 撤销文件目录
 set undofile
 " set undolevels = 1000 "maximum number of changes that can be undone
