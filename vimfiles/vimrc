@@ -205,6 +205,8 @@ source $VIMRUNTIME/menu.vim
 language messages zh_CN.utf-8 " 弹出信息语言选项
 set ambiwidth=double " 把所有的“不明宽度”字符——指的是在 Unicode 字符集中某些同时在东西方语言中使用的字符，如省略号、破折号、书名号和全角引号，在西方文字中通常字符宽度等同于普通 ASCII 字符，而在东方文字中通常字符宽度等同于两倍的普通 ASCII 字符，因而其宽度“不明”——的宽度置为双倍字符宽度（中文字符宽度）。此数值只在 encoding 设为 utf-8 或某一 Unicode 编码时才有效。需要额外注意的是，如果你通过终端使用 Vim 的话，需要令终端也将这些字符显示为双宽度。
 set imcmdline " 开始编辑命令行时总是打开输入方法
+set iminsert=2 " 插入模式打开输入法
+set iminsert=2 " 搜索时打开输入法
 set formatoptions+=1Bjmn
 
 " 搜索 {{{2
