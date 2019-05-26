@@ -143,7 +143,14 @@ nnoremap <leader>x :bd<CR>
 " 撤销文件 {{{2
 
 " 每次在插入模式改变文本就打断撤销序列，确保可以灵活地撤销
-autocmd TextChangedI * call feedkeys("\<C-G>u")
+autocmd TextChangedI * call RightUndo()
+
+function! RightUndo()
+    if bufname("%") != "[unite] - MRU_File"
+        call feedkeys("\<C-G>u")
+        call pumvisible()
+    endif
+endfunction
 
 " set undodir=E:\\Bak\\txt " 撤销文件目录
 set undofile
@@ -515,15 +522,20 @@ let g:neocomplete#enable_at_startup = 1
 let g:neocomplete#sources#syntax#min_keyword_length = 3
 " Disbale ignore case
 let g:neocomplete#enable_ignore_case = 0
+" Disable auto complete
+" let g:neocomplete#disable_auto_complete = 1
+let g:neocomplete#enable_cursor_hold_i = 1
 
 " Recommended key-mappings.
 " <CR>: close popup and save indent.
 inoremap <CR> <C-r>=<SID>my_cr_function()<CR>
+
 function! s:my_cr_function()
   return neocomplete#close_popup() . "\<CR>"
   " For no inserting <CR> key.
   "return pumvisible() ? neocomplete#close_popup() : "\<CR>"
 endfunction
+
 " <TAB>: completion.
 inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 
@@ -547,7 +559,7 @@ let g:neocomplete#same_filetypes._ = '_'
 " let g:SuperTabNoCompleteAfter = ['^', ',', '\s', '"', "'"]
 " let g:SuperTabDefaultCompletionType = "<c-n>"
 
-" Vim-Notes
+" Vim-Notes {{{2
 " nnoremap <F8> <Esc>:Note<CR>
 " let g:notes_suffix = '.txt'
 " let g:notes_tab_indents = 0
@@ -674,18 +686,20 @@ let g:unite_source_menu_menus.Edit.command_candidates = [
         \'g/^\(.*\)$\n\1$/d'],
     \[' > 清除所有 HTML 标签              :%s/<\_.\{-1,\}>//g ',
         \'%s/<\_.\{-1,\}>//g'],
+    \[' > 删除 HTML 的标签部分            :%s#<[^>]\+>##g ',
+        \'%s#<[^>]\+>##g'],
     \[' > 生成 Markdown ToC（GFM）        :GenTocGFM ',
         \'GenTocGFM'],
     \[' > Bookmark 增删书签               mm 或 :ToggleBookmark ',
         \'ToggleBookmark'],
+    \[' > 创建折叠标记                    <Leader>f ',
+        \'echo "<Leader>ff表示子级折叠，<Leader>fc表示在注释中标记折叠" '],
     \[' > 编辑书签的描述说明              mi 或 :Annotate <TEXT> ',
         \'echo ":Annotate <TEXT>" '],
     \[' > 在新窗口中显示所有书签          ma 或 :ShowAllBookmarks ',
         \'ShowAllBookmarks'],
     \[' > 清除当前缓冲区书签              mc 或 :clearbookmarks ',
         \'clearbookmarks'],
-    \[' > 删除 HTML 的标签部分            :%s#<[^>]\+>##g ',
-        \'%s#<[^>]\+>##g'],
     \[' > Pathogen 更新插件帮助文档       :Helptags ',
         \'Helptags'],
     \[' > 转换为 GB2312 编码              :set fileencoding=cp936 ',
