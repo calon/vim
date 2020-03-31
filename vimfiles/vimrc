@@ -4,9 +4,9 @@ set nocompatible " 如果使用兼容模式，后续设置会使用 Vi 的一些
 source $VIMRUNTIME/mswin.vim
 behave mswin " 使用更接近 Windows 的操作配置
 set t_Co=256
-source $HOME/vimfiles/vimrc_hp.vim
+" source $HOME/vimfiles/vimrc_hp.vim
 " source $HOME/vimfiles/vimrc_surface3.vim
-" source $HOME/vimfiles/vimrc_office_dev.vim
+source $HOME/vimfiles/vimrc_office_dev.vim
 " source $HOME/vimfiles/vimrc_office_primary.vim
 set browsedir=buffer
 
@@ -489,6 +489,7 @@ let g:calendar_mark = 'left-fit' "可以让*和数字可靠近
 nnoremap <leader>vm <Esc>:VoomToggle markdown<CR>
 nnoremap <F11> <Esc>:VoomToggle markdown<CR>
 nnoremap <C-F11> <Esc>:VoomToggle<CR>
+let g:voom_python_versions = [3,2]
 
 " Convenient command to see the difference between the current buffer and the
 " file it was loaded from, thus the changes you made.
