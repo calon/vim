@@ -4,9 +4,9 @@ set nocompatible " 如果使用兼容模式，后续设置会使用 Vi 的一些
 source $VIMRUNTIME/mswin.vim
 behave mswin " 使用更接近 Windows 的操作配置
 set t_Co=256
-" source $HOME/vimfiles/vimrc_hp.vim
+source $HOME/vimfiles/vimrc_hp.vim
 " source $HOME/vimfiles/vimrc_surface3.vim
-source $HOME/vimfiles/vimrc_office_dev.vim
+" source $HOME/vimfiles/vimrc_office_dev.vim
 " source $HOME/vimfiles/vimrc_office_primary.vim
 set browsedir=buffer
 
@@ -477,19 +477,21 @@ let g:html_dynamic_folds = 1
 " Pathogen  {{{2
 call pathogen#infect()
 
-" Colorizer {{{2
-let g:colorizer_startup = 0
+" Buftabline {{{2
+let g:buftabline_show = 0
+let g:buftabline_numbers = 1
+let g:buftabline_indicators = 1
 
 " Calendar {{{2
 let g:calendar_monday = 1 "以星期一为开始 
 let g:calendar_focus_today = 1 " 光标在当天的日期上 
 let g:calendar_mark = 'left-fit' "可以让*和数字可靠近 
 
-" Voom  {{{2
-nnoremap <leader>vm <Esc>:VoomToggle markdown<CR>
-nnoremap <F11> <Esc>:VoomToggle markdown<CR>
-nnoremap <C-F11> <Esc>:VoomToggle<CR>
-let g:voom_python_versions = [3,2]
+" Colorizer {{{2
+let g:colorizer_startup = 0
+
+" CtrlP {{{2
+"let g:ctrlp_cmd = 'CtrlPMRUFiles'
 
 " Convenient command to see the difference between the current buffer and the
 " file it was loaded from, thus the changes you made.
@@ -508,13 +510,72 @@ let g:voom_python_versions = [3,2]
 " HTML  "{{{2
 let g:no_html_tab_mapping = 'yes'
 
+" Lightline {{{2
+
+let g:lightline = {
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ], [ 'filename' ], [ 'updatetime' ] ],
+      \   'right': [ [ 'lineinfo' ], ['percent'], [ 'fileformat', 'fileencoding', 'filetype' ], [ 'size' ] ]
+      \ },
+      \ 'component_function': {
+      \   'filename': 'MyFilename',
+      \   'fileformat': 'MyFileformat',
+      \   'filetype': 'MyFiletype',
+      \   'fileencoding': 'MyFileencoding',
+      \   'modified': 'MyModified',
+      \   'size': 'FileSize',
+      \   'updatetime': 'UpdateTime',
+      \ },
+      \ 'subseparator': { 'left': '|', 'right': '|' }
+      \ }
+
+function! UpdateTime()
+    return strftime("%Y-%m-%d %H:%M", getftime(expand("%:p")))
+endfunction
+
+function! FileSize()
+  let bytes = getfsize(expand("%:p"))
+  if bytes <= 0
+    return ""
+  endif
+  if bytes < 1024
+    return bytes
+  else
+    return (bytes / 1024) . "K"
+  endif
+endfunction
+
+function! MyFilename()
+  return ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
+       \ ('' != expand('%:t') ? expand('%:t') : '[No Name]') .
+       \ ('' != MyModified() ? ' ' . MyModified() : '')
+endfunction
+
+function! MyModified()
+  return &ft =~ 'help' ? '' : &modified ? '+' : &modifiable ? '' : '-'
+endfunction
+
+function! MyReadonly()
+  return &ft !~? 'help' && &readonly ? 'RO' : ''
+endfunction
+
+function! MyFileformat()
+  return winwidth(0) > 70 ? &fileformat : 'No Format'
+endfunction
+
+function! MyFiletype()
+  return winwidth(0) > 70 ? (strlen(&filetype) ? &filetype : 'No Type') : ''
+endfunction
+
+function! MyFileencoding()
+  return winwidth(0) > 70 ? (strlen(&fenc) ? &fenc : &enc) : ''
+endfunction
+
 " MiniBufExpl {{{2
 " let g:miniBufExplCheckDupeBufs = 0
 
-" CtrlP {{{2
-"let g:ctrlp_cmd = 'CtrlPMRUFiles'
-
 " Neocomplete {{{2
+
 " Disable AutoComplPop.
 let g:acp_enableAtStartup = 0
 " Use neocomplete.
@@ -555,15 +616,24 @@ autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 let g:neocomplete#same_filetypes = {}
 let g:neocomplete#same_filetypes._ = '_'
 
+" Platinum Searcher  {{{2
+let g:ackprg = "pt"
+let g:ack_default_options = " --smart-case --nocolor"
+let g:ackhighlight = 1
+nnoremap <Leader>g <Esc>:Ack!<Space>
+nnoremap <Leader>gw <Esc>:lcd %:p:h <Bar> AckWindow!<Space>
+
+let g:ack_mappings = { "<Esc>": ":q<CR>" }
+
 " SuperTab {{{2
 
 " let g:SuperTabNoCompleteAfter = ['^', ',', '\s', '"', "'"]
 " let g:SuperTabDefaultCompletionType = "<c-n>"
 
-" Vim-Notes {{{2
-" nnoremap <F8> <Esc>:Note<CR>
-" let g:notes_suffix = '.txt'
-" let g:notes_tab_indents = 0
+" Tagbar {{{2
+let g:tagbar_sort = 0
+let g:tagbar_left = 1
+let g:tagbar_foldlevel = 0
 
 " TagList {{{2
 
@@ -571,10 +641,16 @@ let g:neocomplete#same_filetypes._ = '_'
 " let Tlist_Exit_OnlyWindow = 1
 " let Tlist_Show_Menu = 1
 
-" Tagbar {{{2
-let g:tagbar_sort = 0
-let g:tagbar_left = 1
-let g:tagbar_foldlevel = 0
+" Targets {{{2
+
+autocmd User targets#mappings#user call targets#mappings#extend({
+    \ 'q': {'pair': [{'o': '\%u201c', 'c': '\%u201d'}]},
+    \ })
+
+    " \ 'q': {'pair': [{'o': '\u201c', 'c': '\u201d'}, {'o':'‘', 'c':'’'}]},
+    " \ 'b': {'pair': [{'o':'（', 'c':'）'}, {'o':'《', 'c':'》'}, {'o':'『', 'c':'』'}, {'o':'「', 'c':'」'}]},
+    " \ ',': {'separator': [{'d': '，'}, {'d': '、'}, {'d': '；'}]},
+    " \ '.': {'separator': [{'d': '。'}, {'d': '！'}, {'d': '？'}]},
 
 " Unite.vim {{{2
 
@@ -741,6 +817,15 @@ let g:unite_source_menu_menus.Search.command_candidates = [
 " NeoMru
 " let g:neomru#time_format = strftime("[%m-%d %H:%M] ")
 
+" Vim-Bookmark {{{2
+let g:bookmark_sign = '>>'
+let g:bookmark_annotation_sign = '##'
+
+" Vim-Notes {{{2
+" nnoremap <F8> <Esc>:Note<CR>
+" let g:notes_suffix = '.txt'
+" let g:notes_tab_indents = 0
+
 " Vimfiler {{{2
 nnoremap <C-\> :lcd %:p:h <Bar> VimFiler -force-quit -toggle -split -horizontal -buffer-name=VimFiler -sort-type=Time<CR>
 " autocmd VimEnter * if !argc() | VimFiler | endif
@@ -749,76 +834,12 @@ call vimfiler#custom#profile('default', 'context', {
 		\   'sort_type' : 'Time'
 		\ })
 
-" Vim-Bookmark {{{2
-let g:bookmark_sign = '>>'
-let g:bookmark_annotation_sign = '##'
+" Voom  {{{2
+nnoremap <leader>vm <Esc>:VoomToggle markdown<CR>
+nnoremap <F11> <Esc>:VoomToggle markdown<CR>
+nnoremap <C-F11> <Esc>:VoomToggle<CR>
+let g:voom_python_versions = [3,2]
 
-
-" Lightline {{{2
-
-let g:lightline = {
-      \ 'active': {
-      \   'left': [ [ 'mode', 'paste' ], [ 'filename' ], [ 'updatetime' ] ],
-      \   'right': [ [ 'lineinfo' ], ['percent'], [ 'fileformat', 'fileencoding', 'filetype' ], [ 'size' ] ]
-      \ },
-      \ 'component_function': {
-      \   'filename': 'MyFilename',
-      \   'fileformat': 'MyFileformat',
-      \   'filetype': 'MyFiletype',
-      \   'fileencoding': 'MyFileencoding',
-      \   'modified': 'MyModified',
-      \   'size': 'FileSize',
-      \   'updatetime': 'UpdateTime',
-      \ },
-      \ 'subseparator': { 'left': '|', 'right': '|' }
-      \ }
-
-function! UpdateTime()
-    return strftime("%Y-%m-%d %H:%M", getftime(expand("%:p")))
-endfunction
-
-function! FileSize()
-  let bytes = getfsize(expand("%:p"))
-  if bytes <= 0
-    return ""
-  endif
-  if bytes < 1024
-    return bytes
-  else
-    return (bytes / 1024) . "K"
-  endif
-endfunction
-
-function! MyFilename()
-  return ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
-       \ ('' != expand('%:t') ? expand('%:t') : '[No Name]') .
-       \ ('' != MyModified() ? ' ' . MyModified() : '')
-endfunction
-
-function! MyModified()
-  return &ft =~ 'help' ? '' : &modified ? '+' : &modifiable ? '' : '-'
-endfunction
-
-function! MyReadonly()
-  return &ft !~? 'help' && &readonly ? 'RO' : ''
-endfunction
-
-function! MyFileformat()
-  return winwidth(0) > 70 ? &fileformat : 'No Format'
-endfunction
-
-function! MyFiletype()
-  return winwidth(0) > 70 ? (strlen(&filetype) ? &filetype : 'No Type') : ''
-endfunction
-
-function! MyFileencoding()
-  return winwidth(0) > 70 ? (strlen(&fenc) ? &fenc : &enc) : ''
-endfunction
-
-" Buftabline {{{2
-let g:buftabline_show = 0
-let g:buftabline_numbers = 1
-let g:buftabline_indicators = 1
 
 " Wintabs {{{2
 " let g:wintabs_display = 'tabline'
@@ -826,15 +847,6 @@ let g:buftabline_indicators = 1
 " let g:wintabs_autoclose_vim = 1
 " let g:wintabs_autoclose_vimtab = 1
 " let g:wintabs_ui_buffer_name_format = '%n %t'
-
-" Platinum Searcher  {{{2
-let g:ackprg = "pt"
-let g:ack_default_options = " --smart-case --nocolor"
-let g:ackhighlight = 1
-nnoremap <Leader>g <Esc>:Ack!<Space>
-nnoremap <Leader>gw <Esc>:lcd %:p:h <Bar> AckWindow!<Space>
-
-let g:ack_mappings = { "<Esc>": ":q<CR>" }
 
 " The Nerd Tree
 " nnoremap <C-\> :NERDTreeToggle<CR>
