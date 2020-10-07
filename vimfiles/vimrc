@@ -74,7 +74,7 @@ set sidescrolloff=8 " 光标左右两侧最少保留的屏幕列数
 set whichwrap=b,s,<,>,[,] "对某一个或几个按键开启到头后自动折向下一行的功能
 set lazyredraw " 执行宏、寄存器和其它不通过输入的命令时屏幕不会重画
 set nolinebreak
-set concealcursor=nc
+set concealcursor=n
 
 " 状态栏设置 {{{2
 set laststatus=2 " 总是显示状态行
@@ -572,6 +572,34 @@ function! MyFileencoding()
   return winwidth(0) > 70 ? (strlen(&fenc) ? &fenc : &enc) : ''
 endfunction
 
+" LeaderF {{{2
+
+" don't show the help in normal mode
+let g:Lf_HideHelp = 1
+let g:Lf_UseCache = 0
+let g:Lf_UseVersionControlTool = 0
+let g:Lf_IgnoreCurrentBufferName = 1
+" popup mode
+let g:Lf_WindowPosition = 'popup'
+let g:Lf_PreviewInPopup = 1
+let g:Lf_StlSeparator = { 'left': "\ue0b0", 'right': "\ue0b2" }
+let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
+
+let g:Lf_ShortcutF = '<leader>ff'
+noremap <leader><leader> :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
+noremap <leader>fb :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
+noremap <C-P> :<C-U><C-R>=printf("Leaderf mru %s", "")<CR><CR>
+noremap <leader>fm :<C-U><C-R>=printf("Leaderf mru %s", "")<CR><CR>
+" noremap <leader>ft :<C-U><C-R>=printf("Leaderf bufTag %s", "")<CR><CR>
+noremap <C-l> :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
+noremap <leader>fl :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
+
+" noremap <C-B> :<C-U><C-R>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))<CR>
+noremap <C-F> :<C-U><C-R>=printf("Leaderf! rg -e %s ", expand("<cword>"))<CR>
+" search visually selected text literally
+" xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F -e %s ", leaderf#Rg#visual())<CR>
+" noremap go :<C-U>Leaderf! rg --recall<CR>
+
 " MiniBufExpl {{{2
 " let g:miniBufExplCheckDupeBufs = 0
 
@@ -618,13 +646,13 @@ let g:neocomplete#same_filetypes = {}
 let g:neocomplete#same_filetypes._ = '_'
 
 " Platinum Searcher  {{{2
-let g:ackprg = "pt"
-let g:ack_default_options = " --smart-case --nocolor"
-let g:ackhighlight = 1
-nnoremap <Leader>g <Esc>:Ack!<Space>
-nnoremap <Leader>gw <Esc>:lcd %:p:h <Bar> AckWindow!<Space>
-
-let g:ack_mappings = { "<Esc>": ":q<CR>" }
+" let g:ackprg = "pt"
+" let g:ack_default_options = " --smart-case --nocolor"
+" let g:ackhighlight = 1
+" nnoremap <Leader>g <Esc>:Ack!<Space>
+" nnoremap <Leader>gw <Esc>:lcd %:p:h <Bar> AckWindow!<Space>
+"
+" let g:ack_mappings = { "<Esc>": ":q<CR>" }
 
 " SuperTab {{{2
 
@@ -655,7 +683,7 @@ autocmd User targets#mappings#user call targets#mappings#extend({
 
 " Unite.vim {{{2
 
-nnoremap <C-p> :Unite -no-split -auto-resize -buffer-name=MRU_File file_mru<CR>
+" nnoremap <C-p> :Unite -no-split -auto-resize -buffer-name=MRU_File file_mru<CR>
 
 autocmd FileType unite call s:unite_settings()
 
@@ -678,35 +706,35 @@ endfunction
 
 " Yank history
 
-let g:unite_source_history_yank_enable = 1
-nnoremap <Leader>y :Unite -no-split -start-insert -auto-resize -buffer-name=Yank_History history/yank<CR>
+" let g:unite_source_history_yank_enable = 1
+" nnoremap <Leader>y :Unite -no-split -start-insert -auto-resize -buffer-name=Yank_History history/yank<CR>
 
-nnoremap <Leader><Leader> :Unite -no-split -auto-resize -buffer-name=Buffer_List buffer<CR>
+" nnoremap <Leader>bl :Unite -no-split -auto-resize -buffer-name=Buffer_List buffer<CR>
 
 " Unite Menu
 
 nnoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
 inoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
 
-nnoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
-inoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
+" nnoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
+" inoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
 
 let g:unite_source_menu_menus = {}
 
 let g:unite_source_menu_menus.Unite = {
-    \ 'description' : ' > Unite 常用操作（文件、缓冲区）
+    \ 'description' : ' > Unite/LeaderF 常用操作（文件、缓冲区）
         \                            ',
     \}
 
 let g:unite_source_menu_menus.Unite.command_candidates = [
     \[' > 查看历史文件         Ctrl-p ',
-        \'Unite -no-split -auto-resize -buffer-name=MRU_File file_mru'],
-    \[' > 筛选当前缓冲区内容   Ctrl-l',
-        \'Unite -no-split -auto-resize -buffer-name=Lines line'],
-    \[' > 查看当前目录文件 ',
-        \'lcd %:p:h | Unite -no-split -auto-resize -start-insert -buffer-name=File_List file'],
+        \'LeaderfMru'],
+    \[' > 筛选当前缓冲区内容   Ctrl-l ',
+        \'LeaderfLine'],
+    \[' > 查看当前目录文件     <leader>ff ',
+        \'LeaderfFile'],
     \[' > 查看缓冲区           <leader><leader> ',
-        \'Unite -no-split -auto-resize -buffer-name=Buffer_List buffer'],
+        \'LeaderfBuffer'],
     \[' > 增加文件书签        :UniteBookmarkAdd ',
         \'UniteBookmarkAdd'],
     \[' > 查看文件书签 ',

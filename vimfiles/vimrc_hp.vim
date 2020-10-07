@@ -18,3 +18,5 @@ let g:tagbar_ctags_bin = 'c:/Application/ctags/ctags.exe'
 " set shellcmdflag=""
 " let g:notes_directories = ['d:\Data\Share\Dropbox\Note\Vim-Notes\']
 let g:vimwiki_list = [{'path': 'c:/Users/chaon/OneDrive/Note/vimwiki'}]
+" set rtp += "C:/Users/chaon/scoop/apps/fzf/current/"
+
