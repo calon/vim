@@ -43,6 +43,7 @@ set shortmess=aoOtTI " 缩写某些提示信息
 set showmatch " 插入括号时，短暂地跳转到匹配的对应括号
 set list " 显示特殊字符
 set listchars=tab:>-,nbsp:.
+set completeopt+=menuone,noinsert
 
 " 光标和标尺 {{{2
 
@@ -605,45 +606,46 @@ noremap <C-F> :<C-U><C-R>=printf("Leaderf! rg -e %s ", expand("<cword>"))<CR>
 
 " Neocomplete {{{2
 
-" Disable AutoComplPop.
-let g:acp_enableAtStartup = 0
-" Use neocomplete.
-let g:neocomplete#enable_at_startup = 1
-" Set minimum syntax keyword length.
-let g:neocomplete#sources#syntax#min_keyword_length = 3
-" Disbale ignore case
-let g:neocomplete#enable_ignore_case = 0
-" Disable auto complete
-" let g:neocomplete#disable_auto_complete = 1
-let g:neocomplete#enable_cursor_hold_i = 1
 
-" Recommended key-mappings.
-" <CR>: close popup and save indent.
-inoremap <CR> <C-r>=<SID>my_cr_function()<CR>
-
-function! s:my_cr_function()
-  return neocomplete#close_popup() . "\<CR>"
-  " For no inserting <CR> key.
-  "return pumvisible() ? neocomplete#close_popup() : "\<CR>"
-endfunction
-
-" <TAB>: completion.
-inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-
-" Search from neocomplete, omni candidates, vim keywords.
-let g:neocomplete#fallback_mappings =
-\ ["\<C-x>\<C-o>", "\<C-x>\<C-n>"]
-
-" Enable omni completion.
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-
-" complete from all buffers
-let g:neocomplete#same_filetypes = {}
-let g:neocomplete#same_filetypes._ = '_'
+" " Disable AutoComplPop.
+" let g:acp_enableAtStartup = 0
+" " Use neocomplete.
+" let g:neocomplete#enable_at_startup = 1
+" " Set minimum syntax keyword length.
+" let g:neocomplete#sources#syntax#min_keyword_length = 3
+" " Disbale ignore case
+" " let g:neocomplete#enable_ignore_case = 1
+" " Disable auto complete
+" " let g:neocomplete#disable_auto_complete = 1
+" let g:neocomplete#enable_cursor_hold_i = 1
+"
+" " Recommended key-mappings.
+" " <CR>: close popup and save indent.
+" inoremap <CR> <C-r>=<SID>my_cr_function()<CR>
+"
+" function! s:my_cr_function()
+"   return neocomplete#close_popup() . "\<CR>"
+"   " For no inserting <CR> key.
+"   "return pumvisible() ? neocomplete#close_popup() : "\<CR>"
+" endfunction
+"
+" " <TAB>: completion.
+" inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+"
+" " Search from neocomplete, omni candidates, vim keywords.
+" let g:neocomplete#fallback_mappings =
+" \ ["\<C-x>\<C-o>", "\<C-x>\<C-n>"]
+"
+" " Enable omni completion.
+" autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+" autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+" autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+" autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+" autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+"
+" " complete from all buffers
+" let g:neocomplete#same_filetypes = {}
+" let g:neocomplete#same_filetypes._ = '_'
 
 " Platinum Searcher  {{{2
 " let g:ackprg = "pt"
