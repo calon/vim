@@ -74,6 +74,7 @@ set sidescrolloff=8 " 光标左右两侧最少保留的屏幕列数
 set whichwrap=b,s,<,>,[,] "对某一个或几个按键开启到头后自动折向下一行的功能
 set lazyredraw " 执行宏、寄存器和其它不通过输入的命令时屏幕不会重画
 set nolinebreak
+set concealcursor=nc
 
 " 状态栏设置 {{{2
 set laststatus=2 " 总是显示状态行
@@ -406,8 +407,8 @@ inoremap <Up> <Esc>gka
 inoremap <Down> <Esc>gja
 
 " 上下翻页
-nnoremap <Enter> <C-F>
-nnoremap <BackSpace> <C-B>
+nnoremap <Enter><Enter> <C-D>
+nnoremap <BackSpace><BackSpace> <C-U>
 
 " 标签页跳转
 " nnoremap <silent> <C-Right> :tabnext<CR>
@@ -799,20 +800,43 @@ let g:unite_source_menu_menus.Edit.command_candidates = [
         \'TOhtml'],
     \]
 
-let g:unite_source_menu_menus.Search = {
-    \ 'description' : ' > 搜索（Search）
+" let g:unite_source_menu_menus.Search = {
+"     \ 'description' : ' > 搜索（Search）
+"         \                            ',
+"     \}
+"
+" let g:unite_source_menu_menus.Search.command_candidates = [
+"     \[' > 遍历搜索文件内容     Ctrl-/ 或 :Ag [Options] Pattern [Path] ',
+"         \'echo ":Ag [Options] Pattern [Path]" （--context 展示上下文）'],
+"     \[' > 遍历搜索文件         :Ag [Options] -l Pattern [Path] ',
+"         \'echo ":Ag [Options] -l Pattern [Path]" '],
+"     \[' > Locate 列出搜索清单  :L[!] /<pattern1>/<pattern2>/.../[<flags>]） ',
+"         \'echo ":L[!] /{pattern1}/{pattern2}/.../[{flags}]" '],
+"     \]
+
+let g:unite_source_menu_menus.Wiki = {
+    \ 'description' : ' > Wiki
         \                            ',
     \}
 
-let g:unite_source_menu_menus.Search.command_candidates = [
-    \[' > 遍历搜索文件内容     Ctrl-/ 或 :Ag [Options] Pattern [Path] ',
-        \'echo ":Ag [Options] Pattern [Path]" （--context 展示上下文）'],
-    \[' > 遍历搜索文件         :Ag [Options] -l Pattern [Path] ',
-        \'echo ":Ag [Options] -l Pattern [Path]" '],
-    \[' > Locate 列出搜索清单  :L[!] /<pattern1>/<pattern2>/.../[<flags>]） ',
-        \'echo ":L[!] /{pattern1}/{pattern2}/.../[{flags}]" '],
+let g:unite_source_menu_menus.Wiki.command_candidates = [
+    \[' > 选择 Wiki 库         <Leader>ws 或者 :VimwikiUISelect',
+        \'VimwikiUISelect'],
+    \[' > 打开 Wiki 索引文件   <Leader>ww 或者 :VimwikiIndex',
+        \'VimwikiIndex'],
+    \[' > 打开日志文件索引     <Leader>wi 或者 :VimwikiDiaryIndex',
+        \'VimwikiDiaryIndex'],
+    \[' > 打开当天的日志文件   <Leader>w<Leader>w 或者 :VimwikiMakeDiaryNote',
+        \'VimwikiMakeDiaryNote'],
+    \[' > 插入表格             :VimwikiTable',
+        \'VimwikiTable'],
+    \[' > 插入或更新内容大纲   :VimwikiTOC',
+        \'VimwikiTOC'],
+    \[' > 转换当前文件为网页   <Leader>wh 或者 :Vimwiki2HTML',
+        \'Vimwiki2HTML'],
+    \[' > 转换所有文件为网页   :VimwikiAll2HTML',
+        \'VimwikiAll2HTML'],
     \]
-
 
 " NeoMru
 " let g:neomru#time_format = strftime("[%m-%d %H:%M] ")
@@ -833,6 +857,10 @@ let g:vimfiler_enable_auto_cd = 1
 call vimfiler#custom#profile('default', 'context', {
 		\   'sort_type' : 'Time'
 		\ })
+
+" VimWiki "{{{2
+
+let g:vimwiki_list_ignore_newline = 0
 
 " Voom  {{{2
 nnoremap <leader>vm <Esc>:VoomToggle markdown<CR>
