@@ -50,8 +50,10 @@ set completeopt+=menuone,noinsert
 " set cursorline " 显示光标所在行背景颜色
 " set ruler " 显示光标位置的行号和列号
 set number " 显示行号
-autocmd BufWinLeave * setlocal nocursorline " 非当前缓冲区取消高亮光标所在行
-autocmd BufWinEnter * setlocal cursorline " 当前缓冲区高亮光标所在行
+" autocmd BufWinLeave * setlocal nocursorline " 非当前缓冲区取消高亮光标所在行
+" autocmd BufWinEnter * setlocal cursorline " 当前缓冲区高亮光标所在行
+autocmd BufWinLeave * setlocal nocursorline nocursorcolumn
+autocmd BufWinEnter * setlocal cursorline cursorcolumn
 
 set backspace=2 " 退格会删除缩进、换行符和插入的起始位置
 set iskeyword+=_,$,@,%,#,- " 定义一个word中可以包含哪些字符。"@"在这里代指所有的字母。
@@ -655,6 +657,9 @@ noremap <C-F> :<C-U><C-R>=printf("Leaderf! rg -e %s ", expand("<cword>"))<CR>
 " nnoremap <Leader>gw <Esc>:lcd %:p:h <Bar> AckWindow!<Space>
 "
 " let g:ack_mappings = { "<Esc>": ":q<CR>" }
+
+" SmartColumnColors {{{2
+let g:smart_display_opts = { 'column' : 84 } 
 
 " SuperTab {{{2
 
