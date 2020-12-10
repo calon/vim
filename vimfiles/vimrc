@@ -44,6 +44,7 @@ set showmatch " 插入括号时，短暂地跳转到匹配的对应括号
 set list " 显示特殊字符
 set listchars=tab:>-,nbsp:.
 set completeopt+=menuone,noinsert
+set cc=84 "显示提示一定宽度的竖线
 
 " 光标和标尺 {{{2
 
