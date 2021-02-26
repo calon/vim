@@ -444,7 +444,7 @@ endwhile
 
 " 折叠 {{{2
 " nnoremap <Space> za
-nnoremap <s> za
+nnoremap s za
 set foldenable " 开始折叠
 set foldmethod=marker " 设置语法折叠
 setlocal foldlevel=1 " 设置折叠层数
