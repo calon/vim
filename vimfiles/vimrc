@@ -79,6 +79,7 @@ set whichwrap=b,s,<,>,[,] "对某一个或几个按键开启到头后自动折�
 set lazyredraw " 执行宏、寄存器和其它不通过输入的命令时屏幕不会重画
 set nolinebreak
 set concealcursor=n
+set display+=lastline
 
 " 状态栏设置 {{{2
 set laststatus=2 " 总是显示状态行
@@ -238,7 +239,12 @@ set ignorecase " 搜索时忽略大小写
 set smartcase " 搜索小写忽略大小写
 
 " 剪贴板、寄存器 {{{2
-set clipboard=unnamed "与系统共剪贴板
+" set clipboard=unnamed "与系统共剪贴板
+if has('unnamedplus')
+  set clipboard=unnamedplus,unnamed
+else
+  set clipboard+=unnamed
+endif
 
 " 优化大文件编辑 {{{2
 
@@ -264,9 +270,22 @@ set virtualedit+=block
 
 " 进入命令行
 nnoremap ; :
+vnoremap ; :
 nnoremap ； :
+vnoremap ； :
 nnoremap ： :
-nnoremap 、 \
+vnoremap ： :
+
+" 命令行快捷操作
+
+cnoremap <C-h> <BS>
+cnoremap <C-j> <Down>
+cnoremap <C-k> <Up>
+cnoremap <C-b> <Left>
+cnoremap <C-f> <Right>
+cnoremap <C-a> <Home>
+cnoremap <C-e> <End>
+cnoremap <C-d> <Delete>
 
 " 复制到行末
 nnoremap Y y$
@@ -312,13 +331,13 @@ function! ToggleSyntaxHighlight()
 endfunction
 
 " Locate 搜索清单
-nnoremap <A-F7> <Esc>:L<SPACE>
-inoremap <A-F7> <Esc>:L<SPACE>
+" nnoremap <A-F7> <Esc>:L<SPACE>
+" inoremap <A-F7> <Esc>:L<SPACE>
 
 " Tagbar Toggle
 nnoremap <F8> :TagbarToggle<CR>
 
-" F9 for Unite
+" F9 for Vim-QuickUI
 
 " 新建缓冲区
 nnoremap <F10> <Esc>:enew<CR>
@@ -328,19 +347,10 @@ inoremap <F10> <Esc>:enew<CR>
 nnoremap <C-F10> <Esc>:bdelete<CR>
 inoremap <C-F10> <Esc>:bdelete<CR>
 
+" F12 for LeaderF
+
 " BufferList
-map <silent> <F12> :call BufferList()<CR>
-
-" BufferTabLine
-map <silent> <C-F12> :call ToggleBufTabLine()<CR>
-
-function! ToggleBufTabLine()
-     if (g:buftabline_show==0)
-          let g:buftabline_show=1
-     else
-          let g:buftabline_show=0
-     endif
-endfunction
+" map <silent> <F12> :call BufferList()<CR>
 
 " 切换当前目录
 nnoremap <leader>cd :lcd %:p:h<CR>
@@ -411,8 +421,8 @@ inoremap <Up> <Esc>gka
 inoremap <Down> <Esc>gja
 
 " 上下翻页
-nnoremap <Enter><Enter> <C-D>
-nnoremap <BackSpace><BackSpace> <C-U>
+nnoremap <Space> <C-D>
+nnoremap <BackSpace> <C-U>
 
 " 标签页跳转
 " nnoremap <silent> <C-Right> :tabnext<CR>
@@ -433,7 +443,8 @@ while i <= 99
 endwhile  
 
 " 折叠 {{{2
-nnoremap <Space> za
+" nnoremap <Space> za
+nnoremap <s> za
 set foldenable " 开始折叠
 set foldmethod=marker " 设置语法折叠
 setlocal foldlevel=1 " 设置折叠层数
@@ -487,6 +498,17 @@ let g:buftabline_show = 0
 let g:buftabline_numbers = 1
 let g:buftabline_indicators = 1
 
+" BufferTabLine
+map <C-F12> :call ToggleBufTabLine()<CR>
+
+function! ToggleBufTabLine()
+     if (g:buftabline_show==0)
+          let g:buftabline_show=1
+     else
+          let g:buftabline_show=0
+     endif
+endfunction
+
 " Calendar {{{2
 let g:calendar_monday = 1 "以星期一为开始 
 let g:calendar_focus_today = 1 " 光标在当天的日期上 
@@ -494,6 +516,12 @@ let g:calendar_mark = 'left-fit' "可以让*和数字可靠近
 
 " Colorizer {{{2
 let g:colorizer_startup = 0
+
+" Completor {{{2
+
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
 
 " CtrlP {{{2
 "let g:ctrlp_cmd = 'CtrlPMRUFiles'
@@ -591,11 +619,13 @@ let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
 
 let g:Lf_ShortcutF = '<leader>ff'
 noremap <leader><leader> :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
+noremap <F12> :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
 noremap <leader>fb :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
 noremap <C-P> :<C-U><C-R>=printf("Leaderf mru %s", "")<CR><CR>
 noremap <leader>fm :<C-U><C-R>=printf("Leaderf mru %s", "")<CR><CR>
 " noremap <leader>ft :<C-U><C-R>=printf("Leaderf bufTag %s", "")<CR><CR>
 noremap <C-l> :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
+noremap <A-F7> :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
 noremap <leader>fl :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
 
 " noremap <C-B> :<C-U><C-R>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))<CR>
@@ -664,8 +694,8 @@ let g:smart_display_opts = { 'column' : 84 }
 
 " SuperTab {{{2
 
-let g:SuperTabNoCompleteAfter = ['^', ',', '\s', '"', "'"]
-let g:SuperTabDefaultCompletionType = "<c-n>"
+" let g:SuperTabNoCompleteAfter = ['^', ',', '\s', '"', "'"]
+" let g:SuperTabDefaultCompletionType = "<c-n>"
 
 " Tagbar {{{2
 let g:tagbar_sort = 0
@@ -693,13 +723,13 @@ autocmd User targets#mappings#user call targets#mappings#extend({
 
 " nnoremap <C-p> :Unite -no-split -auto-resize -buffer-name=MRU_File file_mru<CR>
 
-autocmd FileType unite call s:unite_settings()
-
-function! s:unite_settings()
-  let b:SuperTabDisabled=1
-  setlocal noswapfile undolevels=-1
-  nmap <buffer> <ESC> <Plug>(unite_exit)
-endfunction
+" autocmd FileType unite call s:unite_settings()
+"
+" function! s:unite_settings()
+"   let b:SuperTabDisabled=1
+"   setlocal noswapfile undolevels=-1
+"   nmap <buffer> <ESC> <Plug>(unite_exit)
+" endfunction
 
 " For ag/silver searcher
 
@@ -721,120 +751,120 @@ endfunction
 
 " Unite Menu
 
-nnoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
-inoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
+" nnoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
+" inoremap <F9> :Unite -auto-resize -buffer-name=Unite_Menu menu<CR>
 
 " nnoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
 " inoremap <C-L> :Unite -no-split -auto-resize -buffer-name=Lines line<CR>
 
-let g:unite_source_menu_menus = {}
-
-let g:unite_source_menu_menus.Unite = {
-    \ 'description' : ' > Unite/LeaderF 常用操作（文件、缓冲区）
-        \                            ',
-    \}
-
-let g:unite_source_menu_menus.Unite.command_candidates = [
-    \[' > 查看历史文件         Ctrl-p ',
-        \'LeaderfMru'],
-    \[' > 筛选当前缓冲区内容   Ctrl-l ',
-        \'LeaderfLine'],
-    \[' > 查看当前目录文件     <leader>ff ',
-        \'LeaderfFile'],
-    \[' > 查看缓冲区           <leader><leader> ',
-        \'LeaderfBuffer'],
-    \[' > 增加文件书签        :UniteBookmarkAdd ',
-        \'UniteBookmarkAdd'],
-    \[' > 查看文件书签 ',
-        \'Unite -no-split -auto-resize -buffer-name=Bookmark bookmark'],
-    \[' > 查看复制寄存器内容 ',
-        \'Unite -no-split -quick-match -auto-resize -buffer-name=Yank_History history/yank'],
-    \]
-
-let g:unite_source_menu_menus.View = {
-    \ 'description' : ' > 视图设置切换操作（View）
-        \                            ',
-    \}
-
-let g:unite_source_menu_menus.View.command_candidates = [
-    \[' > Toggle Comment 切换注释    gcc ',
-        \'exe "normal! gcc"'],
-    \[' > 多行注释                   gcw ',
-        \'exe "normal! gcw"'],
-    \[' > 取消多行注释               gcuw ',
-        \'exe "normal! gcuw"'],
-    \[' > 切换颜色代码自动着色       :ColorToggle ',
-        \'ColorToggle'],
-    \[' > 设置为纯文本类型           :set filetype=txt ',
-        \'set filetype=txt'],
-    \[' > 切换当前窗口工作目录       <leader>cd ',
-        \'lcd %:p:h'],
-    \[' > 切换行号显示模式           <F2> ',
-        \'call ToggleRelativeNumber()'],
-    \[' > 切换搜索结果高亮显示       <F3> ',
-        \'call ToggleHLSearch()'],
-    \[' > 切换撤销历史显示           <F5> ',
-        \'UndotreeToggle'],
-    \[' > 切换自动换行               <F6> ',
-        \'call ToggleWrap()'],
-    \[' > 切换语法高亮显示           <F7> ',
-        \'call ToggleSyntaxHighlight()'],
-    \[' > 打开 TagList               <F8> ',
-        \'TagbarToggle'],
-    \[' > 切换大纲视图（Markdown）   <F11> ',
-        \'VoomToggle markdown'],
-    \[' > 打开 BufferList            <F12> ',
-        \'call BufferList()'],
-    \[' > 切换缩进标志显示           :IndentLinesToggle',
-        \'IndentLinesToggle'],
-    \]
-let g:unite_source_menu_menus.Edit = {
-    \ 'description' : ' > 编辑操作（Edit）
-        \                            ',
-    \}
-
-let g:unite_source_menu_menus.Edit.command_candidates = [
-    \[' > 剔重排序，带 [!] 则反向排序     :sort[!] u ',
-        \'sort u'],
-    \[' > 排序并只保留最后一个            :g/^\(.*\)$\n\1$/d ',
-        \'g/^\(.*\)$\n\1$/d'],
-    \[' > 清除所有 HTML 标签              :%s/<\_.\{-1,\}>//g ',
-        \'%s/<\_.\{-1,\}>//g'],
-    \[' > 删除 HTML 的标签部分            :%s#<[^>]\+>##g ',
-        \'%s#<[^>]\+>##g'],
-    \[' > 生成 Markdown ToC（GFM）        :GenTocGFM ',
-        \'GenTocGFM'],
-    \[' > Bookmark 增删书签               mm 或 :ToggleBookmark ',
-        \'ToggleBookmark'],
-    \[' > 创建折叠标记                    <Leader>f ',
-        \'echo "<Leader>ff表示子级折叠，<Leader>fc表示在注释中标记折叠" '],
-    \[' > 编辑书签的描述说明              mi 或 :Annotate <TEXT> ',
-        \'echo ":Annotate <TEXT>" '],
-    \[' > 在新窗口中显示所有书签          ma 或 :ShowAllBookmarks ',
-        \'ShowAllBookmarks'],
-    \[' > 清除当前缓冲区书签              mc 或 :clearbookmarks ',
-        \'clearbookmarks'],
-    \[' > Pathogen 更新插件帮助文档       :Helptags ',
-        \'Helptags'],
-    \[' > 转换为 GB2312 编码              :set fileencoding=cp936 ',
-        \'set fileencoding=cp936'],
-    \[' > 转换为 UTF-8 编码               :set fileencoding=utf-8 ',
-        \'set fileencoding=utf-8'],
-    \[' > 跳回最后编辑的位置              `. ',
-        \'exe "normal! `."'],
-    \[' > Case Switch 切换大小写           ~ ',
-        \'exe "normal! ~"'],
-    \[' > 显示光标位置，并统计字词        g<Ctrl-g> ',
-        \'exe "normal! g\<c-g>"'],
-    \[' > Align 对齐                      :Tabularize/{pattern} ',
-        \'echo ":Tabularize/{pattern} " '],
-    \[' > Mark 标记当前词                 <Leader>m ',
-        \'call mark#MarkCurrentWord()<CR>'],
-    \[' > Mark 标记指定模式               :Mark {pattern} ',
-        \'echo ":Mark {pattern}" '],
-    \[' > To Html 转换为网页文件          :TOhtml ',
-        \'TOhtml'],
-    \]
+" let g:unite_source_menu_menus = {}
+"
+" let g:unite_source_menu_menus.Unite = {
+"     \ 'description' : ' > Unite/LeaderF 常用操作（文件、缓冲区）
+"         \                            ',
+"     \}
+"
+" let g:unite_source_menu_menus.Unite.command_candidates = [
+"     \[' > 查看历史文件         Ctrl-p ',
+"         \'LeaderfMru'],
+"     \[' > 筛选当前缓冲区内容   Ctrl-l ',
+"         \'LeaderfLine'],
+"     \[' > 查看当前目录文件     <leader>ff ',
+"         \'LeaderfFile'],
+"     \[' > 查看缓冲区           <leader><leader> ',
+"         \'LeaderfBuffer'],
+"     \[' > 增加文件书签        :UniteBookmarkAdd ',
+"         \'UniteBookmarkAdd'],
+"     \[' > 查看文件书签 ',
+"         \'Unite -no-split -auto-resize -buffer-name=Bookmark bookmark'],
+"     \[' > 查看复制寄存器内容 ',
+"         \'Unite -no-split -quick-match -auto-resize -buffer-name=Yank_History history/yank'],
+"     \]
+"
+" let g:unite_source_menu_menus.View = {
+"     \ 'description' : ' > 视图设置切换操作（View）
+"         \                            ',
+"     \}
+"
+" let g:unite_source_menu_menus.View.command_candidates = [
+"     \[' > Toggle Comment 切换注释    gcc ',
+"         \'exe "normal! gcc"'],
+"     \[' > 多行注释                   gcw ',
+"         \'exe "normal! gcw"'],
+"     \[' > 取消多行注释               gcuw ',
+"         \'exe "normal! gcuw"'],
+"     \[' > 切换颜色代码自动着色       :ColorToggle ',
+"         \'ColorToggle'],
+"     \[' > 设置为纯文本类型           :set filetype=txt ',
+"         \'set filetype=txt'],
+"     \[' > 切换当前窗口工作目录       <leader>cd ',
+"         \'lcd %:p:h'],
+"     \[' > 切换行号显示模式           <F2> ',
+"         \'call ToggleRelativeNumber()'],
+"     \[' > 切换搜索结果高亮显示       <F3> ',
+"         \'call ToggleHLSearch()'],
+"     \[' > 切换撤销历史显示           <F5> ',
+"         \'UndotreeToggle'],
+"     \[' > 切换自动换行               <F6> ',
+"         \'call ToggleWrap()'],
+"     \[' > 切换语法高亮显示           <F7> ',
+"         \'call ToggleSyntaxHighlight()'],
+"     \[' > 打开 TagList               <F8> ',
+"         \'TagbarToggle'],
+"     \[' > 切换大纲视图（Markdown）   <F11> ',
+"         \'VoomToggle markdown'],
+"     \[' > 打开 BufferList            <F12> ',
+"         \'call BufferList()'],
+"     \[' > 切换缩进标志显示           :IndentLinesToggle',
+"         \'IndentLinesToggle'],
+"     \]
+" let g:unite_source_menu_menus.Edit = {
+"     \ 'description' : ' > 编辑操作（Edit）
+"         \                            ',
+"     \}
+"
+" let g:unite_source_menu_menus.Edit.command_candidates = [
+"     \[' > 剔重排序，带 [!] 则反向排序     :sort[!] u ',
+"         \'sort u'],
+"     \[' > 排序并只保留最后一个            :g/^\(.*\)$\n\1$/d ',
+"         \'g/^\(.*\)$\n\1$/d'],
+"     \[' > 清除所有 HTML 标签              :%s/<\_.\{-1,\}>//g ',
+"         \'%s/<\_.\{-1,\}>//g'],
+"     \[' > 删除 HTML 的标签部分            :%s#<[^>]\+>##g ',
+"         \'%s#<[^>]\+>##g'],
+"     \[' > 生成 Markdown ToC（GFM）        :GenTocGFM ',
+"         \'GenTocGFM'],
+"     \[' > Bookmark 增删书签               mm 或 :ToggleBookmark ',
+"         \'ToggleBookmark'],
+"     \[' > 创建折叠标记                    <Leader>f ',
+"         \'echo "<Leader>ff表示子级折叠，<Leader>fc表示在注释中标记折叠" '],
+"     \[' > 编辑书签的描述说明              mi 或 :Annotate <TEXT> ',
+"         \'echo ":Annotate <TEXT>" '],
+"     \[' > 在新窗口中显示所有书签          ma 或 :ShowAllBookmarks ',
+"         \'ShowAllBookmarks'],
+"     \[' > 清除当前缓冲区书签              mc 或 :clearbookmarks ',
+"         \'clearbookmarks'],
+"     \[' > Pathogen 更新插件帮助文档       :Helptags ',
+"         \'Helptags'],
+"     \[' > 转换为 GB2312 编码              :set fileencoding=cp936 ',
+"         \'set fileencoding=cp936'],
+"     \[' > 转换为 UTF-8 编码               :set fileencoding=utf-8 ',
+"         \'set fileencoding=utf-8'],
+"     \[' > 跳回最后编辑的位置              `. ',
+"         \'exe "normal! `."'],
+"     \[' > Case Switch 切换大小写           ~ ',
+"         \'exe "normal! ~"'],
+"     \[' > 显示光标位置，并统计字词        g<Ctrl-g> ',
+"         \'exe "normal! g\<c-g>"'],
+"     \[' > Align 对齐                      :Tabularize/{pattern} ',
+"         \'echo ":Tabularize/{pattern} " '],
+"     \[' > Mark 标记当前词                 <Leader>m ',
+"         \'call mark#MarkCurrentWord()<CR>'],
+"     \[' > Mark 标记指定模式               :Mark {pattern} ',
+"         \'echo ":Mark {pattern}" '],
+"     \[' > To Html 转换为网页文件          :TOhtml ',
+"         \'TOhtml'],
+"     \]
 
 " let g:unite_source_menu_menus.Search = {
 "     \ 'description' : ' > 搜索（Search）
@@ -850,32 +880,44 @@ let g:unite_source_menu_menus.Edit.command_candidates = [
 "         \'echo ":L[!] /{pattern1}/{pattern2}/.../[{flags}]" '],
 "     \]
 
-let g:unite_source_menu_menus.Wiki = {
-    \ 'description' : ' > Wiki
-        \                            ',
-    \}
-
-let g:unite_source_menu_menus.Wiki.command_candidates = [
-    \[' > 选择 Wiki 库         <Leader>ws 或者 :VimwikiUISelect',
-        \'VimwikiUISelect'],
-    \[' > 打开 Wiki 索引文件   <Leader>ww 或者 :VimwikiIndex',
-        \'VimwikiIndex'],
-    \[' > 打开日志文件索引     <Leader>wi 或者 :VimwikiDiaryIndex',
-        \'VimwikiDiaryIndex'],
-    \[' > 打开当天的日志文件   <Leader>w<Leader>w 或者 :VimwikiMakeDiaryNote',
-        \'VimwikiMakeDiaryNote'],
-    \[' > 插入表格             :VimwikiTable',
-        \'VimwikiTable'],
-    \[' > 插入或更新内容大纲   :VimwikiTOC',
-        \'VimwikiTOC'],
-    \[' > 转换当前文件为网页   <Leader>wh 或者 :Vimwiki2HTML',
-        \'Vimwiki2HTML'],
-    \[' > 转换所有文件为网页   :VimwikiAll2HTML',
-        \'VimwikiAll2HTML'],
-    \]
+" let g:unite_source_menu_menus.Wiki = {
+"     \ 'description' : ' > Wiki
+"         \                            ',
+"     \}
+"
+" let g:unite_source_menu_menus.Wiki.command_candidates = [
+"     \[' > 选择 Wiki 库         <Leader>ws 或者 :VimwikiUISelect',
+"         \'VimwikiUISelect'],
+"     \[' > 打开 Wiki 索引文件   <Leader>ww 或者 :VimwikiIndex',
+"         \'VimwikiIndex'],
+"     \[' > 打开日志文件索引     <Leader>wi 或者 :VimwikiDiaryIndex',
+"         \'VimwikiDiaryIndex'],
+"     \[' > 打开当天的日志文件   <Leader>w<Leader>w 或者 :VimwikiMakeDiaryNote',
+"         \'VimwikiMakeDiaryNote'],
+"     \[' > 插入表格             :VimwikiTable',
+"         \'VimwikiTable'],
+"     \[' > 插入或更新内容大纲   :VimwikiTOC',
+"         \'VimwikiTOC'],
+"     \[' > 转换当前文件为网页   <Leader>wh 或者 :Vimwiki2HTML',
+"         \'Vimwiki2HTML'],
+"     \[' > 转换所有文件为网页   :VimwikiAll2HTML',
+"         \'VimwikiAll2HTML'],
+"     \]
 
 " NeoMru
 " let g:neomru#time_format = strftime("[%m-%d %H:%M] ")
+
+
+" Vim-Auto-Popmenu {{{2
+
+" enable this plugin for filetypes, '*' for all files.
+" let g:apc_enable_ft = {'*':1}
+
+" source for dictionary, current or other loaded buffers, see ':help cpt'
+set cpt=.,k,w,b
+
+" don't select the first item.
+set completeopt=menu,menuone,noselect 
 
 " Vim-Bookmark {{{2
 let g:bookmark_sign = '>>'
@@ -886,22 +928,83 @@ let g:bookmark_annotation_sign = '##'
 " let g:notes_suffix = '.txt'
 " let g:notes_tab_indents = 0
 
+" Vim-QuickUI {{{2
+
+" clear all the menus
+call quickui#menu#reset()
+
+call quickui#menu#install('&File', [
+            \ [ "查看历史文件\tCtrl+p", 'LeaderfMru' ],
+            \ [ "打开缓冲区清单\t<F12>", 'LeaderfBuffer' ],
+            \ [ "查看当前目录文件\t:LeaderfFile", 'LeaderfFile' ],
+            \ [ "转换为网页文件\t:TOhtml", 'TOhtml' ],
+            \ ])
+
+call quickui#menu#install('&View', [
+            \ [ "切换注释\tgcc", 'exe "normal! gcc"' ],
+            \ [ "切换颜色代码自动着色\t:ColorToggle", 'ColorToggle' ],
+            \ [ "设置为纯文本类型\t:set filetype=txt", 'set filetype=txt' ],
+            \ [ "切换行号显示模式\t<F2>", 'call ToggleRelativeNumber()' ],
+            \ [ "切换搜索结果高亮显示\t<F3>", 'call ToggleHLSearch()' ],
+            \ [ "显示撤销历史\t<F5>", 'UndotreeToggle' ],
+            \ [ "切换自动换行\t<F6>", 'call ToggleWrap()' ],
+            \ [ "切换语法高亮显示\t<F7>", 'call ToggleSyntaxHighlight()' ],
+            \ [ "打开 TagList\t<F8>", 'TagbarToggle' ],
+            \ [ "切换大纲视图（Markdown）\t<F11>", 'VoomToggle markdown' ],
+            \ [ "切换大纲视图\t<Ctrl-F11>", 'VoomToggle' ],
+            \ [ "切换缩进标志显示\t:IndentLinesToggle", 'IndentLinesToggle' ],
+            \ [ "标记当前词\t<Leader>m", 'call mark#MarkCurrentWord()<CR>' ],
+            \ ])
+
+call quickui#menu#install('&Edit', [
+            \ [ "剔重排序，带 [!] 则反向排序\t:sort[!] u", 'sort u' ],
+            \ [ "清除所有 HTML 标签\t:%s/<\_.\{-1,\}>//g", '%s/<\_.\{-1,\}>//g' ],
+            \ [ "删除 HTML 的标签部分\t:%s#<[^>]\+>##g", '%s#<[^>]\+>##g' ],
+            \ [ "生成 Markdown ToC（GFM）\t:GenTocGFM", 'GenTocGFM' ],
+            \ [ "创建折叠标记\t<Leader>f", 'echo "<Leader>ff表示子级折叠，<Leader>fc表示在注释中标记折叠"' ],
+            \ [ "Pathogen 更新插件帮助文档\t:Helptags", 'Helptags' ],
+            \ [ "转换为 GB2312 编码\t:set fileencoding=cp936", 'set fileencoding=cp936' ],
+            \ [ "转换为 UTF-8 编码\t:set fileencoding=utf-8", 'set fileencoding=utf-8' ],
+            \ [ "跳回最后编辑的位置\t`.", 'exe "normal! `."' ],
+            \ [ "切换大小写\t~", 'exe "normal! ~"' ],
+            \ [ "显示光标位置，并统计字词\tg<Ctrl-g>", 'exe "normal! g\<c-g>"' ],
+            \ [ "对齐\t:Tabularize/{pattern}", 'echo ":Tabularize/{pattern} "' ],
+            \ ])
+
+call quickui#menu#install('&Search', [
+            \ [ "模糊查找当前缓冲区内容\tCtrl-l 或 Alt-F7", 'LeaderfLine' ],
+            \ ])
+
+call quickui#menu#install('&Wiki', [
+            \ [ "选择 Wiki 库\t<Leader>ws 或者 :VimwikiUISelect", 'VimwikiUISelect' ],
+            \ [ "打开 Wiki 索引文件\t<Leader>ww 或者 :VimwikiIndex", 'VimwikiIndex' ],
+            \ [ "打开日志文件索引\t<Leader>wi 或者 :VimwikiDiaryIndex", 'VimwikiDiaryIndex' ],
+            \ [ "打开当天的日志文件\t<Leader>w<Leader>w 或者 :VimwikiMakeDiaryNote", 'VimwikiMakeDiaryNote' ],
+            \ [ "插入表格\t:VimwikiTable", 'VimwikiTable' ],
+            \ [ "插入或更新内容大纲\t:VimwikiTOC", 'VimwikiTOC' ],
+            \ [ "转换当前文件为网页\t<Leader>wh 或者 :Vimwiki2HTML", 'Vimwiki2HTML' ],
+            \ [ "转换所有文件为网页\t:VimwikiAll2HTML", 'VimwikiAll2HTML' ],
+            \ ])
+" enable to display tips in the cmdline
+let g:quickui_show_tip = 1
+
+noremap <F9> :call quickui#menu#open()<cr>
+
 " Vimfiler {{{2
-nnoremap <C-\> :lcd %:p:h <Bar> VimFiler -force-quit -toggle -split -horizontal -buffer-name=VimFiler -sort-type=Time<CR>
-" autocmd VimEnter * if !argc() | VimFiler | endif
-let g:vimfiler_enable_auto_cd = 1
-call vimfiler#custom#profile('default', 'context', {
-		\   'sort_type' : 'Time'
-		\ })
+" nnoremap <C-\> :lcd %:p:h <Bar> VimFiler -force-quit -toggle -split -horizontal -buffer-name=VimFiler -sort-type=Time<CR>
+" " autocmd VimEnter * if !argc() | VimFiler | endif
+" let g:vimfiler_enable_auto_cd = 1
+" call vimfiler#custom#profile('default', 'context', {
+" 		\   'sort_type' : 'Time'
+" 		\ })
 
 " VimWiki "{{{2
 
 let g:vimwiki_list_ignore_newline = 0
 
 " Voom  {{{2
-nnoremap <leader>vm <Esc>:VoomToggle markdown<CR>
-nnoremap <F11> <Esc>:VoomToggle markdown<CR>
-nnoremap <C-F11> <Esc>:VoomToggle<CR>
+noremap <F11> <Esc>:VoomToggle markdown<CR>
+noremap <C-F11> <Esc>:VoomToggle<CR>
 let g:voom_python_versions = [3,2]
 
 
