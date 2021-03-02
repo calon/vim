@@ -540,6 +540,7 @@ inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
 " Start interactive EasyAlign with a Vim movement
 " nmap <Leader>a <Plug>(EasyAlign)
 
+
 " HTML  "{{{2
 let g:no_html_tab_mapping = 'yes'
 
@@ -618,15 +619,15 @@ let g:Lf_StlSeparator = { 'left': "\ue0b0", 'right': "\ue0b2" }
 let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
 
 let g:Lf_ShortcutF = '<leader>ff'
-noremap <leader><leader> :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
+" noremap <leader><leader> :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
+noremap <leader>b :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
 noremap <F12> :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
-noremap <leader>fb :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
 noremap <C-P> :<C-U><C-R>=printf("Leaderf mru %s", "")<CR><CR>
 noremap <leader>fm :<C-U><C-R>=printf("Leaderf mru %s", "")<CR><CR>
 " noremap <leader>ft :<C-U><C-R>=printf("Leaderf bufTag %s", "")<CR><CR>
-noremap <C-l> :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
+" noremap <C-l> :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
 noremap <A-F7> :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
-noremap <leader>fl :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
+noremap <leader>l :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
 
 " noremap <C-B> :<C-U><C-R>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))<CR>
 noremap <C-F> :<C-U><C-R>=printf("Leaderf! rg -e %s ", expand("<cword>"))<CR>
@@ -710,9 +711,9 @@ let g:tagbar_foldlevel = 0
 
 " Targets {{{2
 
-autocmd User targets#mappings#user call targets#mappings#extend({
-    \ 'q': {'pair': [{'o': '\%u201c', 'c': '\%u201d'}]},
-    \ })
+" autocmd User targets#mappings#user call targets#mappings#extend({
+"     \ 'q': {'pair': [{'o': '\%u201c', 'c': '\%u201d'}]},
+"     \ })
 
     " \ 'q': {'pair': [{'o': '\u201c', 'c': '\u201d'}, {'o':'‘', 'c':'’'}]},
     " \ 'b': {'pair': [{'o':'（', 'c':'）'}, {'o':'《', 'c':'》'}, {'o':'『', 'c':'』'}, {'o':'「', 'c':'」'}]},
@@ -958,6 +959,7 @@ call quickui#menu#install('&View', [
 
 call quickui#menu#install('&Edit', [
             \ [ "剔重排序，带 [!] 则反向排序\t:sort[!] u", 'sort u' ],
+            \ [ "清除所有不包含指定字符串的行\t:v/xxx/d" ],
             \ [ "清除所有 HTML 标签\t:%s/<\_.\{-1,\}>//g", '%s/<\_.\{-1,\}>//g' ],
             \ [ "删除 HTML 的标签部分\t:%s#<[^>]\+>##g", '%s#<[^>]\+>##g' ],
             \ [ "生成 Markdown ToC（GFM）\t:GenTocGFM", 'GenTocGFM' ],
@@ -972,7 +974,7 @@ call quickui#menu#install('&Edit', [
             \ ])
 
 call quickui#menu#install('&Search', [
-            \ [ "模糊查找当前缓冲区内容\tCtrl-l 或 Alt-F7", 'LeaderfLine' ],
+            \ [ "模糊查找当前缓冲区内容\tAlt-F7", 'LeaderfLine' ],
             \ ])
 
 call quickui#menu#install('&Wiki', [
@@ -985,6 +987,16 @@ call quickui#menu#install('&Wiki', [
             \ [ "转换当前文件为网页\t<Leader>wh 或者 :Vimwiki2HTML", 'Vimwiki2HTML' ],
             \ [ "转换所有文件为网页\t:VimwikiAll2HTML", 'VimwikiAll2HTML' ],
             \ ])
+
+call quickui#menu#install('&Window', [
+            \ [ "垂直分割窗口\t<Ctrl-W> v 或 <Ctrl-W><Ctrl-V> 或 :vs" ],
+            \ [ "水平分割窗口\t<Ctrl-W> s 或 <Ctrl-W><Ctrl-S> 或 :sp" ],
+            \ [ "调整窗口高度\t<Ctrl-W> + 或 -" ],
+            \ [ "调整窗口宽度\t<Ctrl-W> \< 或 \>" ],
+            \ [ "统一所有窗口尺寸\t<Ctrl-W> =" ],
+            \ [ "关闭当前窗口\t<Ctrl-W> c" ],
+            \ ])
+
 " enable to display tips in the cmdline
 let g:quickui_show_tip = 1
 
