@@ -1,0 +1,9 @@
+Execute (Disable plugin):
+  let g:wordmotion_nomap = 1
+  call wordmotion#reload()
+
+Include: iw.vader
+Include: aw.vader
+
+Execute (Reset plugin for further tests):
+  call wordmotion#_default()

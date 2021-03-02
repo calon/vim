@@ -1002,6 +1002,10 @@ let g:quickui_show_tip = 1
 
 noremap <F9> :call quickui#menu#open()<cr>
 
+" Vim-WordMotion {{{2
+
+let g:wordmotion_spaces = ['。', '，', '！', '？', '：', '；', '”', '“', '‘', '’', '（', '）', '《', '》', '、', '…', '·']
+
 " Vimfiler {{{2
 " nnoremap <C-\> :lcd %:p:h <Bar> VimFiler -force-quit -toggle -split -horizontal -buffer-name=VimFiler -sort-type=Time<CR>
 " " autocmd VimEnter * if !argc() | VimFiler | endif

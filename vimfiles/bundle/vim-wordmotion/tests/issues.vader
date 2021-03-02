@@ -1,0 +1,60 @@
+Given (Weird characters: https://github.com/chaoren/vim-wordmotion/issues/1):
+  abc déf ghi
+
+Do (Move 2 words):
+  2w
+
+Then (Assert that cursor is at [g]hi):
+  AssertEqual 'g', getline('.')[col('.') - 1]
+
+Given (Underscores: https://github.com/chaoren/vim-wordmotion/issues/5):
+  abc_def_ghi
+
+Do (Move 2 words):
+  2w
+
+Then (Assert that cursor is at _[d]ef_):
+  AssertEqual 'g', getline('.')[col('.') - 1]
+
+Given (CamelCase):
+  CamelCase
+
+Do (<C-V>iw at C: https://github.com/chaoren/vim-wordmotion/issues/7):
+  w\<C-V>iwd
+
+Expect (Case deleted):
+  Camel
+
+Given (Hex color codes: https://github.com/chaoren/vim-wordmotion/issues/48):
+  #abcabc #012 #1234 #12345 #NOTHEX
+  123456789012345678901234567890123
+           1         2         3
+
+Do (Move 2 words):
+  2w
+
+Then (Assert that cursor is at [#]1234):
+  AssertEqual 14, col('.')
+
+Do (Move 5 words):
+  5w
+
+Then (Assert that cursor is at #[N]OTHEX):
+  AssertEqual 28, col('.')
+
+Given (Weird spaces: https://github.com/chaoren/vim-wordmotion/issues/52):
+  foo_-.:<>()[]{}&*=!+"'bar
+
+Before (Set space):
+  let g:wordmotion_spaces = '_-.:<>()\[\]{}&*=!+"'''
+  let g:wordmotion_uppercase_spaces = '.:<>()\[\]{}&*=!+"'''
+  call wordmotion#reload()
+
+After (Restore default options):
+  call wordmotion#_default()
+
+Do (Move over spaces):
+  w
+
+Then (Assert that cursor is at [b]ar):
+  AssertEqual 'b', getline('.')[col('.') - 1]
