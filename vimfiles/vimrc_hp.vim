@@ -3,8 +3,8 @@
 " set guifontwide=Yahei_Mono:h11 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
 " set guifont=SimHei:h14 " GUI 版本使用的字体列表。
 " set guifontwide=SimHei:h14 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
-set guifont=等距更纱黑体_T_SC:h12 " GUI 版本使用的字体列表。
-set guifontwide=等距更纱黑体_T_SC:h12 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
+set guifont=等距更纱黑体_T_SC:h14 " GUI 版本使用的字体列表。
+set guifontwide=等距更纱黑体_T_SC:h14 " 如果非空，指定逗号分隔的用于双宽字符的字体列表。
 
 set backupdir=c:\\Bak\\txt " 备份目录
 set directory=c:\\Bak\\swap " 交换目录
@@ -17,6 +17,6 @@ let g:tagbar_ctags_bin = 'c:/Application/ctags/ctags.exe'
 " set shell=\"d:\Program\ Files\ConEmu\ConEmu.exe\"
 " set shellcmdflag=""
 " let g:notes_directories = ['d:\Data\Share\Dropbox\Note\Vim-Notes\']
-let g:vimwiki_list = [{'path': 'c:/Users/chaon/OneDrive/Note/vimwiki'}]
+let g:vimwiki_list = [{'path': 'c:/Users/chaon/OneDrive/Note/vimwiki', 'auto_tags': 1}]
 " set rtp += "C:/Users/chaon/scoop/apps/fzf/current/"
 

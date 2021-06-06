@@ -1,0 +1,9 @@
+g:markdown_fold_override_foldtext	markdown-folding.txt	/*g:markdown_fold_override_foldtext*
+g:markdown_fold_style	markdown-folding.txt	/*g:markdown_fold_style*
+markdown-folding	markdown-folding.txt	/*markdown-folding*
+markdown-folding-:FoldToggle	markdown-folding.txt	/*markdown-folding-:FoldToggle*
+markdown-folding-configuration	markdown-folding.txt	/*markdown-folding-configuration*
+markdown-folding-introduction	markdown-folding.txt	/*markdown-folding-introduction*
+markdown-folding-nested	markdown-folding.txt	/*markdown-folding-nested*
+markdown-folding-stacked	markdown-folding.txt	/*markdown-folding-stacked*
+markdown-folding.txt	markdown-folding.txt	/*markdown-folding.txt*

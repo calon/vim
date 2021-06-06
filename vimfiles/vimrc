@@ -78,6 +78,7 @@ set sidescrolloff=8 " 光标左右两侧最少保留的屏幕列数
 set whichwrap=b,s,<,>,[,] "对某一个或几个按键开启到头后自动折向下一行的功能
 set lazyredraw " 执行宏、寄存器和其它不通过输入的命令时屏幕不会重画
 set nolinebreak
+set conceallevel=0
 set concealcursor=n
 set display+=lastline
 
@@ -544,6 +545,9 @@ inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
 " HTML  "{{{2
 let g:no_html_tab_mapping = 'yes'
 
+" IndentLine  "{{{2
+let g:indentLine_concealcursor = "n"
+
 " Lightline {{{2
 
 let g:lightline = {
@@ -564,7 +568,7 @@ let g:lightline = {
       \ }
 
 function! UpdateTime()
-    return strftime("%Y-%m-%d %H:%M", getftime(expand("%:p")))
+    return strftime("%Y-%m-%d %H:%M:%S", getftime(expand("%:p")))
 endfunction
 
 function! FileSize()
@@ -630,7 +634,7 @@ noremap <A-F7> :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
 noremap <leader>l :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
 
 " noremap <C-B> :<C-U><C-R>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))<CR>
-noremap <C-F> :<C-U><C-R>=printf("Leaderf! rg -e %s ", expand("<cword>"))<CR>
+noremap <C-F> :<C-U><C-R>=printf("Leaderf! rg -e %s", "")<CR>
 " search visually selected text literally
 " xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F -e %s ", leaderf#Rg#visual())<CR>
 " noremap go :<C-U>Leaderf! rg --recall<CR>
@@ -942,6 +946,7 @@ call quickui#menu#install('&File', [
             \ ])
 
 call quickui#menu#install('&View', [
+            \ [ "调整字体大小\t<Leader><Leader>+/-" ],
             \ [ "切换注释\tgcc", 'exe "normal! gcc"' ],
             \ [ "切换颜色代码自动着色\t:ColorToggle", 'ColorToggle' ],
             \ [ "设置为纯文本类型\t:set filetype=txt", 'set filetype=txt' ],
@@ -977,12 +982,13 @@ call quickui#menu#install('&Search', [
             \ [ "模糊查找当前缓冲区内容\tAlt-F7", 'LeaderfLine' ],
             \ ])
 
-call quickui#menu#install('&Wiki', [
+call quickui#menu#install('Wi&ki', [
             \ [ "选择 Wiki 库\t<Leader>ws 或者 :VimwikiUISelect", 'VimwikiUISelect' ],
             \ [ "打开 Wiki 索引文件\t<Leader>ww 或者 :VimwikiIndex", 'VimwikiIndex' ],
             \ [ "打开日志文件索引\t<Leader>wi 或者 :VimwikiDiaryIndex", 'VimwikiDiaryIndex' ],
             \ [ "打开当天的日志文件\t<Leader>w<Leader>w 或者 :VimwikiMakeDiaryNote", 'VimwikiMakeDiaryNote' ],
             \ [ "插入表格\t:VimwikiTable", 'VimwikiTable' ],
+            \ [ "更新标签\t:VimwikiRebuildTags", 'VimwikiRebuildTags' ],
             \ [ "插入或更新内容大纲\t:VimwikiTOC", 'VimwikiTOC' ],
             \ [ "转换当前文件为网页\t<Leader>wh 或者 :Vimwiki2HTML", 'Vimwiki2HTML' ],
             \ [ "转换所有文件为网页\t:VimwikiAll2HTML", 'VimwikiAll2HTML' ],
@@ -1017,6 +1023,8 @@ let g:wordmotion_spaces = ['。', '，', '！', '？', '：', '；', '”', '“
 " VimWiki "{{{2
 
 let g:vimwiki_list_ignore_newline = 0
+let g:vimwiki_conceallevel = 0
+let g:vimwiki_conceal_onechar_markers = 0
 
 " Voom  {{{2
 noremap <F11> <Esc>:VoomToggle markdown<CR>
